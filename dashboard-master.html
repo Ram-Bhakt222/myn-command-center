@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MYN Master Dashboard — All Systems</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #111827;
+    --bg3: #1a1f2e;
+    --border: #1e293b;
+    --border-light: #334155;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --dim: #64748b;
+    --accent: #818cf8;
+    --accent-glow: rgba(129,140,248,0.15);
+    --emerald: #10b981;
+    --cyan: #06b6d4;
+    --amber: #f59e0b;
+    --rose: #f43f5e;
+    --purple: #a78bfa;
+    --pink: #ec4899;
+    --orange: #f97316;
+    --teal: #14b8a6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow: hidden;
+  }
+
+  body { display: flex; flex-direction: column; }
+
+  /* ─── Background Grid ─── */
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(129,140,248,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(129,140,248,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* ─── Header ─── */
+  .master-header {
+    position: relative; z-index: 10;
+    background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    border-bottom: 1px solid var(--border);
+    padding: 16px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .master-header .left { display: flex; align-items: center; gap: 14px; }
+  .master-header .logo-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--emerald));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; color: #fff;
+    box-shadow: 0 0 20px rgba(129,140,248,0.2);
+  }
+  .master-header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px; font-weight: 700;
+    background: linear-gradient(135deg, #f1f5f9 30%, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .master-header .subtitle { color: var(--muted); font-size: 12px; margin-top: 1px; }
+  .master-header .right { display: flex; align-items: center; gap: 12px; }
+  .master-header .badge {
+    font-size: 11px; font-weight: 600; padding: 4px 12px;
+    border-radius: 20px; letter-spacing: 0.5px;
+  }
+  .badge-count {
+    background: var(--accent-glow); color: var(--accent);
+    border: 1px solid rgba(129,140,248,0.25);
+  }
+  .badge-live {
+    background: rgba(16,185,129,0.1); color: var(--emerald);
+    border: 1px solid rgba(16,185,129,0.25);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 4px rgba(16,185,129,0.2); }
+    50% { box-shadow: 0 0 12px rgba(16,185,129,0.4); }
+  }
+  .master-header .clock {
+    color: var(--muted); font-size: 12px;
+    background: var(--bg); padding: 5px 14px;
+    border-radius: 20px; border: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ─── Category Tabs (top level) ─── */
+  .category-bar {
+    position: relative; z-index: 10;
+    display: flex; gap: 0;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 12px;
+    flex-shrink: 0;
+    overflow-x: auto;
+  }
+  .category-tab {
+    padding: 12px 20px; cursor: pointer;
+    font-size: 12px; font-weight: 600;
+    color: var(--dim); text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .category-tab:hover { color: var(--muted); background: rgba(255,255,255,0.02); }
+  .category-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .category-tab .cat-icon { font-size: 14px; }
+  .category-tab .cat-count {
+    font-size: 10px; background: rgba(255,255,255,0.06);
+    padding: 1px 7px; border-radius: 10px; color: var(--muted);
+  }
+  .category-tab.active .cat-count { background: var(--accent-glow); color: var(--accent); }
+
+  /* ─── Sub-Tab Bar (within each category) ─── */
+  .sub-tab-bar {
+    position: relative; z-index: 10;
+    display: none; gap: 0;
+    background: rgba(17,24,39,0.8);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    flex-shrink: 0;
+    overflow-x: auto;
+    backdrop-filter: blur(8px);
+  }
+  .sub-tab-bar.active { display: flex; }
+  .sub-tab {
+    padding: 10px 18px; cursor: pointer;
+    font-size: 12px; font-weight: 500;
+    color: var(--dim);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .sub-tab:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+  .sub-tab.active { color: var(--emerald); border-bottom-color: var(--emerald); }
+  .sub-tab .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--dim);
+  }
+  .sub-tab.active .dot { background: var(--emerald); box-shadow: 0 0 6px rgba(16,185,129,0.5); }
+
+  /* ─── Iframe Container ─── */
+  .iframe-container {
+    flex: 1; position: relative; z-index: 1;
+    overflow: hidden;
+  }
+  .iframe-container iframe {
+    width: 100%; height: 100%;
+    border: none; background: var(--bg);
+  }
+
+  /* ─── Welcome / Index View ─── */
+  .welcome-view {
+    flex: 1; overflow-y: auto;
+    padding: 40px 32px;
+    position: relative; z-index: 1;
+  }
+  .welcome-view h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px; font-weight: 700;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #f1f5f9, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .welcome-view .intro { color: var(--muted); font-size: 14px; margin-bottom: 36px; max-width: 700px; line-height: 1.6; }
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px; max-width: 1200px;
+  }
+  .dash-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .dash-card:hover {
+    border-color: var(--border-light);
+    background: var(--bg3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .dash-card .card-top { display: flex; align-items: center; gap: 12px; }
+  .dash-card .card-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .dash-card .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; }
+  .dash-card .card-source { font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; }
+  .dash-card .card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .dash-card .card-meta { display: flex; gap: 10px; font-size: 10px; color: var(--dim); margin-top: auto; }
+  .dash-card .card-meta span { display: flex; align-items: center; gap: 4px; }
+
+  .icon-ops { background: linear-gradient(135deg, rgba(129,140,248,0.15), rgba(129,140,248,0.05)); color: var(--accent); }
+  .icon-arch { background: linear-gradient(135deg, rgba(6,182,212,0.15), rgba(6,182,212,0.05)); color: var(--cyan); }
+  .icon-strat { background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.05)); color: var(--emerald); }
+  .icon-report { background: linear-gradient(135deg, rgba(244,63,94,0.15), rgba(244,63,94,0.05)); color: var(--rose); }
+  .icon-guide { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05)); color: var(--amber); }
+  .icon-system { background: linear-gradient(135deg, rgba(167,139,250,0.15), rgba(167,139,250,0.05)); color: var(--purple); }
+
+  /* ─── Category Headers in Welcome ─── */
+  .cat-section { margin-bottom: 36px; }
+  .cat-section h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--dim);
+    margin-bottom: 14px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cat-section h3 .line { flex: 1; height: 1px; background: var(--border); }
+
+  /* ─── Scrollbar ─── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+  /* ─── Back Button ─── */
+  .back-btn {
+    display: none; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.05); color: var(--muted);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 14px; font-size: 12px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+  .back-btn.visible { display: flex; }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 768px) {
+    .master-header { padding: 12px 16px; }
+    .master-header h1 { font-size: 16px; }
+    .category-tab { padding: 10px 14px; font-size: 11px; }
+    .sub-tab { padding: 8px 14px; font-size: 11px; }
+    .welcome-view { padding: 24px 16px; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .master-header .badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+
+<!-- ═══════ HEADER ═══════ -->
+<header class="master-header">
+  <div class="left">
+    <div class="logo-icon">M</div>
+    <div>
+      <h1>MYN Master Dashboard</h1>
+      <div class="subtitle">All Dashboards &amp; Outputs — Unified View</div>
+    </div>
+  </div>
+  <div class="right">
+    <button class="back-btn" id="backBtn" onclick="goHome()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      All Dashboards
+    </button>
+    <span class="badge badge-count" id="totalCount">19 Outputs</span>
+    <span class="badge badge-live">● LIVE</span>
+    <span class="clock" id="clock"></span>
+  </div>
+</header>
+
+<!-- ═══════ CATEGORY TABS ═══════ -->
+<nav class="category-bar" id="categoryBar">
+  <div class="category-tab active" data-cat="home" onclick="showCategory('home')">
+    <span class="cat-icon">◉</span> Overview
+  </div>
+  <div class="category-tab" data-cat="ops" onclick="showCategory('ops')">
+    <span class="cat-icon">⌘</span> Operations <span class="cat-count">5</span>
+  </div>
+  <div class="category-tab" data-cat="arch" onclick="showCategory('arch')">
+    <span class="cat-icon">◈</span> Architecture <span class="cat-count">5</span>
+  </div>
+  <div class="category-tab" data-cat="strat" onclick="showCategory('strat')">
+    <span class="cat-icon">◆</span> Strategy <span class="cat-count">3</span>
+  </div>
+  <div class="category-tab" data-cat="reports" onclick="showCategory('reports')">
+    <span class="cat-icon">◧</span> Reports <span class="cat-count">2</span>
+  </div>
+  <div class="category-tab" data-cat="guides" onclick="showCategory('guides')">
+    <span class="cat-icon">▤</span> Guides <span class="cat-count">3</span>
+  </div>
+</nav>
+
+<!-- ═══════ SUB-TAB BARS (one per category) ═══════ -->
+
+<!-- Operations -->
+<div class="sub-tab-bar" data-cat-bar="ops">
+  <div class="sub-tab active" onclick="loadDash(this, 'myn_command_center.html')"><span class="dot"></span> Command Center</div>
+  <div class="sub-tab" onclick="loadDash(this, 'myn_intelligence_console.html')"><span class="dot"></span> Intelligence Console</div>
+  <div class="sub-tab" onclick="loadDash(this, 'api_dashboard.html')"><span class="dot"></span> API Dashboard</div>
+  <div class="sub-tab" onclick="loadDash(this, 'myn_workflows.html')"><span class="dot"></span> Workflows</div>
+  <div class="sub-tab" onclick="loadDash(this, 'myn_search_history.html')"><span class="dot"></span> Search History</div>
+</div>
+
+<!-- Architecture -->
+<div class="sub-tab-bar" data-cat-bar="arch">
+  <div class="sub-tab active" onclick="loadDash(this, 'MYN_ORG_Architecture.html')"><span class="dot"></span> MYN ORG Architecture</div>
+  <div class="sub-tab" onclick="loadDash(this, '../myn.com-main/MYN_COM_Architecture_Plan.html')"><span class="dot"></span> MYN COM Architecture</div>
+  <div class="sub-tab" onclick="loadDash(this, '../myn.org-main/MYN_ORG_Architecture_Plan.html')"><span class="dot"></span> MYN.ORG Dashboard Plan</div>
+  <div class="sub-tab" onclick="loadDash(this, 'investor_architecture_interactive.html')"><span class="dot"></span> Investor Architecture</div>
+  <div class="sub-tab" onclick="loadDash(this, 'consulting_diagram_premium.html')"><span class="dot"></span> Revenue Infrastructure</div>
+</div>
+
+<!-- Strategy -->
+<div class="sub-tab-bar" data-cat-bar="strat">
+  <div class="sub-tab active" onclick="loadDash(this, 'company_operating_manual_enhanced.html')"><span class="dot"></span> Operating Manual</div>
+  <div class="sub-tab" onclick="loadDash(this, 'myn_capabilities.html')"><span class="dot"></span> System Capabilities</div>
+  <div class="sub-tab" onclick="loadDash(this, 'consulting_architecture_diagram.html')"><span class="dot"></span> Consulting Diagram</div>
+</div>
+
+<!-- Reports -->
+<div class="sub-tab-bar" data-cat-bar="reports">
+  <div class="sub-tab active" onclick="loadDash(this, '../myn.com-main/reports by vertical/My_Yoga_Network_Strategic_Healthcare_Platform_WhitePaper.html')"><span class="dot"></span> Healthcare Whitepaper</div>
+  <div class="sub-tab" onclick="loadDash(this, '../myn.com-main/reports by vertical/My_Yoga_Network_White_Paper_Styled.html')"><span class="dot"></span> Whitepaper (Styled)</div>
+</div>
+
+<!-- Guides -->
+<div class="sub-tab-bar" data-cat-bar="guides">
+  <div class="sub-tab active" onclick="loadDash(this, 'DEPLOY_NOW.html')"><span class="dot"></span> Deployment Guide</div>
+  <div class="sub-tab" onclick="loadDash(this, 'intern_mind_map.html')"><span class="dot"></span> Team Mind Map</div>
+  <div class="sub-tab" onclick="loadDash(this, 'infrastructure/ingestion/EXECUTION_GUIDE.html')"><span class="dot"></span> Ingestion Pipeline Guide</div>
+</div>
+
+<!-- ═══════ WELCOME / INDEX VIEW ═══════ -->
+<div class="welcome-view" id="welcomeView">
+  <h2>All MYN Dashboards &amp; Outputs</h2>
+  <p class="intro">
+    A unified hub for every dashboard, architecture diagram, strategic document, whitepaper, and execution guide
+    across the My Yoga Network tri-system. Click any card to open it, or use the category tabs above to browse.
+  </p>
+
+  <!-- Operations -->
+  <div class="cat-section">
+    <h3><span>⌘</span> Operations Dashboards <span class="line"></span></h3>
+    <div class="dashboard-grid">
+      <div class="dash-card" onclick="openFromCard('ops', 0, 'myn_command_center.html')">
+        <div class="card-top">
+          <div class="card-icon icon-ops">⌘</div>
+          <div><div class="card-title">MYN Command Center</div><div class="card-source">Strategy AGI</div></div>
+        </div>
+        <div class="card-desc">Central operations hub — division status, build targets, agent health, and cross-system monitoring.</div>
+        <div class="card-meta"><span>📐 142 KB</span><span>📅 Mar 21</span></div>
+      </div>
+      <div class="dash-card" onclick="openFromCard('ops', 1, 'myn_intelligence_console.html')">
+        <div class="card-top">
+          <div class="card-icon icon-ops">🧠</div>
+          <div><div class="card-title">Intelligence Console</div><div class="card-source">Strategy AGI</div></div>
+        </div>
+        <div class="card-desc">AI agent orchestration, real-time intelligence feeds, and strategic research aggregation.</div>
+        <div class="card-meta"><span>📐 131 KB</span><span>📅 Mar 20</span></div>
+      </div>
+      <div class="dash-card" onclick="openFromCard('ops', 2, 'api_dashboard.html')">
+        <div class="card-top">
+          <div class="card-icon icon-ops">🔌</div>
+          <div><div class="card-title">API Status Dashboard</div><div class="card-source">Strategy AGI</div></div>
+        </div>
+        <div class="card-desc">API health monitoring — Supabase, n8n, Apify, OpenAI, and all external service statuses.</div>
+        <div class="card-meta"><span>📐 24 KB</span><span>📅 Mar 19</span></div>
+      </div>
+      <div class="dash-card" onclick="openFromCard('ops', 3, 'myn_workflows.html')">
+        <div class="card-top">
+          <div class="card-icon icon-ops">⚡</div>
+          <div><div class="card-title">Workflow Console</div><div class="card-source">Strategy AGI</div></div>
+        </div>
+        <div class="card-desc">n8n workflow orchestration — pipeline status, execution logs, and automation triggers.</div>
+        <div class="card-meta"><span>📐 77 KB</span><span>📅 Mar 19</span></div>
+      </div>
+      <div class="dash-card" onclick="openFromCard('ops', 4, 'myn_search_history.html')">
+        <div class="card-top">
+          <div class="card-icon icon-ops">🔍</div>
+          <div><div class="card-title">Search History</div><div class="card-source">Strategy AGI</div></div>
+        </div>
+        <div class="card-desc">Lead research history, data queries, and search audit trail with data management.</div>
+        <div class="card-meta"><span>📐 51 KB</span><span>📅 Mar 20</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Architecture -->
+  <div class="cat-section">
+    <h3><span>◈</span> Architecture Diagrams <span class="line"></span></h3>
+    <div class="dashboard-grid">
+      <div class="dash-card" onclick="openFromCard('arch', 0, 'MYN_ORG_Architecture.html')">
+        <div class="card-top">
+          <div class="card-icon icon-arch">🏗️</div>
+          <div><div class="card-title">MYN ORG Architecture</div><div class="card-source">Strategy AGI</div></div>
+        </div>
+        <div class="card-desc">Organizational system architecture — data flow, agent connections, and infrastructure map.</div>
+        <div class="card-meta"><span>📐 52 KB</span><span>📅 Mar 20</span></div>
+      </div>
+      <div class="dash-card" onclick="openFromCard('arch', 1, '../myn.com-main/MYN_COM_Architecture_Plan.html')">
+        <div class="card-top">
+          <div class="card-icon icon-arch">🌐</div>
+          <div><div class="card-title">MYN.COM Architecture</div><div class="card-source">myn.com</div></div>
+        </div>
+        <div class="card-desc">Public website architecture — page structure, SEO strategy, and Next.js component hierarchy.</div>
+        <div class="card-meta"><span>📐 38 KB</span><span>📅 Mar 20</span></div>
+      </div>
+      <div class="dash-card" onclick="openFromCard('arch', 2, '../myn.org-main/MYN_ORG_Architecture_Plan.html')">
+        <div class="card-top">
+          <div class="card-icon icon-arch">📊</div>
+          <div><div class="card-title">MYN.ORG Dashboard Plan</div><div class="card-source">myn.org</div></div>
+        </div>
+        <div class="card-desc">Admin dashboard architecture — feature roadmap, component plan, and API integration.</div>
+        <div class="card-meta"><span>📐 43 KB</span><span>📅 Mar 20</span></div>
+      </div>
+      <div class="dash-card" onclick="openFromCard('arch', 3, 'investor_architecture_interactive.html')">
+        <div class="card-top">
+          <div class="card-icon icon-arch">💼</div>
+          <div><div class="card-title">Investor Architecture</div><div class="card-source">Strategy AGI</div></div>
+        </div>
+        <div class="card-desc">Investor-facing business systems architecture — division structure and technology overview.</div>
+        <div class="card-meta"><span>📐 20 KB</span><span>📅 Mar 18</span></div>
+      </div>
+      <div class="dash-card" onclick="openFromCard('arch', 4, 'consulting_diagram_premium.html')">
+        <div class="card-top">
+          <div class="card-icon icon-arch">💰</div>
+          <div><div class="card-title">AI Revenue Infrastructure</div><div class="card-source">Strategy AGI</div></div>
+        </div>
+        <div class="card-desc">AI-enabled revenue infrastructure diagram — monetization pathways and automation layers.</div>
+        <div class="card-meta"><span>📐 17 KB</span><span>📅 Mar 18</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Strategy -->
+  <div class="cat-section">
+    <h3><span>◆</span> Strategy &amp; Capabilities <span class="line"></span></h3>
+    <div class="dashboard-grid">
+      <div class="dash-card" onclick="openFromCard('strat', 0, 'company_operating_manual_enhanced.html')">
+        <div class="card-top">
+          <div class="card-icon icon-strat">📋</div>
+          <div><div class="card-title">Company Operating Manual</div><div class="card-source">Strategy AGI</div></div>
+        </div>
+        <div class="card-desc">Complete operating manual — 9 divisions, brand spine, PMF economics, and execution playbook.</div>
+        <div class="card-meta"><span>📐 60 KB</span><span>📅 Mar 18</span></div>
+      </div>
+      <div class="dash-card" onclick="openFromCard('strat', 1, 'myn_capabilities.html')">
+        <div class="card-top">
+          <div class="card-icon icon-strat">🎯</div>
+          <div><div class="card-title">System Capabilities</div><div class="card-source">Strategy AGI</div></div>
+        </div>
+        <div class="card-desc">Full system capabilities overview — agents, workflows, data pipelines, and tool inventory.</div>
+        <div class="card-meta"><span>📐 65 KB</span><span>📅 Mar 19</span></div>
+      </div>
+      <div class="dash-card" onclick="openFromCard('strat', 2, 'consulting_architecture_diagram.html')">
+        <div class="card-top">
+          <div class="card-icon icon-strat">🧩</div>
+          <div><div class="card-title">Consulting Diagram</div><div class="card-source">Strategy AGI</div></div>
+        </div>
+        <div class="card-desc">Consulting architecture overview — service tiers, delivery model, and engagement framework.</div>
+        <div class="card-meta"><span>📐 10 KB</span><span>📅 Mar 18</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reports -->
+  <div class="cat-section">
+    <h3><span>◧</span> Reports &amp; Whitepapers <span class="line"></span></h3>
+    <div class="dashboard-grid">
+      <div class="dash-card" onclick="openFromCard('reports', 0, '../myn.com-main/reports by vertical/My_Yoga_Network_Strategic_Healthcare_Platform_WhitePaper.html')">
+        <div class="card-top">
+          <div class="card-icon icon-report">🏥</div>
+          <div><div class="card-title">Healthcare Platform Whitepaper</div><div class="card-source">myn.com / Reports</div></div>
+        </div>
+        <div class="card-desc">Strategic whitepaper — clinical evidence, healthcare integration, and yoga therapy as adjunct care.</div>
+        <div class="card-meta"><span>📐 44 KB</span><span>📅 Mar 20</span></div>
+      </div>
+      <div class="dash-card" onclick="openFromCard('reports', 1, '../myn.com-main/reports by vertical/My_Yoga_Network_White_Paper_Styled.html')">
+        <div class="card-top">
+          <div class="card-icon icon-report">📄</div>
+          <div><div class="card-title">Whitepaper (Styled Edition)</div><div class="card-source">myn.com / Reports</div></div>
+        </div>
+        <div class="card-desc">Presentation-ready styled whitepaper — designed for sharing with healthcare partners and investors.</div>
+        <div class="card-meta"><span>📐 12 KB</span><span>📅 Mar 20</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guides -->
+  <div class="cat-section">
+    <h3><span>▤</span> Guides &amp; Maps <span class="line"></span></h3>
+    <div class="dashboard-grid">
+      <div class="dash-card" onclick="openFromCard('guides', 0, 'DEPLOY_NOW.html')">
+        <div class="card-top">
+          <div class="card-icon icon-guide">🚀</div>
+          <div><div class="card-title">Deployment Guide</div><div class="card-source">Strategy AGI</div></div>
+        </div>
+        <div class="card-desc">Interactive backend deployment checklist — step-by-step guide for all MYN infrastructure.</div>
+        <div class="card-meta"><span>📐 35 KB</span><span>📅 Mar 20</span></div>
+      </div>
+      <div class="dash-card" onclick="openFromCard('guides', 1, 'intern_mind_map.html')">
+        <div class="card-top">
+          <div class="card-icon icon-guide">🗺️</div>
+          <div><div class="card-title">Team &amp; Division Mind Map</div><div class="card-source">Strategy AGI</div></div>
+        </div>
+        <div class="card-desc">Visual mind map of all 9 divisions, teams, and organizational structure for onboarding.</div>
+        <div class="card-meta"><span>📐 19 KB</span><span>📅 Mar 21</span></div>
+      </div>
+      <div class="dash-card" onclick="openFromCard('guides', 2, 'infrastructure/ingestion/EXECUTION_GUIDE.html')">
+        <div class="card-top">
+          <div class="card-icon icon-guide">⚙️</div>
+          <div><div class="card-title">Ingestion Pipeline Guide</div><div class="card-source">Strategy AGI / Infrastructure</div></div>
+        </div>
+        <div class="card-desc">Data ingestion execution guide — takeout pipeline setup, configuration, and troubleshooting.</div>
+        <div class="card-meta"><span>📐 29 KB</span><span>📅 Mar 20</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ IFRAME (hidden until a dashboard is selected) ═══════ -->
+<div class="iframe-container" id="iframeContainer" style="display:none;">
+  <iframe id="dashFrame" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+</div>
+
+<script>
+  // ─── State ───
+  let currentCategory = 'home';
+  let currentDash = null;
+
+  // ─── Clock ───
+  function updateClock() {
+    const now = new Date();
+    const opts = { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    document.getElementById('clock').textContent = now.toLocaleDateString('en-US', opts);
+  }
+  updateClock();
+  setInterval(updateClock, 30000);
+
+  // ─── Show Category ───
+  function showCategory(cat) {
+    currentCategory = cat;
+
+    // Update category tabs
+    document.querySelectorAll('.category-tab').forEach(t => t.classList.toggle('active', t.dataset.cat === cat));
+
+    // Update sub-tab bars
+    document.querySelectorAll('.sub-tab-bar').forEach(bar => bar.classList.toggle('active', bar.dataset.catBar === cat));
+
+    if (cat === 'home') {
+      // Show welcome view, hide iframe
+      document.getElementById('welcomeView').style.display = '';
+      document.getElementById('iframeContainer').style.display = 'none';
+      document.getElementById('backBtn').classList.remove('visible');
+      currentDash = null;
+    } else {
+      // Auto-load first sub-tab
+      const bar = document.querySelector(`.sub-tab-bar[data-cat-bar="${cat}"]`);
+      if (bar) {
+        const firstTab = bar.querySelector('.sub-tab');
+        if (firstTab) firstTab.click();
+      }
+    }
+  }
+
+  // ─── Load Dashboard into Iframe ───
+  function loadDash(tabEl, src) {
+    // Update sub-tab active states
+    tabEl.closest('.sub-tab-bar').querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+    tabEl.classList.add('active');
+
+    // Show iframe, hide welcome
+    document.getElementById('welcomeView').style.display = 'none';
+    document.getElementById('iframeContainer').style.display = 'flex';
+    document.getElementById('backBtn').classList.add('visible');
+
+    // Load
+    const frame = document.getElementById('dashFrame');
+    if (currentDash !== src) {
+      frame.src = src;
+      currentDash = src;
+    }
+  }
+
+  // ─── Open from Card Click ───
+  function openFromCard(cat, subIdx, src) {
+    // Switch to category
+    showCategory(cat);
+
+    // Activate the correct sub-tab
+    const bar = document.querySelector(`.sub-tab-bar[data-cat-bar="${cat}"]`);
+    if (bar) {
+      const tabs = bar.querySelectorAll('.sub-tab');
+      if (tabs[subIdx]) {
+        tabs.forEach(t => t.classList.remove('active'));
+        tabs[subIdx].classList.add('active');
+      }
+    }
+
+    // Load dashboard
+    document.getElementById('welcomeView').style.display = 'none';
+    document.getElementById('iframeContainer').style.display = 'flex';
+    document.getElementById('backBtn').classList.add('visible');
+
+    const frame = document.getElementById('dashFrame');
+    frame.src = src;
+    currentDash = src;
+  }
+
+  // ─── Back to Home ───
+  function goHome() {
+    showCategory('home');
+    document.querySelectorAll('.category-tab').forEach(t => t.classList.toggle('active', t.dataset.cat === 'home'));
+    document.querySelectorAll('.sub-tab-bar').forEach(bar => bar.classList.remove('active'));
+  }
+
+  // ─── Keyboard Shortcuts ───
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') goHome();
+    if (e.key === '1' && e.altKey) showCategory('ops');
+    if (e.key === '2' && e.altKey) showCategory('arch');
+    if (e.key === '3' && e.altKey) showCategory('strat');
+    if (e.key === '4' && e.altKey) showCategory('reports');
+    if (e.key === '5' && e.altKey) showCategory('guides');
+  });
+</script>
+
+</body>
+</html>
