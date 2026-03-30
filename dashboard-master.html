@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MYN Master Dashboard — All Systems</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #111827;
+    --bg3: #1a1f2e;
+    --border: #1e293b;
+    --border-light: #334155;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --dim: #64748b;
+    --accent: #818cf8;
+    --accent-glow: rgba(129,140,248,0.15);
+    --emerald: #10b981;
+    --emerald-glow: rgba(16,185,129,0.12);
+    --cyan: #06b6d4;
+    --amber: #f59e0b;
+    --amber-glow: rgba(245,158,11,0.12);
+    --rose: #f43f5e;
+    --rose-glow: rgba(244,63,94,0.12);
+    --purple: #a78bfa;
+    --pink: #ec4899;
+    --orange: #f97316;
+    --teal: #14b8a6;
+    --sky: #38bdf8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; }
+  body { display: flex; flex-direction: column; }
+
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(129,140,248,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(129,140,248,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* ── Header ── */
+  .header {
+    position: relative; z-index: 10; background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    border-bottom: 1px solid var(--border); padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .header .left { display: flex; align-items: center; gap: 12px; }
+  .header .logo {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--emerald));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #fff; box-shadow: 0 0 20px rgba(129,140,248,0.2);
+  }
+  .header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #f1f5f9 30%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .header .sub { color: var(--muted); font-size: 11px; margin-top: 1px; }
+  .header .right { display: flex; align-items: center; gap: 10px; }
+  .badge { font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.4px; }
+  .badge-accent { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(129,140,248,0.25); }
+  .badge-live { background: var(--emerald-glow); color: var(--emerald); border: 1px solid rgba(16,185,129,0.25); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 4px rgba(16,185,129,0.2); } 50% { box-shadow: 0 0 12px rgba(16,185,129,0.4); } }
+  .clock { color: var(--muted); font-size: 11px; background: var(--bg); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+
+  /* ── Tabs ── */
+  .tab-bar {
+    position: relative; z-index: 10; display: flex; gap: 0; background: var(--bg2);
+    border-bottom: 1px solid var(--border); padding: 0 12px; flex-shrink: 0; overflow-x: auto;
+  }
+  .tab {
+    padding: 11px 18px; cursor: pointer; font-size: 12px; font-weight: 600;
+    color: var(--dim); text-transform: uppercase; letter-spacing: 0.7px;
+    border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .tab:hover { color: var(--muted); background: rgba(255,255,255,0.02); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab .ico { font-size: 13px; }
+  .tab .cnt { font-size: 9px; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 8px; }
+  .tab.active .cnt { background: var(--accent-glow); color: var(--accent); }
+
+  /* ── Content Panels ── */
+  .panel { display: none; flex: 1; overflow-y: auto; padding: 24px; position: relative; z-index: 1; }
+  .panel.active { display: block; }
+  .panel h2 { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 6px; background: linear-gradient(135deg, #f1f5f9, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .panel .intro { color: var(--muted); font-size: 13px; margin-bottom: 24px; line-height: 1.6; max-width: 800px; }
+
+  /* ── Cards ── */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .card:hover { border-color: var(--border-light); }
+  .card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card h4 { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 14px 0 8px; }
+
+  /* ── Grids ── */
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 1100px) { .g3, .g4 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 700px) { .g2, .g3, .g4 { grid-template-columns: 1fr; } }
+
+  /* ── Stat Boxes ── */
+  .stat { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+  .stat .num { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; }
+  .stat .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-accent .num { color: var(--accent); }
+  .stat-emerald .num { color: var(--emerald); }
+  .stat-amber .num { color: var(--amber); }
+  .stat-rose .num { color: var(--rose); }
+  .stat-cyan .num { color: var(--cyan); }
+  .stat-purple .num { color: var(--purple); }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--dim); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  tr:hover td { background: rgba(255,255,255,0.015); }
+
+  /* ── Tags ── */
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; margin: 1px 2px; }
+  .tag-green { background: var(--emerald-glow); color: var(--emerald); }
+  .tag-amber { background: var(--amber-glow); color: var(--amber); }
+  .tag-rose { background: var(--rose-glow); color: var(--rose); }
+  .tag-blue { background: var(--accent-glow); color: var(--accent); }
+  .tag-cyan { background: rgba(6,182,212,0.12); color: var(--cyan); }
+  .tag-purple { background: rgba(167,139,250,0.12); color: var(--purple); }
+  .tag-dim { background: rgba(100,116,139,0.12); color: var(--dim); }
+
+  /* ── Progress Bar ── */
+  .progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin: 6px 0; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+  .fill-green { background: var(--emerald); }
+  .fill-amber { background: var(--amber); }
+  .fill-accent { background: var(--accent); }
+
+  /* ── Section Dividers ── */
+  .section-hdr { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--dim); margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .section-hdr .line { flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Mini List Items ── */
+  .list-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 12px; }
+  .list-item:last-child { border-bottom: none; }
+  .list-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: var(--emerald); box-shadow: 0 0 6px rgba(16,185,129,0.4); }
+  .dot-amber { background: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,0.4); }
+  .dot-rose { background: var(--rose); box-shadow: 0 0 6px rgba(244,63,94,0.4); }
+  .dot-blue { background: var(--accent); box-shadow: 0 0 6px rgba(129,140,248,0.4); }
+  .dot-dim { background: var(--dim); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Iframe Link Cards ── */
+  .link-card { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
+  .link-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+  .link-card .lc-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .link-card .lc-title { font-size: 13px; font-weight: 600; }
+  .link-card .lc-sub { font-size: 10px; color: var(--dim); margin-top: 2px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .header { padding: 10px 14px; }
+    .header h1 { font-size: 15px; }
+    .tab { padding: 9px 12px; font-size: 10px; }
+    .panel { padding: 16px; }
+    .header .badge { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="header">
+  <div class="left">
+    <div class="logo">M</div>
+    <div>
+      <h1>MYN Master Dashboard</h1>
+      <div class="sub">Strategy AGI · myn.org · myn.com — All Systems</div>
+    </div>
+  </div>
+  <div class="right">
+    <span class="badge badge-accent">3 Systems</span>
+    <span class="badge badge-accent">19 Outputs</span>
+    <span class="badge badge-live">● LIVE</span>
+    <span class="clock" id="clock"></span>
+  </div>
+</header>
+
+<!-- ═══ TAB BAR ═══ -->
+<nav class="tab-bar">
+  <div class="tab active" onclick="show('overview')"><span class="ico">◉</span> Overview</div>
+  <div class="tab" onclick="show('ops')"><span class="ico">⌘</span> Operations <span class="cnt">7</span></div>
+  <div class="tab" onclick="show('arch')"><span class="ico">◈</span> Architecture <span class="cnt">3</span></div>
+  <div class="tab" onclick="show('agents')"><span class="ico">◆</span> Agents & Skills <span class="cnt">39</span></div>
+  <div class="tab" onclick="show('bugs')"><span class="ico">◧</span> Bug Tracker <span class="cnt">52</span></div>
+  <div class="tab" onclick="show('divisions')"><span class="ico">▦</span> Divisions <span class="cnt">9</span></div>
+  <div class="tab" onclick="show('build')"><span class="ico">▤</span> 30-Day Build</div>
+  <div class="tab" onclick="show('files')"><span class="ico">◫</span> All Outputs <span class="cnt">19</span></div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ OVERVIEW PANEL ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="panel active" id="p-overview">
+  <h2>System Overview</h2>
+  <p class="intro">My Yoga Network — 1-person holding company with 9 divisions, powered by AI agents and automation. Real-time status across Strategy AGI, myn.org, and myn.com.</p>
+
+  <div class="g4" style="margin-bottom: 20px;">
+    <div class="stat stat-accent"><div class="num">7</div><div class="lbl">Active Agents</div></div>
+    <div class="stat stat-emerald"><div class="num">32</div><div class="lbl">Claude Skills</div></div>
+    <div class="stat stat-amber"><div class="num">2</div><div class="lbl">n8n Workflows</div></div>
+    <div class="stat stat-cyan"><div class="num">9</div><div class="lbl">Divisions</div></div>
+  </div>
+  <div class="g4" style="margin-bottom: 24px;">
+    <div class="stat stat-purple"><div class="num">6</div><div class="lbl">Script Pipelines</div></div>
+    <div class="stat stat-emerald"><div class="num">15+</div><div class="lbl">Integrations</div></div>
+    <div class="stat stat-accent"><div class="num">2,450</div><div class="lbl">Qdrant Vectors</div></div>
+    <div class="stat stat-rose"><div class="num">44/52</div><div class="lbl">Bugs Fixed</div></div>
+  </div>
+
+  <div class="g3">
+    <!-- Strategy AGI -->
+    <div class="card">
+      <h3><span style="color:var(--accent)">●</span> Strategy AGI</h3>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:10px;">Backend intelligence layer — agents, workflows, data pipelines, vector search</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> Supabase — 6 tables active</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> Qdrant — 2,450+ vectors</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> n8n — 2 workflows deployed</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> Apify — 3 actors running</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> 7 AI Agents active</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> 3 workflows planned (Phase 2)</div>
+    </div>
+
+    <!-- myn.org -->
+    <div class="card">
+      <h3><span style="color:var(--amber)">●</span> myn.org — Admin Dashboard</h3>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:10px;">Next.js 15.5.9 · React 18 · Bootstrap 5.3.3 · Reactstrap · FastAPI backend</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> 81 routes / pages</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> 297 React components</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> Auth: Supabase + FastAPI JWT</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> API proxy → mynapi.onrender.com</div>
+      <div class="list-item"><span class="list-dot dot-amber"></span> 8/52 issues remaining</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> 4 scraper apps built</div>
+    </div>
+
+    <!-- myn.com -->
+    <div class="card">
+      <h3><span style="color:var(--emerald)">●</span> myn.com — Public Website</h3>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:10px;">Next.js 16.1.6 · React 18 · TypeScript · Framer Motion · Vercel</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> 18 public pages</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> 82 React components</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> Supabase + OpenAI (server)</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> GTM + Vercel Speed Insights</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> 6 URL redirects configured</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> ASU Wearables project active</div>
+    </div>
+  </div>
+
+  <!-- Team Map -->
+  <div class="section-hdr"><span>👥</span> Team Execution Map <span class="line"></span></div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Role</th><th>Owner</th><th>Scope</th><th>System</th></tr></thead>
+      <tbody>
+        <tr><td>Founder / CEO</td><td><strong>Ram Bhakt</strong></td><td>Strategy, partnerships, product, final approval</td><td><span class="tag tag-blue">All</span></td></tr>
+        <tr><td>Finance / Analytics</td><td>Vaishali</td><td>Growth analytics, ROI, pricing, Looker</td><td><span class="tag tag-purple">AI_STACK</span> <span class="tag tag-amber">myn.org</span></td></tr>
+        <tr><td>Market Research</td><td>Priya</td><td>Competitor intel, pricing, strategy</td><td><span class="tag tag-cyan">Marketing</span> <span class="tag tag-blue">AGI</span></td></tr>
+        <tr><td>Ecosystem Research</td><td>Chioma</td><td>Stakeholder mapping, CX, customer research</td><td><span class="tag tag-cyan">Marketing</span></td></tr>
+        <tr><td>Graphics / Creative</td><td>Grace, Sunmeet</td><td>Messaging, retreat content, visuals</td><td><span class="tag tag-cyan">Marketing</span></td></tr>
+        <tr><td>Org / Infrastructure</td><td>Diksha</td><td>Agent development, team docs</td><td><span class="tag tag-blue">AGI</span></td></tr>
+        <tr><td>Kids Programs</td><td>Charisma, Binderiya</td><td>Marketing materials, program design</td><td><span class="tag tag-cyan">Marketing</span></td></tr>
+        <tr><td>AI / Technical</td><td>Claude (Agent)</td><td>PM triage, bug fixes, architecture</td><td><span class="tag tag-blue">All</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ OPERATIONS PANEL ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="panel" id="p-ops">
+  <h2>Operations Status</h2>
+  <p class="intro">Live status of all AI agents, n8n workflows, data pipelines, and infrastructure services.</p>
+
+  <!-- Agents Table -->
+  <div class="section-hdr"><span>🤖</span> AI Agents (7 Active) <span class="line"></span></div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Agent</th><th>Model</th><th>Capability</th><th>Divisions</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Intent Router</strong></td><td>GPT-4 + LangChain</td><td>Slack mention → route to workflow</td><td>All 9</td><td><span class="tag tag-green">Active</span></td></tr>
+        <tr><td><strong>Lead Researcher</strong></td><td>Apify actors</td><td>Multi-source aggregation (LinkedIn, IG, web, Supabase)</td><td>All 9</td><td><span class="tag tag-green">Active</span></td></tr>
+        <tr><td><strong>Style Cloner</strong></td><td>GPT-4</td><td>Writing style analysis → personalized framework</td><td>Marketplace, Boutique</td><td><span class="tag tag-green">Active</span></td></tr>
+        <tr><td><strong>Wellness Recommender</strong></td><td>Perplexity Sonar-Pro</td><td>Company research → top 4 wellness recs</td><td>Healthcare, Wellness, Hotels</td><td><span class="tag tag-green">Active</span></td></tr>
+        <tr><td><strong>Cold Email Writer</strong></td><td>GPT-4</td><td>Company data + style → personalized outreach</td><td>8 outreach divisions</td><td><span class="tag tag-green">Active</span></td></tr>
+        <tr><td><strong>Instagram Summarizer</strong></td><td>Claude</td><td>Brand voice, content themes, engagement</td><td>Marketplace, Boutique</td><td><span class="tag tag-green">Active</span></td></tr>
+        <tr><td><strong>Website Summarizer</strong></td><td>Claude</td><td>Services, messaging, key people extraction</td><td>All 9</td><td><span class="tag tag-green">Active</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Workflows -->
+  <div class="section-hdr"><span>⚡</span> n8n Workflows (2 Active, 3 Planned) <span class="line"></span></div>
+  <div class="g2">
+    <div class="card">
+      <h3><span style="color:var(--emerald)">●</span> Writing Style & Social Scraping</h3>
+      <div style="font-size:11px; color:var(--dim); margin-bottom:8px;">TRIGGER: Tally Form submission</div>
+      <div style="font-size:12px; color:var(--muted); line-height:1.6;">
+        Form → Scrape LinkedIn/Instagram/Website → Summarize → Generate Style Framework → Save to Supabase + Google Drive + Email
+      </div>
+      <h4>Agents Used</h4>
+      <span class="tag tag-blue">Lead Researcher</span>
+      <span class="tag tag-purple">Instagram Summarizer</span>
+      <span class="tag tag-cyan">Website Summarizer</span>
+      <span class="tag tag-green">Style Cloner</span>
+      <h4>Integrations</h4>
+      <span class="tag tag-dim">Tally</span> <span class="tag tag-dim">Apify</span> <span class="tag tag-dim">Claude</span> <span class="tag tag-dim">GPT-4</span> <span class="tag tag-dim">Notion</span> <span class="tag tag-dim">Supabase</span> <span class="tag tag-dim">Google Drive</span> <span class="tag tag-dim">Gmail</span>
+      <div style="margin-top:10px;"><span class="tag tag-green">● Active</span></div>
+    </div>
+    <div class="card">
+      <h3><span style="color:var(--emerald)">●</span> Business Card → Deep Research + Cold Email</h3>
+      <div style="font-size:11px; color:var(--dim); margin-bottom:8px;">TRIGGER: Slack @mention (e.g. @bot card: [LinkedIn URL])</div>
+      <div style="font-size:12px; color:var(--muted); line-height:1.6;">
+        Slack → Route intent → Research (LinkedIn/IG/Web/Supabase) → Wellness Recs + Data Merge → Email → Slack + Gmail + Supabase + Qdrant
+      </div>
+      <h4>Agents Used</h4>
+      <span class="tag tag-blue">Intent Router</span>
+      <span class="tag tag-blue">Lead Researcher</span>
+      <span class="tag tag-purple">Wellness Recommender</span>
+      <span class="tag tag-green">Cold Email Writer</span>
+      <h4>Integrations</h4>
+      <span class="tag tag-dim">Slack</span> <span class="tag tag-dim">LangChain</span> <span class="tag tag-dim">GPT-4</span> <span class="tag tag-dim">Apify</span> <span class="tag tag-dim">Perplexity</span> <span class="tag tag-dim">Supabase</span> <span class="tag tag-dim">Qdrant</span> <span class="tag tag-dim">Gmail</span>
+      <div style="margin-top:10px;"><span class="tag tag-green">● Active</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h3>Planned Workflows (Phase 2)</h3>
+    <div class="list-item"><span class="list-dot dot-blue"></span> <strong>LinkedIn Content Generator</strong> — weekly auto-post</div>
+    <div class="list-item"><span class="list-dot dot-blue"></span> <strong>Inbound Lead Qualifier</strong> — CRM webhook trigger</div>
+    <div class="list-item"><span class="list-dot dot-blue"></span> <strong>Proposal Generator</strong> — Slack command trigger</div>
+  </div>
+
+  <!-- Infrastructure -->
+  <div class="section-hdr"><span>🏗️</span> Infrastructure <span class="line"></span></div>
+  <div class="g3">
+    <div class="card">
+      <h3><span style="color:var(--emerald)">●</span> Supabase</h3>
+      <div style="font-size:11px; color:var(--dim); margin-bottom:8px;">Primary Data Store (replaced BigQuery 2026-03-19)</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> linkedin_profiles</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> instagram_profiles</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> website_scraping</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> writing_styles</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> execution_logs</div>
+      <div class="list-item"><span class="list-dot dot-amber"></span> takeout_accounting (future)</div>
+    </div>
+    <div class="card">
+      <h3><span style="color:var(--emerald)">●</span> Qdrant</h3>
+      <div style="font-size:11px; color:var(--dim); margin-bottom:8px;">Vector Database — Docker (persistent)</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> Collection: business_documents</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> 2,450+ vectors indexed</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> Semantic search active</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> Similarity + clustering</div>
+    </div>
+    <div class="card">
+      <h3><span style="color:var(--emerald)">●</span> n8n</h3>
+      <div style="font-size:11px; color:var(--dim); margin-bottom:8px;">Workflow Automation Engine</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> 2 workflows deployed</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> 300+ integrations available</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> Job logging active</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> 3 workflows planned</div>
+    </div>
+  </div>
+
+  <!-- Script Pipelines -->
+  <div class="section-hdr"><span>📜</span> Script Pipelines (6 Categories) <span class="line"></span></div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Pipeline</th><th>Scripts</th><th>Output</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td><strong>LinkedIn Scraping</strong></td><td>scraper.py, profile_enricher.py</td><td>linkedin_profiles table + embeddings</td><td><span class="tag tag-green">Active</span></td></tr>
+        <tr><td><strong>Business Cards</strong></td><td>generator.py, templates.py</td><td>PNG/PDF output</td><td><span class="tag tag-green">Active</span></td></tr>
+        <tr><td><strong>Deep Research</strong></td><td>orchestrator.py, web_search.py, competitor_analysis.py</td><td>Supabase + Notion</td><td><span class="tag tag-green">Active</span></td></tr>
+        <tr><td><strong>Instagram Scraping</strong></td><td>scraper.py, content_analyzer.py</td><td>instagram_profiles table</td><td><span class="tag tag-green">Active</span></td></tr>
+        <tr><td><strong>Website Crawling</strong></td><td>crawler.py, content_extractor.py</td><td>website_scraping table</td><td><span class="tag tag-green">Active</span></td></tr>
+        <tr><td><strong>Shared Utilities</strong></td><td>supabase_client, qdrant_client, notion_client, claude_client, logger</td><td>Internal libraries</td><td><span class="tag tag-green">Active</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ ARCHITECTURE PANEL ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="panel" id="p-arch">
+  <h2>Architecture & Tech Stack</h2>
+  <p class="intro">Tri-system architecture — Strategy AGI (backend intelligence), myn.org (admin dashboard), myn.com (public marketing site). All share Supabase.</p>
+
+  <div class="g3">
+    <!-- Strategy AGI -->
+    <div class="card">
+      <h3><span style="color:var(--accent)">◆</span> Strategy AGI</h3>
+      <table>
+        <tr><td style="color:var(--dim)">Purpose</td><td>Backend intelligence layer</td></tr>
+        <tr><td style="color:var(--dim)">Stack</td><td>Python · n8n · Supabase · Qdrant · Apify</td></tr>
+        <tr><td style="color:var(--dim)">AI Models</td><td>GPT-4, Claude, Perplexity Sonar-Pro</td></tr>
+        <tr><td style="color:var(--dim)">Agents</td><td>7 active</td></tr>
+        <tr><td style="color:var(--dim)">Workflows</td><td>2 active (n8n)</td></tr>
+        <tr><td style="color:var(--dim)">Skills</td><td>32 Claude skills</td></tr>
+        <tr><td style="color:var(--dim)">Scripts</td><td>6 pipeline categories</td></tr>
+        <tr><td style="color:var(--dim)">Servers</td><td>intelligence_server.py, dashboard_server.py (Flask)</td></tr>
+        <tr><td style="color:var(--dim)">Files</td><td>45+ documentation files</td></tr>
+      </table>
+    </div>
+
+    <!-- myn.org -->
+    <div class="card">
+      <h3><span style="color:var(--amber)">◆</span> myn.org</h3>
+      <table>
+        <tr><td style="color:var(--dim)">Purpose</td><td>Admin dashboard</td></tr>
+        <tr><td style="color:var(--dim)">Framework</td><td>Next.js 15.5.9</td></tr>
+        <tr><td style="color:var(--dim)">UI</td><td>React 18.3.1 + Bootstrap 5.3.3 + Reactstrap</td></tr>
+        <tr><td style="color:var(--dim)">Auth</td><td>Supabase + FastAPI JWT</td></tr>
+        <tr><td style="color:var(--dim)">Backend</td><td>mynapi.onrender.com (FastAPI)</td></tr>
+        <tr><td style="color:var(--dim)">Pages</td><td>81 routes</td></tr>
+        <tr><td style="color:var(--dim)">Components</td><td>297 JS files (19 dirs)</td></tr>
+        <tr><td style="color:var(--dim)">Dependencies</td><td>50+ npm packages</td></tr>
+        <tr><td style="color:var(--dim)">Security</td><td>DOMPurify, security headers, cookie auth</td></tr>
+        <tr><td style="color:var(--dim)">Apps</td><td>Website Analyzer, IG Scraper, LinkedIn Scraper, Jobs Scraper</td></tr>
+      </table>
+    </div>
+
+    <!-- myn.com -->
+    <div class="card">
+      <h3><span style="color:var(--emerald)">◆</span> myn.com</h3>
+      <table>
+        <tr><td style="color:var(--dim)">Purpose</td><td>Public marketing website</td></tr>
+        <tr><td style="color:var(--dim)">Framework</td><td>Next.js 16.1.6</td></tr>
+        <tr><td style="color:var(--dim)">Language</td><td>TypeScript 5</td></tr>
+        <tr><td style="color:var(--dim)">UI</td><td>React 18 + Framer Motion + AOS + Swiper</td></tr>
+        <tr><td style="color:var(--dim)">Auth</td><td>Supabase Auth Helpers</td></tr>
+        <tr><td style="color:var(--dim)">AI</td><td>OpenAI (server-side)</td></tr>
+        <tr><td style="color:var(--dim)">Hosting</td><td>Vercel + Speed Insights</td></tr>
+        <tr><td style="color:var(--dim)">Pages</td><td>18 public routes + 1 API</td></tr>
+        <tr><td style="color:var(--dim)">Components</td><td>82 (11,824 lines)</td></tr>
+        <tr><td style="color:var(--dim)">Assets</td><td>298 static files, 200+ images</td></tr>
+        <tr><td style="color:var(--dim)">Analytics</td><td>GTM G-9R0KB4WPDK + Turnstile CAPTCHA</td></tr>
+        <tr><td style="color:var(--dim)">Redirects</td><td>6 configured</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- myn.com Pages -->
+  <div class="section-hdr"><span>🌐</span> myn.com Public Pages (18 routes) <span class="line"></span></div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Route</th><th>Purpose</th><th>Division</th><th>SEO Priority</th></tr></thead>
+      <tbody>
+        <tr><td><code>/</code></td><td>Homepage</td><td>All</td><td><span class="tag tag-green">Highest</span></td></tr>
+        <tr><td><code>/yoga-for-hotels-and-resorts</code></td><td>Hotel vertical landing</td><td>B2B Hotels</td><td><span class="tag tag-green">Highest</span></td></tr>
+        <tr><td><code>/hotels</code></td><td>Hotel directory</td><td>B2B Hotels</td><td><span class="tag tag-green">Highest</span></td></tr>
+        <tr><td><code>/yoga-for-healthcare-providers</code></td><td>Healthcare vertical</td><td>Healthcare</td><td><span class="tag tag-green">Highest</span></td></tr>
+        <tr><td><code>/corporate-wellness-programs</code></td><td>Corporate wellness</td><td>Wellness Activation</td><td><span class="tag tag-green">Highest</span></td></tr>
+        <tr><td><code>/find-a-yoga-therapist-near-me</code></td><td>Therapist marketplace search</td><td>Marketplace</td><td><span class="tag tag-amber">Medium</span></td></tr>
+        <tr><td><code>/join-as-yoga-instructor</code></td><td>Instructor onboarding</td><td>Marketplace</td><td><span class="tag tag-amber">Medium</span></td></tr>
+        <tr><td><code>/blogs</code></td><td>Blog listing</td><td>Content / SEO</td><td><span class="tag tag-blue">Supporting</span></td></tr>
+        <tr><td><code>/post/[slug]</code></td><td>Blog post detail</td><td>Content / SEO</td><td><span class="tag tag-blue">Supporting</span></td></tr>
+        <tr><td><code>/platform</code></td><td>Platform overview</td><td>All</td><td><span class="tag tag-blue">Supporting</span></td></tr>
+        <tr><td><code>/about-our-team-and-vision</code></td><td>Team & vision</td><td>Brand</td><td><span class="tag tag-blue">Supporting</span></td></tr>
+        <tr><td><code>/after-school-program</code></td><td>Kids / family programs</td><td>Kids</td><td><span class="tag tag-blue">Supporting</span></td></tr>
+        <tr><td><code>/hotel/[hotelId]</code></td><td>Individual hotel detail</td><td>B2B Hotels</td><td><span class="tag tag-green">Highest</span></td></tr>
+        <tr><td><code>/hotels/[hotelId]</code></td><td>Hotel detail (alt route)</td><td>B2B Hotels</td><td><span class="tag tag-green">Highest</span></td></tr>
+        <tr><td><code>/contact-us</code></td><td>Contact form</td><td>Utility</td><td><span class="tag tag-dim">Lowest</span></td></tr>
+        <tr><td><code>/faqs</code></td><td>FAQ</td><td>Utility</td><td><span class="tag tag-dim">Lowest</span></td></tr>
+        <tr><td><code>/privacy-policy</code></td><td>Legal</td><td>Utility</td><td><span class="tag tag-dim">Lowest</span></td></tr>
+        <tr><td><code>/terms-of-service</code></td><td>Legal</td><td>Utility</td><td><span class="tag tag-dim">Lowest</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- myn.org Key Pages -->
+  <div class="section-hdr"><span>📊</span> myn.org Key Sections (81 routes) <span class="line"></span></div>
+  <div class="card">
+    <div class="g4">
+      <div>
+        <h4>Authentication (3)</h4>
+        <div class="list-item"><span class="list-dot dot-green"></span> /auth/login</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> /auth/signup</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> /auth/callback</div>
+      </div>
+      <div>
+        <h4>Core Operations (6)</h4>
+        <div class="list-item"><span class="list-dot dot-green"></span> /dashboard</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> /profile + /edit</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> /business-profile + /edit</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> /classes + /edit</div>
+      </div>
+      <div>
+        <h4>Web Apps (4)</h4>
+        <div class="list-item"><span class="list-dot dot-green"></span> Website Analyzer</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> Instagram Scraper</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> LinkedIn Scraper</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> Jobs Scraper</div>
+      </div>
+      <div>
+        <h4>UI Kit (40+)</h4>
+        <div class="list-item"><span class="list-dot dot-green"></span> 16 form elements</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> 7 icon libraries</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> 28 UI components</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> 3 maps, 4 tables</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ AGENTS & SKILLS PANEL ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="panel" id="p-agents">
+  <h2>Agents & Skills Inventory</h2>
+  <p class="intro">7 AI agents, 32 Claude skills, and 2 Flask servers powering the intelligence layer.</p>
+
+  <div class="g4" style="margin-bottom:20px;">
+    <div class="stat stat-accent"><div class="num">7</div><div class="lbl">AI Agents</div></div>
+    <div class="stat stat-emerald"><div class="num">32</div><div class="lbl">Claude Skills</div></div>
+    <div class="stat stat-amber"><div class="num">2</div><div class="lbl">Flask Servers</div></div>
+    <div class="stat stat-purple"><div class="num">4</div><div class="lbl">LLM Models</div></div>
+  </div>
+
+  <!-- Skills Grid -->
+  <div class="section-hdr"><span>🎯</span> Claude Skills (32 Active) <span class="line"></span></div>
+  <div class="card">
+    <div class="g4">
+      <div>
+        <h4>Lead Generation</h4>
+        <div class="list-item"><span class="list-dot dot-green"></span> classify-leads</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> gmaps-leads</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> lead-research</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> prospect-enrich</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> scrape-leads</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> cross-niche-outliers</div>
+      </div>
+      <div>
+        <h4>Research & Content</h4>
+        <div class="list-item"><span class="list-dot dot-green"></span> deep-research</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> literature-research</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> company-snapshot</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> title-variants</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> generate-report</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> youtube-outliers</div>
+      </div>
+      <div>
+        <h4>Outreach & Sales</h4>
+        <div class="list-item"><span class="list-dot dot-green"></span> create-proposal</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> instantly-campaigns</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> instantly-autoreply</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> style-pipeline</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> welcome-email</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> upwork-apply</div>
+      </div>
+      <div>
+        <h4>Infrastructure</h4>
+        <div class="list-item"><span class="list-dot dot-green"></span> division-router</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> add-webhook</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> gmail-inbox</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> local-server</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> modal-deploy</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> project-dev-orchestrator</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;" class="g3">
+      <div>
+        <h4>Community & Monitoring</h4>
+        <div class="list-item"><span class="list-dot dot-green"></span> skool-monitor</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> skool-rag</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> onboarding-kickoff</div>
+      </div>
+      <div>
+        <h4>Media & Creative</h4>
+        <div class="list-item"><span class="list-dot dot-green"></span> video-edit</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> recreate-thumbnails</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> pan-3d-transition</div>
+      </div>
+      <div>
+        <h4>Utility</h4>
+        <div class="list-item"><span class="list-dot dot-green"></span> casualize-names</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> regen-pdf</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ BUG TRACKER PANEL ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="panel" id="p-bugs">
+  <h2>Bug Tracker — myn.org</h2>
+  <p class="intro">52 total issues tracked. 44 resolved, 6 deferred, 2 remaining. Last audit: March 20, 2026.</p>
+
+  <div class="g4" style="margin-bottom:20px;">
+    <div class="stat stat-emerald"><div class="num">44</div><div class="lbl">Fixed</div></div>
+    <div class="stat stat-amber"><div class="num">6</div><div class="lbl">Deferred</div></div>
+    <div class="stat stat-rose"><div class="num">2</div><div class="lbl">Remaining</div></div>
+    <div class="stat stat-accent"><div class="num">85%</div><div class="lbl">Resolution Rate</div></div>
+  </div>
+
+  <div class="progress-bar"><div class="progress-fill fill-green" style="width:85%"></div></div>
+  <div style="font-size:11px; color:var(--dim); margin-bottom:20px; text-align:right;">44 of 52 issues resolved</div>
+
+  <!-- Critical Bugs -->
+  <div class="section-hdr"><span style="color:var(--rose)">●</span> Critical Issues (10) — ALL FIXED <span class="line"></span></div>
+  <div class="card">
+    <table>
+      <thead><tr><th>ID</th><th>Issue</th><th>Fix Applied</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>C-01</td><td>XSS via dangerouslySetInnerHTML</td><td>DOMPurify.sanitize() added</td><td><span class="tag tag-green">Fixed</span></td></tr>
+        <tr><td>C-02</td><td>Hardcoded localhost in logout</td><td>Uses /api/ proxy</td><td><span class="tag tag-green">Fixed</span></td></tr>
+        <tr><td>C-03</td><td>Auth tokens logged to console</td><td>Gated behind NODE_ENV check</td><td><span class="tag tag-green">Fixed</span></td></tr>
+        <tr><td>C-04</td><td>.env tracked in git</td><td>.gitignore updated</td><td><span class="tag tag-green">Fixed</span></td></tr>
+        <tr><td>C-05</td><td>jQuery in React Customizer</td><td>Native DOM APIs</td><td><span class="tag tag-green">Fixed</span></td></tr>
+        <tr><td>C-06</td><td>XSS in Glightbox attribute</td><td>Title sanitized</td><td><span class="tag tag-green">Fixed</span></td></tr>
+        <tr><td>C-07</td><td>Unvalidated API input</td><td>URL validation added</td><td><span class="tag tag-green">Fixed</span></td></tr>
+        <tr><td>C-08</td><td>innerHTML in chart components</td><td>Replaced with textContent</td><td><span class="tag tag-green">Fixed</span></td></tr>
+        <tr><td>C-09</td><td>Logout without state cleanup</td><td>setUser(null) before redirect</td><td><span class="tag tag-green">Fixed</span></td></tr>
+        <tr><td>C-10</td><td>Hardcoded promo code</td><td>Externalized to env</td><td><span class="tag tag-green">Fixed</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Medium Bugs -->
+  <div class="section-hdr"><span style="color:var(--amber)">●</span> Medium Issues (22) — 20 Fixed, 2 Deferred <span class="line"></span></div>
+  <div class="card">
+    <div style="font-size:12px; color:var(--muted); margin-bottom:12px;">M-01 through M-22: 20 of 22 resolved. All security, UX, and data-handling medium-priority bugs have been addressed.</div>
+    <div class="g2">
+      <div>
+        <h4>Deferred</h4>
+        <div class="list-item"><span class="list-dot dot-amber"></span> <strong>M-02</strong>: CSRF protection — requires backend coordination</div>
+        <div class="list-item"><span class="list-dot dot-amber"></span> <strong>M-05</strong>: CSS optimization — template pages only</div>
+      </div>
+      <div>
+        <h4>Security Headers (Active)</h4>
+        <div class="list-item"><span class="list-dot dot-green"></span> X-Content-Type-Options: nosniff</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> X-Frame-Options: DENY</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> Referrer-Policy: strict-origin</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> X-XSS-Protection: 1; mode=block</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Low Issues -->
+  <div class="section-hdr"><span style="color:var(--dim)">●</span> Low Issues (20) — 14 Fixed, 6 in Backlog <span class="line"></span></div>
+  <div class="card">
+    <div style="font-size:12px; color:var(--muted);">14 low-priority issues resolved. Remaining 6 are cosmetic/template-only issues in the backlog. None affect production functionality or security.</div>
+    <div class="progress-bar" style="margin-top:8px;"><div class="progress-fill fill-amber" style="width:70%"></div></div>
+    <div style="font-size:11px; color:var(--dim); text-align:right;">14 of 20 resolved</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ DIVISIONS PANEL ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="panel" id="p-divisions">
+  <h2>Business Divisions</h2>
+  <p class="intro">9 divisions ranked by PMF strength. Hotels & Luxury Residential is the economic anchor — build everything around this first.</p>
+
+  <!-- PMF Priority -->
+  <div class="section-hdr"><span>🎯</span> PMF Priority Ranking <span class="line"></span></div>
+
+  <!-- Priority 1: ANCHOR -->
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span class="tag tag-green">PRIORITY 1 — ANCHOR</span></h3>
+    <div style="font-size:12px; color:var(--muted); margin:8px 0 12px;">STRONGEST — high willingness to pay, recurring demand, low price sensitivity once embedded</div>
+    <div class="g2">
+      <div>
+        <h4>B2B Hotels + Finance</h4>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Hotel chains + financial orgs · 4/7 agents active</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> Revenue: per-class fees, retainers, rev share</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> Pages: /hotels, /hotel, /yoga-for-hotels-and-resorts</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> Status: Active — economic anchor</div>
+      </div>
+      <div>
+        <h4>Boutique/Lifestyle Hotels</h4>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Premium wellness for boutique brands · 5/7 agents active</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> Revenue: premium niche pricing</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> Pages: /hotels, /hotel</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> Status: Active</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Priority 2: PARALLEL -->
+  <div class="card" style="border-left: 3px solid var(--amber);">
+    <h3><span class="tag tag-amber">PRIORITY 2 — PARALLEL PIPELINE</span></h3>
+    <div style="font-size:12px; color:var(--muted); margin:8px 0 12px;">LARGE but SLOW — big budgets, heavy compliance, long sales cycles</div>
+    <div class="g2">
+      <div>
+        <h4>B2B2C Healthcare + Locals</h4>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Healthcare providers + local wellness · 4/7 agents</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> Pages: /yoga-for-healthcare-providers, /find-a-yoga-therapist</div>
+        <div class="list-item"><span class="list-dot dot-blue"></span> ASU Wearables + EHR project active</div>
+        <div class="list-item"><span class="list-dot dot-blue"></span> MD Anderson / ECHO credibility play</div>
+      </div>
+      <div>
+        <h4>Convention Hotels</h4>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Large event venue wellness · 4/7 agents</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> Pages: /yoga-for-hotels-and-resorts</div>
+        <div class="list-item"><span class="list-dot dot-amber"></span> Niche market — parallel pursuit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Priority 3: SELECTIVE -->
+  <div class="card" style="border-left: 3px solid var(--accent);">
+    <h3><span class="tag tag-blue">PRIORITY 3 — SELECTIVE</span></h3>
+    <div style="font-size:12px; color:var(--muted); margin:8px 0 12px;">VARIABLE — HR budgets fluctuate, ROI scrutiny varies, program churn common</div>
+    <div class="g2">
+      <div>
+        <h4>B2B Wellness Activation</h4>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Corporate wellness programs · 4/7 agents</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> Pages: /corporate-wellness-programs</div>
+        <div class="list-item"><span class="list-dot dot-amber"></span> Selective pursuit — avoid custom-heavy</div>
+      </div>
+      <div>
+        <h4>Hospitality Groups</h4>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:8px;">Bulk wellness, group retreats · 4/7 agents</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> Niche hospitality segment</div>
+        <div class="list-item"><span class="list-dot dot-amber"></span> Selective pursuit</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Priority 4: LEVERAGE -->
+  <div class="card" style="border-left: 3px solid var(--dim);">
+    <h3><span class="tag tag-dim">PRIORITY 4 — LEVERAGE (Supply-side)</span></h3>
+    <div style="font-size:12px; color:var(--muted); margin:8px 0 12px;">WEAKEST early — low willingness to pay, high support needs. Adoption drivers, not revenue.</div>
+    <div class="g3">
+      <div>
+        <h4>Yoga Therapy Marketplace</h4>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">5/7 agents</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> /find-a-yoga-therapist</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> /join-as-yoga-instructor</div>
+      </div>
+      <div>
+        <h4>Procurement + Kids</h4>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">4/7 agents</div>
+        <div class="list-item"><span class="list-dot dot-green"></span> /after-school-program</div>
+      </div>
+      <div>
+        <h4>Finance & Accounting</h4>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">1/7 agents (internal)</div>
+        <div class="list-item"><span class="list-dot dot-dim"></span> Monitoring / internal ops</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent Coverage -->
+  <div class="section-hdr"><span>🤖</span> Agent Coverage by Division <span class="line"></span></div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Division</th><th>Coverage</th><th>Agents</th></tr></thead>
+      <tbody>
+        <tr><td>B2B Hotels + Finance</td><td>4/7</td><td><div class="progress-bar" style="width:120px;display:inline-block;vertical-align:middle;"><div class="progress-fill fill-green" style="width:57%"></div></div></td></tr>
+        <tr><td>Boutique/Lifestyle Hotels</td><td>5/7</td><td><div class="progress-bar" style="width:120px;display:inline-block;vertical-align:middle;"><div class="progress-fill fill-green" style="width:71%"></div></div></td></tr>
+        <tr><td>B2B2C Healthcare + Locals</td><td>4/7</td><td><div class="progress-bar" style="width:120px;display:inline-block;vertical-align:middle;"><div class="progress-fill fill-green" style="width:57%"></div></div></td></tr>
+        <tr><td>Yoga Therapy Marketplace</td><td>5/7</td><td><div class="progress-bar" style="width:120px;display:inline-block;vertical-align:middle;"><div class="progress-fill fill-green" style="width:71%"></div></div></td></tr>
+        <tr><td>B2B Wellness Activation</td><td>4/7</td><td><div class="progress-bar" style="width:120px;display:inline-block;vertical-align:middle;"><div class="progress-fill fill-amber" style="width:57%"></div></div></td></tr>
+        <tr><td>Convention Hotels</td><td>4/7</td><td><div class="progress-bar" style="width:120px;display:inline-block;vertical-align:middle;"><div class="progress-fill fill-amber" style="width:57%"></div></div></td></tr>
+        <tr><td>Hospitality Groups</td><td>4/7</td><td><div class="progress-bar" style="width:120px;display:inline-block;vertical-align:middle;"><div class="progress-fill fill-amber" style="width:57%"></div></div></td></tr>
+        <tr><td>Procurement + Kids</td><td>4/7</td><td><div class="progress-bar" style="width:120px;display:inline-block;vertical-align:middle;"><div class="progress-fill fill-amber" style="width:57%"></div></div></td></tr>
+        <tr><td>Finance & Accounting</td><td>1/7</td><td><div class="progress-bar" style="width:120px;display:inline-block;vertical-align:middle;"><div class="progress-fill fill-accent" style="width:14%"></div></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ 30-DAY BUILD PANEL ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="panel" id="p-build">
+  <h2>30-Day Build Targets</h2>
+  <p class="intro">Current sprint priorities aligned to OKRs. Week 1 is highest leverage — Marketing Agent unlocks full-funnel automation.</p>
+
+  <div class="g2">
+    <!-- Week 1 -->
+    <div class="card" style="border-left: 3px solid var(--emerald);">
+      <h3><span class="tag tag-green">WEEK 1</span> Marketing Agent</h3>
+      <div style="font-size:11px; color:var(--dim); margin-bottom:10px;">HIGHEST LEVERAGE — unlocks full-funnel</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> Full-funnel marketing (content, email, SEO, social, nurture)</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> Blog post generation for myn.com</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> Cold email sequences for 3 divisions</div>
+      <div class="list-item"><span class="list-dot dot-amber"></span> Scaffold in /Marketing Agent/ — 10 marketing skills</div>
+      <div class="list-item"><span class="list-dot dot-dim"></span> Playbook: vibe-marketing-skills.md (31KB)</div>
+    </div>
+
+    <!-- Week 2 -->
+    <div class="card" style="border-left: 3px solid var(--amber);">
+      <h3><span class="tag tag-amber">WEEK 2</span> myn.com Lead Capture</h3>
+      <div style="font-size:11px; color:var(--dim); margin-bottom:10px;">Convert traffic → pipeline</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> Supabase `leads` table</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> React Hook Form + Zod validation</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> GA4 conversion tracking</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> All pages need conversion paths</div>
+    </div>
+
+    <!-- Weeks 2-3 -->
+    <div class="card" style="border-left: 3px solid var(--accent);">
+      <h3><span class="tag tag-blue">WEEKS 2-3</span> myn.org Final Fixes + Real Data</h3>
+      <div style="font-size:11px; color:var(--dim); margin-bottom:10px;">Stabilize the admin dashboard</div>
+      <div class="list-item"><span class="list-dot dot-amber"></span> Resolve remaining medium issues (M-02, M-05)</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> Replace all mock data with real Supabase data</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> Dashboard pulling live agent output</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> Close remaining 6 low backlog items</div>
+    </div>
+
+    <!-- Week 4 -->
+    <div class="card" style="border-left: 3px solid var(--purple);">
+      <h3><span class="tag tag-purple">WEEK 4</span> Intelligence Console + Qdrant</h3>
+      <div style="font-size:11px; color:var(--dim); margin-bottom:10px;">Bring research to the dashboard</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> Research Console in myn.org</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> Semantic search functional</div>
+      <div class="list-item"><span class="list-dot dot-blue"></span> Qdrant local instance running</div>
+    </div>
+  </div>
+
+  <!-- OKRs -->
+  <div class="section-hdr"><span>🎯</span> OKR Framework (Multi-Agent System) <span class="line"></span></div>
+  <div class="g2">
+    <div class="card">
+      <h3>OBJ 1: Ship Working Multi-Agent Foundation</h3>
+      <div class="list-item"><span class="list-dot dot-green"></span> <strong>KR1:</strong> 3 control databases in Notion ✓</div>
+      <div class="list-item"><span class="list-dot dot-green"></span> <strong>KR2:</strong> Agent workflow contract in n8n ✓</div>
+      <div class="list-item"><span class="list-dot dot-amber"></span> <strong>KR3:</strong> 3 agents end-to-end — in progress</div>
+      <div class="list-item"><span class="list-dot dot-amber"></span> <strong>KR4:</strong> Structured output (JSON) + audit trail — in progress</div>
+    </div>
+    <div class="card">
+      <h3>OBJ 2: Prove ROI with Real Business Work</h3>
+      <div class="list-item"><span class="list-dot dot-amber"></span> <strong>KR1:</strong> One high-leverage vertical executing weekly</div>
+      <div class="list-item"><span class="list-dot dot-amber"></span> <strong>KR2:</strong> Reduce manual ops by 50%</div>
+      <div class="list-item"><span class="list-dot dot-amber"></span> <strong>KR3:</strong> 20 production-grade outputs/week</div>
+    </div>
+    <div class="card">
+      <h3>OBJ 3: Reliability & Guardrails</h3>
+      <div class="list-item"><span class="list-dot dot-amber"></span> <strong>KR1:</strong> Schema validation + "needs review" flag</div>
+      <div class="list-item"><span class="list-dot dot-amber"></span> <strong>KR2:</strong> 100% run logging</div>
+      <div class="list-item"><span class="list-dot dot-amber"></span> <strong>KR3:</strong> Weekly agent health report</div>
+    </div>
+    <div class="card">
+      <h3>OBJ 4: Maintainability</h3>
+      <div class="list-item"><span class="list-dot dot-amber"></span> <strong>KR1:</strong> Shared base prompt + per-agent deltas</div>
+      <div class="list-item"><span class="list-dot dot-amber"></span> <strong>KR2:</strong> Agent Onboarding Checklist (&lt;60 min)</div>
+      <div class="list-item"><span class="list-dot dot-amber"></span> <strong>KR3:</strong> One-page system architecture</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══ ALL OUTPUTS PANEL ═══ -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="panel" id="p-files">
+  <h2>All HTML Dashboards & Outputs</h2>
+  <p class="intro">Every dashboard, architecture diagram, whitepaper, and guide across all three systems. Click to open in a new tab.</p>
+
+  <div class="section-hdr"><span>⌘</span> Operations Dashboards — Strategy AGI <span class="line"></span></div>
+  <div class="g3">
+    <a class="link-card" href="myn_command_center.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:var(--accent-glow);color:var(--accent);">⌘</div>
+      <div><div class="lc-title">MYN Command Center</div><div class="lc-sub">142 KB · Mar 21 — Central ops hub</div></div>
+    </a>
+    <a class="link-card" href="myn_intelligence_console.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:var(--accent-glow);color:var(--accent);">🧠</div>
+      <div><div class="lc-title">Intelligence Console</div><div class="lc-sub">131 KB · Mar 20 — AI orchestration</div></div>
+    </a>
+    <a class="link-card" href="api_dashboard.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:var(--accent-glow);color:var(--accent);">🔌</div>
+      <div><div class="lc-title">API Dashboard</div><div class="lc-sub">24 KB · Mar 19 — Service health</div></div>
+    </a>
+    <a class="link-card" href="myn_workflows.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:var(--accent-glow);color:var(--accent);">⚡</div>
+      <div><div class="lc-title">Workflow Console</div><div class="lc-sub">77 KB · Mar 19 — Pipeline status</div></div>
+    </a>
+    <a class="link-card" href="myn_search_history.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:var(--accent-glow);color:var(--accent);">🔍</div>
+      <div><div class="lc-title">Search History</div><div class="lc-sub">51 KB · Mar 20 — Research audit trail</div></div>
+    </a>
+    <a class="link-card" href="myn_capabilities.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:var(--accent-glow);color:var(--accent);">🎯</div>
+      <div><div class="lc-title">System Capabilities</div><div class="lc-sub">65 KB · Mar 19 — Full capability map</div></div>
+    </a>
+  </div>
+
+  <div class="section-hdr"><span>◈</span> Architecture Diagrams <span class="line"></span></div>
+  <div class="g3">
+    <a class="link-card" href="MYN_ORG_Architecture.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:rgba(6,182,212,0.12);color:var(--cyan);">🏗️</div>
+      <div><div class="lc-title">MYN ORG Architecture</div><div class="lc-sub">52 KB · Mar 20 — Strategy AGI</div></div>
+    </a>
+    <a class="link-card" href="../myn.com-main/MYN_COM_Architecture_Plan.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:rgba(6,182,212,0.12);color:var(--cyan);">🌐</div>
+      <div><div class="lc-title">MYN.COM Architecture</div><div class="lc-sub">38 KB · Mar 20 — myn.com</div></div>
+    </a>
+    <a class="link-card" href="../myn.org-main/MYN_ORG_Architecture_Plan.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:rgba(6,182,212,0.12);color:var(--cyan);">📊</div>
+      <div><div class="lc-title">MYN.ORG Dashboard Plan</div><div class="lc-sub">43 KB · Mar 20 — myn.org</div></div>
+    </a>
+    <a class="link-card" href="investor_architecture_interactive.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:rgba(6,182,212,0.12);color:var(--cyan);">💼</div>
+      <div><div class="lc-title">Investor Architecture</div><div class="lc-sub">20 KB · Mar 18 — Business systems</div></div>
+    </a>
+    <a class="link-card" href="consulting_diagram_premium.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:rgba(6,182,212,0.12);color:var(--cyan);">💰</div>
+      <div><div class="lc-title">AI Revenue Infrastructure</div><div class="lc-sub">17 KB · Mar 18 — Monetization</div></div>
+    </a>
+    <a class="link-card" href="consulting_architecture_diagram.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:rgba(6,182,212,0.12);color:var(--cyan);">🧩</div>
+      <div><div class="lc-title">Consulting Diagram</div><div class="lc-sub">10 KB · Mar 18 — Service tiers</div></div>
+    </a>
+  </div>
+
+  <div class="section-hdr"><span>◆</span> Strategy & Operations <span class="line"></span></div>
+  <div class="g3">
+    <a class="link-card" href="company_operating_manual_enhanced.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:var(--emerald-glow);color:var(--emerald);">📋</div>
+      <div><div class="lc-title">Operating Manual (Enhanced)</div><div class="lc-sub">60 KB · Mar 18 — 9 divisions + PMF</div></div>
+    </a>
+    <a class="link-card" href="company_operating_manual.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:var(--emerald-glow);color:var(--emerald);">📄</div>
+      <div><div class="lc-title">Operating Manual (Original)</div><div class="lc-sub">36 KB · Mar 18 — Core version</div></div>
+    </a>
+  </div>
+
+  <div class="section-hdr"><span>◧</span> Reports & Whitepapers <span class="line"></span></div>
+  <div class="g3">
+    <a class="link-card" href="../myn.com-main/reports by vertical/My_Yoga_Network_Strategic_Healthcare_Platform_WhitePaper.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:var(--rose-glow);color:var(--rose);">🏥</div>
+      <div><div class="lc-title">Healthcare Whitepaper</div><div class="lc-sub">44 KB · Mar 20 — Clinical positioning</div></div>
+    </a>
+    <a class="link-card" href="../myn.com-main/reports by vertical/My_Yoga_Network_White_Paper_Styled.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:var(--rose-glow);color:var(--rose);">📄</div>
+      <div><div class="lc-title">Whitepaper (Styled)</div><div class="lc-sub">12 KB · Mar 20 — Presentation-ready</div></div>
+    </a>
+  </div>
+
+  <div class="section-hdr"><span>▤</span> Guides & Maps <span class="line"></span></div>
+  <div class="g3">
+    <a class="link-card" href="DEPLOY_NOW.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:var(--amber-glow);color:var(--amber);">🚀</div>
+      <div><div class="lc-title">Deployment Guide</div><div class="lc-sub">35 KB · Mar 20 — Interactive checklist</div></div>
+    </a>
+    <a class="link-card" href="intern_mind_map.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:var(--amber-glow);color:var(--amber);">🗺️</div>
+      <div><div class="lc-title">Team & Division Mind Map</div><div class="lc-sub">19 KB · Mar 21 — Onboarding visual</div></div>
+    </a>
+    <a class="link-card" href="infrastructure/ingestion/EXECUTION_GUIDE.html" target="_blank" style="text-decoration:none;color:inherit;">
+      <div class="lc-icon" style="background:var(--amber-glow);color:var(--amber);">⚙️</div>
+      <div><div class="lc-title">Ingestion Pipeline Guide</div><div class="lc-sub">29 KB · Mar 20 — Data pipeline</div></div>
+    </a>
+  </div>
+</div>
+
+<!-- ═══ JAVASCRIPT ═══ -->
+<script>
+  function show(id) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    const panel = document.getElementById('p-' + id);
+    if (panel) panel.classList.add('active');
+    // Find the tab that triggered this
+    const tabs = document.querySelectorAll('.tab');
+    const map = ['overview','ops','arch','agents','bugs','divisions','build','files'];
+    const idx = map.indexOf(id);
+    if (idx >= 0 && tabs[idx]) tabs[idx].classList.add('active');
+  }
+
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
+  updateClock();
+  setInterval(updateClock, 30000);
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    const map = { '1':'overview','2':'ops','3':'arch','4':'agents','5':'bugs','6':'divisions','7':'build','8':'files' };
+    if (e.altKey && map[e.key]) { e.preventDefault(); show(map[e.key]); }
+  });
+</script>
+</body>
+</html>
