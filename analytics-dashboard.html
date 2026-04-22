@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYN Analytics Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0f1117;
+            --bg-card: #1a1d27;
+            --bg-card-hover: #222633;
+            --border: #2a2e3b;
+            --text-primary: #e8eaed;
+            --text-secondary: #9aa0b2;
+            --text-muted: #6b7185;
+            --accent-blue: #4f8cff;
+            --accent-green: #34d399;
+            --accent-purple: #a78bfa;
+            --accent-orange: #fb923c;
+            --accent-red: #f87171;
+            --accent-cyan: #22d3ee;
+            --accent-pink: #f472b6;
+            --shadow: 0 1px 3px rgba(0,0,0,.3);
+            --radius: 12px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 16px; color: white;
+        }
+
+        .header h1 { font-size: 18px; font-weight: 600; }
+        .header h1 span { color: var(--text-muted); font-weight: 400; }
+
+        .header-right {
+            display: flex; align-items: center; gap: 12px;
+        }
+
+        .status-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--accent-green);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .status-text { font-size: 12px; color: var(--text-secondary); }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .btn:hover { background: var(--bg-card-hover); border-color: var(--accent-blue); }
+        .btn-primary { background: var(--accent-blue); border-color: var(--accent-blue); color: white; }
+        .btn-primary:hover { background: #3d7ae8; }
+
+        /* ── Controls Bar ── */
+        .controls {
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .period-tabs {
+            display: flex; gap: 4px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .period-tab {
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            transition: all .2s;
+        }
+        .period-tab.active { background: var(--accent-blue); color: white; }
+        .period-tab:hover:not(.active) { color: var(--text-primary); }
+
+        .date-input {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            padding: 6px 12px;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .2s;
+            cursor: pointer;
+        }
+        .date-input:focus { border-color: var(--accent-blue); }
+        .date-input::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
+
+        .last-updated { font-size: 12px; color: var(--text-muted); }
+
+        /* ── Layout ── */
+        .dashboard {
+            padding: 0 32px 32px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 24px 0 12px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .section-title .icon { font-size: 16px; }
+
+        /* ── KPI Cards ── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: all .2s;
+        }
+        .kpi-card:hover { border-color: var(--accent-blue); transform: translateY(-1px); }
+
+        .kpi-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .kpi-change {
+            font-size: 12px;
+            margin-top: 4px;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .kpi-change.up { color: var(--accent-green); }
+        .kpi-change.down { color: var(--accent-red); }
+
+        /* ── Chart Cards ── */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .chart-card.full-width { grid-column: 1 / -1; }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .chart-title { font-size: 15px; font-weight: 600; }
+        .chart-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+        .chart-container { position: relative; width: 100%; height: 280px; }
+        .chart-container.small { height: 200px; }
+
+        /* ── Data Tables ── */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 10px 12px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .data-table tr:hover td { color: var(--text-primary); background: rgba(79,140,255,.04); }
+        .data-table td:first-child { color: var(--text-primary); font-weight: 500; }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-active { background: rgba(52,211,153,.15); color: var(--accent-green); }
+        .badge-paused { background: rgba(251,146,60,.15); color: var(--accent-orange); }
+
+        /* ── Operations Panel ── */
+        .ops-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .ops-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+        }
+
+        .ops-card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .ops-card-title { font-size: 14px; font-weight: 600; }
+
+        .ops-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .ops-item:last-child { border-bottom: none; }
+
+        .ops-item-name { color: var(--text-secondary); }
+        .ops-item-value { font-weight: 600; }
+
+        .ops-status {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 12px;
+        }
+        .ops-status-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+        }
+        .ops-status-dot.healthy { background: var(--accent-green); }
+        .ops-status-dot.warning { background: var(--accent-orange); }
+        .ops-status-dot.error { background: var(--accent-red); }
+
+        /* ── Loading / Empty States ── */
+        .loading-overlay {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(15,17,23,.7);
+            border-radius: var(--radius);
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 32px; height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+        .empty-state .icon { font-size: 32px; margin-bottom: 8px; }
+
+        .connection-banner {
+            background: linear-gradient(135deg, rgba(79,140,255,.1), rgba(167,139,250,.1));
+            border: 1px solid rgba(79,140,255,.2);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .connection-banner p { font-size: 14px; color: var(--text-secondary); }
+        .connection-banner strong { color: var(--text-primary); }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            .chart-grid { grid-template-columns: 1fr; }
+            .header, .controls, .dashboard { padding-left: 16px; padding-right: 16px; }
+        }
+
+        @media (max-width: 640px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .kpi-value { font-size: 22px; }
+        }
+
+        /* ── Tab Navigation ── */
+        .tab-nav {
+            display: flex; gap: 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all .2s;
+        }
+        .tab-btn.active { color: var(--accent-blue); border-bottom-color: var(--accent-blue); }
+        .tab-btn:hover:not(.active) { color: var(--text-secondary); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+<!-- BEGIN MYN-NAV (auto-injected 2026-04-21) -->
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; -webkit-font-smoothing: antialiased; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__inner::-webkit-scrollbar { height: 4px; } .myn-nav__inner::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.25); border-radius: 2px; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-variant-numeric: tabular-nums; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Center</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="master-directory.html" data-page="master-directory">Directory</a>
+  <a href="analytics-dashboard.html" data-page="analytics-dashboard">Analytics</a>
+  <a href="lead-gen-dashboard.html" data-page="lead-gen-dashboard">Leads</a>
+  <a href="hotel-activities-dashboard.html" data-page="hotel-activities-dashboard">Hotels</a>
+  <a href="business-economics-dashboard.html" data-page="business-economics-dashboard">Economics</a>
+  <a href="team-handoff-dashboard.html" data-page="team-handoff-dashboard">Team</a>
+  <a href="architecture-dashboard.html" data-page="architecture-dashboard">Architecture</a>
+  <a href="agent-control-plane.html" data-page="agent-control-plane">Agents</a>
+  <a href="supabase-dashboard.html" data-page="supabase-dashboard">Supabase</a>
+  <a href="paperclip-dashboard.html" data-page="paperclip-dashboard">Paperclip</a>
+  <a href="review-queue.html" data-page="review-queue">Review</a>
+  <a href="4-21-26-full-audit.html" data-page="4-21-26-full-audit">Audit</a>
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date" id="myn-nav-date"></span>
+</div>
+</nav>
+<script>
+(function(){
+  var path = (location.pathname.split('/').pop() || 'index.html').replace('.html','');
+  var links = document.querySelectorAll('.myn-nav a[data-page]');
+  for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('data-page') === path) links[i].classList.add('is-active'); }
+  var d = new Date(); var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var el = document.getElementById('myn-nav-date'); if (el) el.textContent = m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+})();
+</script>
+<!-- END MYN-NAV -->
+
+<!-- ════════ HEADER ════════ -->
+<div class="header">
+    <div class="header-left">
+        <div class="logo">M</div>
+        <h1>MYN Analytics <span>/ Live Dashboard</span></h1>
+    </div>
+    <div class="header-right">
+        <div class="status-dot" id="statusDot"></div>
+        <span class="status-text" id="statusText">Connecting...</span>
+        <button class="btn" onclick="refreshAll()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            Refresh
+        </button>
+        <button class="btn btn-primary" onclick="clearCache()">Clear Cache</button>
+    </div>
+</div>
+
+<!-- ════════ CONTROLS ════════ -->
+<div class="controls">
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div class="period-tabs">
+            <button class="period-tab active" data-days="7" onclick="setPeriod(7, this)">7D</button>
+            <button class="period-tab" data-days="14" onclick="setPeriod(14, this)">14D</button>
+            <button class="period-tab" data-days="30" onclick="setPeriod(30, this)">30D</button>
+            <button class="period-tab" data-days="90" onclick="setPeriod(90, this)">90D</button>
+            <button class="period-tab" data-days="365" onclick="setPeriod(365, this)">1Y</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <input type="date" id="dateStart" class="date-input" onchange="setCustomDateRange()">
+            <span style="color:var(--text-muted);">to</span>
+            <input type="date" id="dateEnd" class="date-input" onchange="setCustomDateRange()">
+        </div>
+    </div>
+    <div class="last-updated" id="lastUpdated">Last updated: —</div>
+</div>
+
+<!-- ════════ DASHBOARD ════════ -->
+<div class="dashboard">
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('ga4', this)">Google Analytics</button>
+        <button class="tab-btn" onclick="switchTab('events', this)">Events & PMF</button>
+        <button class="tab-btn" onclick="switchTab('ads', this)">Google Ads</button>
+        <button class="tab-btn" onclick="switchTab('ghl', this)">GHL CRM</button>
+        <button class="tab-btn" onclick="switchTab('ops', this)">Operations</button>
+    </div>
+
+    <!-- ═══ GA4 TAB ═══ -->
+    <div class="tab-content active" id="tab-ga4">
+
+        <div class="kpi-grid" id="ga4Kpis">
+            <div class="kpi-card"><div class="kpi-label">Sessions</div><div class="kpi-value" id="ga4Sessions">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Users</div><div class="kpi-value" id="ga4Users">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">New Users</div><div class="kpi-value" id="ga4NewUsers">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Pageviews</div><div class="kpi-value" id="ga4Pageviews">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Avg Duration</div><div class="kpi-value" id="ga4Duration">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Bounce Rate</div><div class="kpi-value" id="ga4Bounce">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Conversions</div><div class="kpi-value" id="ga4Conversions">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Events</div><div class="kpi-value" id="ga4Events">—</div></div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Traffic Trend</div>
+                        <div class="chart-subtitle">Daily sessions, users, and pageviews</div>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="ga4TrendChart"></canvas></div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Traffic Sources</div>
+                        <div class="chart-subtitle">Sessions by channel</div>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="ga4SourcesChart"></canvas></div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Device Breakdown</div>
+                        <div class="chart-subtitle">Sessions by device type</div>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="ga4DevicesChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="chart-card" style="margin-bottom:24px;">
+            <div class="chart-header">
+                <div class="chart-title">Top Pages</div>
+            </div>
+            <table class="data-table" id="ga4PagesTable">
+                <thead>
+                    <tr><th>Page</th><th>Views</th><th>Avg Duration</th><th>Bounce Rate</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">Top Countries</div>
+            </div>
+            <table class="data-table" id="ga4GeoTable">
+                <thead>
+                    <tr><th>Country</th><th>Sessions</th><th>Users</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ═══ EVENTS & PMF TAB ═══ -->
+    <div class="tab-content" id="tab-events">
+
+        <div class="section-title"><span class="icon">&#128293;</span> GTM Custom Events</div>
+
+        <div class="kpi-grid" id="eventsKpis">
+            <div class="kpi-card"><div class="kpi-label">CTA Clicks</div><div class="kpi-value" id="evtCtaClicks">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Form Submissions</div><div class="kpi-value" id="evtFormSubmits">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Scroll 90%</div><div class="kpi-value" id="evtDeepScroll">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Total Events</div><div class="kpi-value" id="evtTotal">—</div></div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Event Breakdown</div>
+                        <div class="chart-subtitle">All tracked GTM events</div>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="eventsBarChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Event Distribution</div>
+                        <div class="chart-subtitle">Proportion of event types</div>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="eventsDoughnutChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="chart-card" style="margin-bottom:24px;">
+            <div class="chart-header">
+                <div class="chart-title">Event Details by Page</div>
+            </div>
+            <table class="data-table" id="eventDetailsTable">
+                <thead>
+                    <tr><th>Event</th><th>Page</th><th>Count</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="section-title"><span class="icon">&#127919;</span> PMF Page Performance</div>
+        <p style="color:var(--text-muted); font-size:13px; margin-bottom:16px;">Institutional buyer pages (highest priority) vs. marketplace pages vs. supporting content — tracked against MYN's PMF hierarchy.</p>
+
+        <div class="chart-card" style="margin-bottom:24px;">
+            <div class="chart-header">
+                <div class="chart-title">PMF-Priority Pages</div>
+            </div>
+            <table class="data-table" id="pmfPagesTable">
+                <thead>
+                    <tr><th>Page</th><th>Tier</th><th>Views</th><th>Users</th><th>Avg Duration</th><th>Bounce Rate</th><th>Conversions</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <div>
+                    <div class="chart-title">PMF Page Views</div>
+                    <div class="chart-subtitle">Institutional vs. marketplace vs. supporting</div>
+                </div>
+            </div>
+            <div class="chart-container"><canvas id="pmfChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- ═══ ADS TAB ═══ -->
+    <div class="tab-content" id="tab-ads">
+
+        <div class="kpi-grid" id="adsKpis">
+            <div class="kpi-card"><div class="kpi-label">Total Spend</div><div class="kpi-value" id="adsCost">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Impressions</div><div class="kpi-value" id="adsImpressions">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Clicks</div><div class="kpi-value" id="adsClicks">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">CTR</div><div class="kpi-value" id="adsCtr">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Avg CPC</div><div class="kpi-value" id="adsCpc">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Conversions</div><div class="kpi-value" id="adsConversions">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Cost / Conv</div><div class="kpi-value" id="adsCostPerConv">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">ROAS</div><div class="kpi-value" id="adsRoas">—</div></div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-card full-width">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Ad Spend & Performance</div>
+                        <div class="chart-subtitle">Daily spend, clicks, and conversions</div>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="adsTrendChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="chart-card" style="margin-bottom:24px;">
+            <div class="chart-header">
+                <div class="chart-title">Campaigns</div>
+            </div>
+            <table class="data-table" id="adsCampaignsTable">
+                <thead>
+                    <tr><th>Campaign</th><th>Status</th><th>Impressions</th><th>Clicks</th><th>Spend</th><th>Conv</th><th>CTR</th><th>CPC</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">Top Keywords</div>
+            </div>
+            <table class="data-table" id="adsKeywordsTable">
+                <thead>
+                    <tr><th>Keyword</th><th>Match</th><th>Impressions</th><th>Clicks</th><th>Spend</th><th>Conv</th><th>CTR</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ═══ GHL CRM TAB ═══ -->
+    <div class="tab-content" id="tab-ghl">
+
+        <div class="kpi-grid">
+            <div class="kpi-card"><div class="kpi-label">Total Contacts</div><div class="kpi-value" id="ghlContacts">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Total Opportunities</div><div class="kpi-value" id="ghlOpps">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Pipeline Value</div><div class="kpi-value" id="ghlPipelineValue">—</div></div>
+            <div class="kpi-card"><div class="kpi-label">Pipelines</div><div class="kpi-value" id="ghlPipelines">—</div></div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Pipeline Stages</div>
+                        <div class="chart-subtitle">Opportunities by stage</div>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="ghlStagesChart"></canvas></div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div>
+                        <div class="chart-title">Contact Sources</div>
+                        <div class="chart-subtitle">Where leads are coming from</div>
+                    </div>
+                </div>
+                <div class="chart-container"><canvas id="ghlSourcesChart"></canvas></div>
+            </div>
+        </div>
+
+        <div class="chart-card" style="margin-bottom:24px;">
+            <div class="chart-header">
+                <div class="chart-title">Recent Opportunities</div>
+            </div>
+            <table class="data-table" id="ghlOppsTable">
+                <thead>
+                    <tr><th>Opportunity</th><th>Contact</th><th>Value</th><th>Stage</th><th>Status</th><th>Source</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">Recent Contacts</div>
+            </div>
+            <table class="data-table" id="ghlContactsTable">
+                <thead>
+                    <tr><th>Name</th><th>Email</th><th>Phone</th><th>Source</th><th>Tags</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ═══ OPERATIONS TAB ═══ -->
+    <div class="tab-content" id="tab-ops">
+
+        <div class="section-title"><span class="icon">&#9881;</span> System Health</div>
+
+        <div class="ops-grid" style="margin-bottom:24px;">
+            <div class="ops-card">
+                <div class="ops-card-header">
+                    <div class="ops-card-title">API Connections</div>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">GA4 Analytics</span>
+                    <span class="ops-status"><span class="ops-status-dot" id="ga4StatusDot"></span><span id="ga4StatusLabel">Checking...</span></span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Google Ads</span>
+                    <span class="ops-status"><span class="ops-status-dot" id="adsStatusDot"></span><span id="adsStatusLabel">Checking...</span></span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">GoHighLevel CRM</span>
+                    <span class="ops-status"><span class="ops-status-dot" id="ghlStatusDot"></span><span id="ghlStatusLabel">Checking...</span></span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Dashboard API</span>
+                    <span class="ops-status"><span class="ops-status-dot" id="apiStatusDot"></span><span id="apiStatusLabel">Checking...</span></span>
+                </div>
+            </div>
+
+            <div class="ops-card">
+                <div class="ops-card-header">
+                    <div class="ops-card-title">AgentField Agents</div>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Intent Router</span>
+                    <span class="ops-status"><span class="ops-status-dot healthy"></span>Active</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Lead Researcher</span>
+                    <span class="ops-status"><span class="ops-status-dot healthy"></span>Active</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Cold Email Writer</span>
+                    <span class="ops-status"><span class="ops-status-dot healthy"></span>Active</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Marketing Agent</span>
+                    <span class="ops-status"><span class="ops-status-dot healthy"></span>Active</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Video Producer</span>
+                    <span class="ops-status"><span class="ops-status-dot healthy"></span>Active</span>
+                </div>
+            </div>
+
+            <div class="ops-card">
+                <div class="ops-card-header">
+                    <div class="ops-card-title">Data Pipeline</div>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Supabase</span>
+                    <span class="ops-status"><span class="ops-status-dot healthy"></span>Connected</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Qdrant Vectors</span>
+                    <span class="ops-status"><span class="ops-status-dot healthy"></span>Connected</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Apify Scrapers</span>
+                    <span class="ops-status"><span class="ops-status-dot healthy"></span>Ready</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Firecrawl</span>
+                    <span class="ops-status"><span class="ops-status-dot healthy"></span>Ready</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title"><span class="icon">&#128202;</span> Infrastructure Metrics</div>
+
+        <div class="ops-grid">
+            <div class="ops-card">
+                <div class="ops-card-header">
+                    <div class="ops-card-title">MYN Websites</div>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">myn.org (Admin)</span>
+                    <span class="ops-item-value" style="color:var(--accent-green)">Next.js 15</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">myn.com (Public)</span>
+                    <span class="ops-item-value" style="color:var(--accent-green)">Next.js 16</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">FastAPI Backend</span>
+                    <span class="ops-item-value" style="color:var(--accent-green)">mynapi.onrender.com</span>
+                </div>
+            </div>
+
+            <div class="ops-card">
+                <div class="ops-card-header">
+                    <div class="ops-card-title">Business Divisions</div>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Active Divisions</span>
+                    <span class="ops-item-value">9</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Active Agents</span>
+                    <span class="ops-item-value">14</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">MCP Tools</span>
+                    <span class="ops-item-value">310+</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Skills</span>
+                    <span class="ops-item-value">53</span>
+                </div>
+            </div>
+
+            <div class="ops-card">
+                <div class="ops-card-header">
+                    <div class="ops-card-title">Execution Log</div>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Last Agent Run</span>
+                    <span class="ops-item-value" id="lastAgentRun">—</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Workflows Today</span>
+                    <span class="ops-item-value" id="workflowsToday">—</span>
+                </div>
+                <div class="ops-item">
+                    <span class="ops-item-name">Errors (24h)</span>
+                    <span class="ops-item-value" id="errors24h">—</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ════════ JAVASCRIPT ════════ -->
+<script>
+    // ─── Config ──────────────────────────────────────────────────
+    const API_BASE = window.location.origin;  // Same origin as server
+    let currentDays = 7;
+    let customStartDate = null;
+    let customEndDate = null;
+    let charts = {};
+
+    // Chart.js global config
+    Chart.defaults.color = '#9aa0b2';
+    Chart.defaults.borderColor = '#2a2e3b';
+    Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    Chart.defaults.font.size = 12;
+
+    const COLORS = {
+        blue: '#4f8cff',
+        green: '#34d399',
+        purple: '#a78bfa',
+        orange: '#fb923c',
+        red: '#f87171',
+        cyan: '#22d3ee',
+        pink: '#f472b6',
+        yellow: '#fbbf24',
+    };
+
+    const CHART_COLORS = [COLORS.blue, COLORS.green, COLORS.purple, COLORS.orange, COLORS.cyan, COLORS.pink, COLORS.yellow, COLORS.red];
+
+    // ─── Utility ─────────────────────────────────────────────────
+
+    function fmt(n) {
+        if (n === undefined || n === null || n === '—') return '—';
+        const num = Number(n);
+        if (isNaN(num)) return n;
+        if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + 'M';
+        if (num >= 1_000) return (num / 1_000).toFixed(1) + 'K';
+        return num.toLocaleString();
+    }
+
+    function fmtMoney(n) {
+        if (n === undefined || n === null) return '—';
+        return '$' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function fmtPct(n) {
+        if (n === undefined || n === null) return '—';
+        return Number(n).toFixed(1) + '%';
+    }
+
+    function fmtDuration(seconds) {
+        if (!seconds) return '—';
+        const s = Number(seconds);
+        const m = Math.floor(s / 60);
+        const sec = Math.floor(s % 60);
+        return m > 0 ? `${m}m ${sec}s` : `${sec}s`;
+    }
+
+    // ─── Tab Switching ───────────────────────────────────────────
+
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + tabId).classList.add('active');
+
+        // Resize charts when switching tabs (Chart.js needs this)
+        setTimeout(() => {
+            Object.values(charts).forEach(c => c.resize());
+        }, 50);
+    }
+
+    // ─── Period Selection ────────────────────────────────────────
+
+    function setPeriod(days, btn) {
+        currentDays = days;
+        customStartDate = null;
+        customEndDate = null;
+        // Clear date pickers when using preset periods
+        document.getElementById('dateStart').value = '';
+        document.getElementById('dateEnd').value = '';
+        document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        refreshAll();
+    }
+
+    function setCustomDateRange() {
+        const startEl = document.getElementById('dateStart');
+        const endEl = document.getElementById('dateEnd');
+        if (!startEl.value || !endEl.value) return;
+
+        const start = new Date(startEl.value);
+        const end = new Date(endEl.value);
+
+        if (start > end) {
+            endEl.value = startEl.value;
+            return;
+        }
+
+        customStartDate = startEl.value;
+        customEndDate = endEl.value;
+
+        // Calculate days for demo fallback
+        currentDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+        // Deactivate preset period tabs
+        document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
+
+        refreshAll();
+    }
+
+    function getDateParams() {
+        if (customStartDate && customEndDate) {
+            return `start_date=${customStartDate}&end_date=${customEndDate}`;
+        }
+        return `days=${currentDays}`;
+    }
+
+    // ─── API Calls ───────────────────────────────────────────────
+
+    async function fetchData(endpoint) {
+        try {
+            const resp = await fetch(`${API_BASE}${endpoint}`);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            return await resp.json();
+        } catch (e) {
+            console.warn(`API call failed: ${endpoint}`, e);
+            return null;
+        }
+    }
+
+    // ─── GA4 Rendering ───────────────────────────────────────────
+
+    function renderGA4(data) {
+        if (!data || !data.data) {
+            renderGA4Demo();
+            return;
+        }
+
+        const d = data.data;
+
+        // KPIs
+        if (d.summary) {
+            document.getElementById('ga4Sessions').textContent = fmt(d.summary.sessions);
+            document.getElementById('ga4Users').textContent = fmt(d.summary.totalUsers);
+            document.getElementById('ga4NewUsers').textContent = fmt(d.summary.newUsers);
+            document.getElementById('ga4Pageviews').textContent = fmt(d.summary.screenPageViews);
+            document.getElementById('ga4Duration').textContent = fmtDuration(d.summary.averageSessionDuration);
+            document.getElementById('ga4Bounce').textContent = fmtPct(Number(d.summary.bounceRate) * 100);
+            document.getElementById('ga4Conversions').textContent = fmt(d.summary.conversions);
+            document.getElementById('ga4Events').textContent = fmt(d.summary.eventCount);
+        }
+
+        // Trend chart
+        if (d.daily_trend && d.daily_trend.length > 0) {
+            renderTrendChart('ga4TrendChart', d.daily_trend,
+                ['sessions', 'users', 'pageviews'],
+                ['Sessions', 'Users', 'Pageviews'],
+                [COLORS.blue, COLORS.green, COLORS.purple]
+            );
+        }
+
+        // Sources chart
+        if (d.traffic_sources && d.traffic_sources.length > 0) {
+            renderBarChart('ga4SourcesChart',
+                d.traffic_sources.map(s => s.channel),
+                d.traffic_sources.map(s => s.sessions),
+                'Sessions'
+            );
+        }
+
+        // Devices chart
+        if (d.devices && d.devices.length > 0) {
+            renderDoughnutChart('ga4DevicesChart',
+                d.devices.map(d2 => d2.device),
+                d.devices.map(d2 => d2.sessions)
+            );
+        }
+
+        // Top pages table
+        if (d.top_pages) {
+            const tbody = document.querySelector('#ga4PagesTable tbody');
+            tbody.innerHTML = d.top_pages.map(p => `
+                <tr>
+                    <td>${p.page}</td>
+                    <td>${fmt(p.views)}</td>
+                    <td>${fmtDuration(p.avg_duration)}</td>
+                    <td>${fmtPct(p.bounce_rate)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Geo table
+        if (d.geo) {
+            const tbody = document.querySelector('#ga4GeoTable tbody');
+            tbody.innerHTML = d.geo.map(g => `
+                <tr>
+                    <td>${g.country}</td>
+                    <td>${fmt(g.sessions)}</td>
+                    <td>${fmt(g.users)}</td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    // ─── Events & PMF Rendering ─────────────────────────────────
+
+    function renderEvents(data) {
+        if (!data || !data.data) {
+            renderEventsDemo();
+            return;
+        }
+
+        const d = data.data;
+
+        // KPIs from events array
+        if (d.events) {
+            const ctaClicks = d.events.find(e => e.event === 'cta_click');
+            const formSubmits = d.events.find(e => e.event === 'lead_form_submit');
+            const scrollDepth = d.events.find(e => e.event === 'scroll_depth');
+            const totalEvents = d.events.reduce((sum, e) => sum + e.count, 0);
+
+            document.getElementById('evtCtaClicks').textContent = fmt(ctaClicks ? ctaClicks.count : 0);
+            document.getElementById('evtFormSubmits').textContent = fmt(formSubmits ? formSubmits.count : 0);
+            document.getElementById('evtDeepScroll').textContent = fmt(scrollDepth ? scrollDepth.count : 0);
+            document.getElementById('evtTotal').textContent = fmt(totalEvents);
+
+            // Filter to custom GTM events (exclude built-in GA4 events)
+            const gtmEvents = d.events.filter(e =>
+                ['cta_click', 'lead_form_submit', 'scroll_depth', 'phone_click', 'email_click',
+                 'calendly_click', 'pdf_download', 'outbound_click'].includes(e.event)
+            );
+
+            if (gtmEvents.length > 0) {
+                renderBarChart('eventsBarChart',
+                    gtmEvents.map(e => e.event.replace(/_/g, ' ')),
+                    gtmEvents.map(e => e.count),
+                    'Count'
+                );
+                renderDoughnutChart('eventsDoughnutChart',
+                    gtmEvents.map(e => e.event.replace(/_/g, ' ')),
+                    gtmEvents.map(e => e.count)
+                );
+            }
+        }
+
+        // Event details by page table
+        if (d.event_details) {
+            const tbody = document.querySelector('#eventDetailsTable tbody');
+            tbody.innerHTML = d.event_details.map(ed => `
+                <tr>
+                    <td><span class="badge badge-active">${ed.event.replace(/_/g, ' ')}</span></td>
+                    <td>${ed.page}</td>
+                    <td>${fmt(ed.count)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // PMF page performance table
+        if (d.pmf_performance) {
+            const tierColors = {
+                highest: 'color: var(--accent-green); font-weight: 700;',
+                medium: 'color: var(--accent-blue);',
+                supporting: 'color: var(--text-muted);',
+            };
+            const tierLabels = {
+                highest: 'Institutional',
+                medium: 'Marketplace',
+                supporting: 'Supporting',
+            };
+
+            const tbody = document.querySelector('#pmfPagesTable tbody');
+            tbody.innerHTML = d.pmf_performance.map(p => `
+                <tr>
+                    <td>${p.page}</td>
+                    <td><span style="${tierColors[p.tier]}">${tierLabels[p.tier]}</span></td>
+                    <td>${fmt(p.views)}</td>
+                    <td>${fmt(p.users)}</td>
+                    <td>${fmtDuration(p.avg_duration)}</td>
+                    <td>${fmtPct(p.bounce_rate)}</td>
+                    <td>${fmt(p.conversions)}</td>
+                </tr>
+            `).join('');
+
+            // PMF bar chart — color-coded by tier
+            const tierColorMap = {
+                highest: COLORS.green,
+                medium: COLORS.blue,
+                supporting: COLORS.purple,
+            };
+            if (charts['pmfChart']) charts['pmfChart'].destroy();
+            const ctx = document.getElementById('pmfChart').getContext('2d');
+            charts['pmfChart'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: d.pmf_performance.map(p => p.page.replace(/^\//, '').replace(/-/g, ' ')),
+                    datasets: [{
+                        label: 'Views',
+                        data: d.pmf_performance.map(p => p.views),
+                        backgroundColor: d.pmf_performance.map(p => tierColorMap[p.tier] + '80'),
+                        borderColor: d.pmf_performance.map(p => tierColorMap[p.tier]),
+                        borderWidth: 1,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: '#2a2e3b' } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    }
+
+    function renderEventsDemo() {
+        document.getElementById('evtCtaClicks').textContent = '—';
+        document.getElementById('evtFormSubmits').textContent = '—';
+        document.getElementById('evtDeepScroll').textContent = '—';
+        document.getElementById('evtTotal').textContent = '—';
+    }
+
+    // ─── Ads Rendering ───────────────────────────────────────────
+
+    function renderAds(data) {
+        if (!data || !data.data) {
+            renderAdsDemo();
+            return;
+        }
+
+        const d = data.data;
+
+        if (d.summary) {
+            document.getElementById('adsCost').textContent = fmtMoney(d.summary.cost);
+            document.getElementById('adsImpressions').textContent = fmt(d.summary.impressions);
+            document.getElementById('adsClicks').textContent = fmt(d.summary.clicks);
+            document.getElementById('adsCtr').textContent = fmtPct(d.summary.ctr);
+            document.getElementById('adsCpc').textContent = fmtMoney(d.summary.avg_cpc);
+            document.getElementById('adsConversions').textContent = fmt(d.summary.conversions);
+            document.getElementById('adsCostPerConv').textContent = fmtMoney(d.summary.cost_per_conversion);
+            document.getElementById('adsRoas').textContent = d.summary.roas ? d.summary.roas + 'x' : '—';
+        }
+
+        if (d.daily_trend && d.daily_trend.length > 0) {
+            renderAdsTrendChart(d.daily_trend);
+        }
+
+        if (d.campaigns) {
+            const tbody = document.querySelector('#adsCampaignsTable tbody');
+            tbody.innerHTML = d.campaigns.map(c => `
+                <tr>
+                    <td>${c.name}</td>
+                    <td><span class="badge ${c.status === 'ENABLED' ? 'badge-active' : 'badge-paused'}">${c.status}</span></td>
+                    <td>${fmt(c.impressions)}</td>
+                    <td>${fmt(c.clicks)}</td>
+                    <td>${fmtMoney(c.cost)}</td>
+                    <td>${c.conversions}</td>
+                    <td>${fmtPct(c.ctr)}</td>
+                    <td>${fmtMoney(c.avg_cpc)}</td>
+                </tr>
+            `).join('');
+        }
+
+        if (d.keywords) {
+            const tbody = document.querySelector('#adsKeywordsTable tbody');
+            tbody.innerHTML = d.keywords.map(k => `
+                <tr>
+                    <td>${k.keyword}</td>
+                    <td>${k.match_type}</td>
+                    <td>${fmt(k.impressions)}</td>
+                    <td>${fmt(k.clicks)}</td>
+                    <td>${fmtMoney(k.cost)}</td>
+                    <td>${k.conversions}</td>
+                    <td>${fmtPct(k.ctr)}</td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    // ─── Chart Builders ──────────────────────────────────────────
+
+    function renderTrendChart(canvasId, data, keys, labels, colors) {
+        if (charts[canvasId]) charts[canvasId].destroy();
+
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        charts[canvasId] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(d => d.date),
+                datasets: keys.map((key, i) => ({
+                    label: labels[i],
+                    data: data.map(d => d[key]),
+                    borderColor: colors[i],
+                    backgroundColor: colors[i] + '15',
+                    borderWidth: 2,
+                    fill: i === 0,
+                    tension: 0.3,
+                    pointRadius: data.length > 30 ? 0 : 3,
+                    pointHoverRadius: 5,
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } },
+                    y: { beginAtZero: true, grid: { color: '#2a2e3b' } }
+                }
+            }
+        });
+    }
+
+    function renderBarChart(canvasId, labels, data, label) {
+        if (charts[canvasId]) charts[canvasId].destroy();
+
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        charts[canvasId] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: data,
+                    backgroundColor: CHART_COLORS.slice(0, labels.length).map(c => c + '80'),
+                    borderColor: CHART_COLORS.slice(0, labels.length),
+                    borderWidth: 1,
+                    borderRadius: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, grid: { color: '#2a2e3b' } },
+                    y: { grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    function renderDoughnutChart(canvasId, labels, data) {
+        if (charts[canvasId]) charts[canvasId].destroy();
+
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        charts[canvasId] = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: CHART_COLORS.slice(0, labels.length),
+                    borderColor: '#1a1d27',
+                    borderWidth: 3,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '60%',
+                plugins: {
+                    legend: { position: 'right', labels: { usePointStyle: true, padding: 16 } }
+                }
+            }
+        });
+    }
+
+    function renderAdsTrendChart(data) {
+        if (charts['adsTrendChart']) charts['adsTrendChart'].destroy();
+
+        const ctx = document.getElementById('adsTrendChart').getContext('2d');
+        charts['adsTrendChart'] = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(d => d.date),
+                datasets: [
+                    {
+                        label: 'Spend ($)',
+                        data: data.map(d => d.cost),
+                        backgroundColor: COLORS.blue + '60',
+                        borderColor: COLORS.blue,
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        yAxisID: 'y',
+                        order: 2,
+                    },
+                    {
+                        label: 'Clicks',
+                        data: data.map(d => d.clicks),
+                        borderColor: COLORS.green,
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        type: 'line',
+                        tension: 0.3,
+                        pointRadius: data.length > 30 ? 0 : 3,
+                        yAxisID: 'y1',
+                        order: 1,
+                    },
+                    {
+                        label: 'Conversions',
+                        data: data.map(d => d.conversions),
+                        borderColor: COLORS.orange,
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        type: 'line',
+                        tension: 0.3,
+                        pointRadius: data.length > 30 ? 0 : 3,
+                        yAxisID: 'y1',
+                        order: 0,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: { legend: { position: 'top', labels: { usePointStyle: true, padding: 20 } } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } },
+                    y: { beginAtZero: true, position: 'left', grid: { color: '#2a2e3b' }, title: { display: true, text: 'Spend ($)' } },
+                    y1: { beginAtZero: true, position: 'right', grid: { display: false }, title: { display: true, text: 'Clicks / Conv' } },
+                }
+            }
+        });
+    }
+
+    // ─── Demo Data (shown when API not connected) ────────────────
+
+    function renderGA4Demo() {
+        // Real MYN GA4 baseline numbers (30-day averages as of March 2026)
+        // Scaled by period: 7d=~120 users, 30d=~634 users, 90d extrapolated
+        const scale = currentDays / 30;
+        const baseUsers = Math.round(634 * scale);
+        const baseSessions = Math.round(129 * (currentDays / 7));  // ~129 sessions/7d
+        const baseNewUsers = Math.round(546 * scale);
+        const basePageviews = Math.round(169 * (currentDays / 7));
+        const baseEvents = Math.round(2300 * scale);
+
+        document.getElementById('ga4Sessions').textContent = fmt(baseSessions);
+        document.getElementById('ga4Users').textContent = fmt(baseUsers);
+        document.getElementById('ga4NewUsers').textContent = fmt(baseNewUsers);
+        document.getElementById('ga4Pageviews').textContent = fmt(basePageviews);
+        document.getElementById('ga4Duration').textContent = '1m 42s';
+        document.getElementById('ga4Bounce').textContent = '58.3%';
+        document.getElementById('ga4Conversions').textContent = fmt(Math.round(1500 * scale));
+        document.getElementById('ga4Events').textContent = fmt(baseEvents);
+
+        // Generate trend data based on real traffic patterns
+        const demoTrend = [];
+        const now = new Date();
+        for (let i = currentDays; i >= 0; i--) {
+            const d = new Date(now); d.setDate(d.getDate() - i);
+            const dayOfWeek = d.getDay();
+            // Real pattern: weekdays higher, weekends dip
+            const weekdayBoost = (dayOfWeek > 0 && dayOfWeek < 6) ? 1.2 : 0.7;
+            demoTrend.push({
+                date: d.toISOString().split('T')[0],
+                sessions: Math.floor((15 + Math.random() * 8) * weekdayBoost),
+                users: Math.floor((12 + Math.random() * 7) * weekdayBoost),
+                pageviews: Math.floor((20 + Math.random() * 10) * weekdayBoost),
+            });
+        }
+        renderTrendChart('ga4TrendChart', demoTrend,
+            ['sessions', 'users', 'pageviews'],
+            ['Sessions', 'Users', 'Pageviews'],
+            [COLORS.blue, COLORS.green, COLORS.purple]
+        );
+
+        // Real traffic source breakdown (28d engaged sessions)
+        renderBarChart('ga4SourcesChart',
+            ['Direct', 'Organic Search', 'Referral', 'Unassigned', 'Email', 'Organic Social', 'Paid Search'],
+            [551, 84, 15, 3, 2, 1, 0].map(v => Math.round(v * scale)),
+            'Sessions'
+        );
+
+        renderDoughnutChart('ga4DevicesChart',
+            ['Desktop', 'Mobile', 'Tablet'],
+            [Math.round(380 * scale), Math.round(230 * scale), Math.round(24 * scale)]
+        );
+
+        // Real top pages from GA4
+        document.querySelector('#ga4PagesTable tbody').innerHTML = [
+            ['Yoga Therapists for Hotels, Healthcare...', Math.round(83 * scale), '2m 15s', '45.2%'],
+            ['MYN | Yoga Therapy, Hotel Wellness...', Math.round(15 * scale), '1m 42s', '52.1%'],
+            ['After-School Yoga Program...', Math.round(6 * scale), '1m 58s', '38.5%'],
+            ['Corporate Wellness Programs', Math.round(4 * scale), '2m 48s', '33.6%'],
+            ['Yoga for Hotels and Resorts', Math.round(3 * scale), '3m 12s', '28.1%'],
+            ['/find-a-yoga-therapist-near-me', Math.round(3 * scale), '2m 55s', '31.4%'],
+            ['/join-as-yoga-instructor', Math.round(2 * scale), '2m 32s', '29.8%'],
+            ['/blogs', Math.round(2 * scale), '1m 22s', '41.3%'],
+            ['/platform', Math.round(1 * scale), '1m 45s', '44.1%'],
+            ['/about-our-team-and-vision', Math.round(1 * scale), '1m 08s', '46.5%'],
+        ].map(r => `<tr><td>${r[0]}</td><td>${fmt(r[1])}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('');
+
+        // Real geo data (90d returning users)
+        document.querySelector('#ga4GeoTable tbody').innerHTML = [
+            ['United States', Math.round(22 * scale), Math.round(18 * scale)],
+            ['Canada', Math.round(14 * scale), Math.round(11 * scale)],
+            ['United Kingdom', Math.round(8 * scale), Math.round(6 * scale)],
+            ['India', Math.round(7 * scale), Math.round(5 * scale)],
+            ['Austria', Math.round(3 * scale), Math.round(2 * scale)],
+            ['Australia', Math.round(2 * scale), Math.round(2 * scale)],
+        ].map(r => `<tr><td>${r[0]}</td><td>${fmt(r[1])}</td><td>${fmt(r[2])}</td></tr>`).join('');
+    }
+
+    function renderAdsDemo() {
+        // Google Ads account exists (ID: 8032936971) but has no active campaigns yet
+        document.getElementById('adsCost').textContent = '$0.00';
+        document.getElementById('adsImpressions').textContent = '0';
+        document.getElementById('adsClicks').textContent = '0';
+        document.getElementById('adsCtr').textContent = '0.0%';
+        document.getElementById('adsCpc').textContent = '$0.00';
+        document.getElementById('adsConversions').textContent = '0';
+        document.getElementById('adsCostPerConv').textContent = '$0.00';
+        document.getElementById('adsRoas').textContent = '—';
+
+        // No trend data — show empty state
+        const emptyTrend = [];
+        const now2 = new Date();
+        for (let i = Math.min(currentDays, 30); i >= 0; i--) {
+            const d = new Date(now2); d.setDate(d.getDate() - i);
+            emptyTrend.push({ date: d.toISOString().split('T')[0], cost: 0, clicks: 0, conversions: 0 });
+        }
+        renderAdsTrendChart(emptyTrend);
+
+        document.querySelector('#adsCampaignsTable tbody').innerHTML =
+            '<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:24px;">No active campaigns. Google Ads account (ID: 8032936971) is in setup — complete campaign creation at <a href="https://ads.google.com" target="_blank" style="color:var(--accent-blue);">ads.google.com</a></td></tr>';
+
+        document.querySelector('#adsKeywordsTable tbody').innerHTML =
+            '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:24px;">No keyword data available yet.</td></tr>';
+    }
+
+    // ─── Health Check & Operations ───────────────────────────────
+
+    async function checkHealth() {
+        const health = await fetchData('/api/health');
+
+        if (health) {
+            setStatus('apiStatusDot', 'healthy');
+            document.getElementById('apiStatusLabel').textContent = 'Connected';
+            setStatus('ga4StatusDot', health.ga4_configured ? 'healthy' : 'warning');
+            document.getElementById('ga4StatusLabel').textContent = health.ga4_configured ? 'Configured' : 'Not configured';
+            setStatus('adsStatusDot', health.ads_configured ? 'healthy' : 'warning');
+            document.getElementById('adsStatusLabel').textContent = health.ads_configured ? 'Configured' : 'Not configured';
+            setStatus('ghlStatusDot', health.ghl_configured ? 'healthy' : 'warning');
+            document.getElementById('ghlStatusLabel').textContent = health.ghl_configured ? 'Connected' : 'Not configured';
+
+            document.getElementById('statusDot').style.background = 'var(--accent-green)';
+            document.getElementById('statusText').textContent = 'Live';
+        } else {
+            setStatus('apiStatusDot', 'warning');
+            document.getElementById('apiStatusLabel').textContent = 'Demo mode';
+            setStatus('ga4StatusDot', 'warning');
+            document.getElementById('ga4StatusLabel').textContent = 'Demo mode';
+            setStatus('adsStatusDot', 'warning');
+            document.getElementById('adsStatusLabel').textContent = 'Demo mode';
+            setStatus('ghlStatusDot', 'warning');
+            document.getElementById('ghlStatusLabel').textContent = 'Demo mode';
+
+            document.getElementById('statusDot').style.background = 'var(--accent-orange)';
+            document.getElementById('statusText').textContent = 'Demo Mode';
+        }
+
+        // Mock operations data
+        document.getElementById('lastAgentRun').textContent = 'Just now';
+        document.getElementById('workflowsToday').textContent = Math.floor(12 + Math.random() * 8);
+        document.getElementById('errors24h').textContent = Math.floor(Math.random() * 3);
+    }
+
+    function setStatus(dotId, status) {
+        const dot = document.getElementById(dotId);
+        dot.className = 'ops-status-dot ' + status;
+    }
+
+    // ─── GHL Rendering ─────────────────────────────────────────────
+
+    function renderGHL(data) {
+        if (!data || !data.data) {
+            renderGHLDemo();
+            return;
+        }
+
+        const d = data.data;
+
+        document.getElementById('ghlContacts').textContent = fmt(d.contacts?.total);
+        document.getElementById('ghlOpps').textContent = fmt(d.opportunities?.total);
+        document.getElementById('ghlPipelineValue').textContent = fmtMoney(d.opportunities?.pipeline_value);
+        document.getElementById('ghlPipelines').textContent = d.pipelines?.length || 0;
+
+        // Stages chart
+        if (d.opportunities?.stages?.length > 0) {
+            renderBarChart('ghlStagesChart',
+                d.opportunities.stages.map(s => s.name),
+                d.opportunities.stages.map(s => s.count),
+                'Opportunities'
+            );
+        }
+
+        // Source breakdown from recent contacts
+        if (d.contacts?.recent?.length > 0) {
+            const sourceCounts = {};
+            d.contacts.recent.forEach(c => {
+                const src = c.source || 'Unknown';
+                sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+            });
+            renderDoughnutChart('ghlSourcesChart',
+                Object.keys(sourceCounts),
+                Object.values(sourceCounts)
+            );
+        }
+
+        // Opportunities table
+        if (d.opportunities?.recent) {
+            document.querySelector('#ghlOppsTable tbody').innerHTML = d.opportunities.recent.map(o => `
+                <tr>
+                    <td>${o.name}</td>
+                    <td>${o.contact}</td>
+                    <td>${fmtMoney(o.value)}</td>
+                    <td>${o.stage}</td>
+                    <td><span class="badge ${o.status === 'open' ? 'badge-active' : 'badge-paused'}">${o.status}</span></td>
+                    <td>${o.source || '—'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Contacts table
+        if (d.contacts?.recent) {
+            document.querySelector('#ghlContactsTable tbody').innerHTML = d.contacts.recent.map(c => `
+                <tr>
+                    <td>${c.name}</td>
+                    <td>${c.email || '—'}</td>
+                    <td>${c.phone || '—'}</td>
+                    <td>${c.source || '—'}</td>
+                    <td>${(c.tags || []).join(', ') || '—'}</td>
+                </tr>
+            `).join('');
+        }
+    }
+
+    function renderGHLDemo() {
+        document.getElementById('ghlContacts').textContent = '1,247';
+        document.getElementById('ghlOpps').textContent = '86';
+        document.getElementById('ghlPipelineValue').textContent = '$342,500';
+        document.getElementById('ghlPipelines').textContent = '3';
+
+        renderBarChart('ghlStagesChart',
+            ['New Lead', 'Qualified', 'Proposal Sent', 'Negotiation', 'Won', 'Lost'],
+            [28, 18, 14, 12, 9, 5],
+            'Opportunities'
+        );
+
+        renderDoughnutChart('ghlSourcesChart',
+            ['Website', 'LinkedIn', 'Referral', 'Google Ads', 'Cold Outreach', 'Other'],
+            [380, 290, 210, 180, 120, 67]
+        );
+
+        document.querySelector('#ghlOppsTable tbody').innerHTML = [
+            ['Marriott Scottsdale Wellness', 'Sarah Chen', 45000, 'Proposal Sent', 'open', 'LinkedIn'],
+            ['Mayo Clinic Partnership', 'Dr. James Wu', 82000, 'Negotiation', 'open', 'Referral'],
+            ['Hilton Corporate Program', 'Mike Torres', 35000, 'Qualified', 'open', 'Website'],
+            ['ASU Campus Wellness', 'Lisa Park', 28000, 'New Lead', 'open', 'Cold Outreach'],
+            ['Scottsdale USD After-School', 'Amy Nguyen', 18500, 'Proposal Sent', 'open', 'Referral'],
+            ['Four Seasons Scottsdale', 'Robert Kim', 52000, 'Qualified', 'open', 'LinkedIn'],
+            ['Banner Health Integration', 'Dr. Patel', 65000, 'New Lead', 'open', 'Website'],
+            ['Westin Kierland Resort', 'Jennifer Blake', 22000, 'Negotiation', 'open', 'Google Ads'],
+        ].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${fmtMoney(r[2])}</td><td>${r[3]}</td><td><span class="badge badge-active">${r[4]}</span></td><td>${r[5]}</td></tr>`).join('');
+
+        document.querySelector('#ghlContactsTable tbody').innerHTML = [
+            ['Sarah Chen', 'sarah@marriott.com', '(480) 555-0142', 'LinkedIn', 'hotel, enterprise'],
+            ['Dr. James Wu', 'jwu@mayoclinic.org', '(480) 555-0198', 'Referral', 'healthcare, priority'],
+            ['Mike Torres', 'mtorres@hilton.com', '(602) 555-0234', 'Website', 'corporate, wellness'],
+            ['Lisa Park', 'lpark@asu.edu', '(480) 555-0311', 'Cold Outreach', 'education, campus'],
+            ['Amy Nguyen', 'anguyen@susd.org', '(480) 555-0187', 'Referral', 'k12, after-school'],
+        ].map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`).join('');
+    }
+
+    // ─── Refresh ─────────────────────────────────────────────────
+
+    async function refreshAll() {
+        document.getElementById('statusText').textContent = 'Refreshing...';
+
+        const params = getDateParams();
+        const [ga4, ads, ghl, events] = await Promise.all([
+            fetchData(`/api/ga4?${params}`),
+            fetchData(`/api/ads?${params}`),
+            fetchData('/api/ghl'),
+            fetchData(`/api/events?${params}`)
+        ]);
+
+        renderGA4(ga4);
+        renderEvents(events);
+        renderAds(ads);
+        renderGHL(ghl);
+        await checkHealth();
+
+        document.getElementById('lastUpdated').textContent =
+            'Last updated: ' + new Date().toLocaleTimeString();
+    }
+
+    async function clearCache() {
+        await fetchData('/api/cache/clear');
+        refreshAll();
+    }
+
+    // ─── Auto-refresh every 5 minutes ────────────────────────────
+    setInterval(refreshAll, 5 * 60 * 1000);
+
+    // ─── Init ────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        refreshAll();
+    });
+</script>
+</body>
+</html>

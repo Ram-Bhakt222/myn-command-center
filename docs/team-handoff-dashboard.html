@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYN Team Handoff Dashboard — Neha, Naveen & Avi</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #0f1f35 100%);
+            color: #e8e8e8;
+            min-height: 100vh;
+        }
+        .container { display: flex; height: 100vh; }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: rgba(10, 22, 40, 0.95);
+            border-right: 1px solid rgba(0, 212, 170, 0.2);
+            overflow-y: auto;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            left: 0; top: 0; z-index: 100;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.3);
+        }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.3); border-radius: 3px; }
+        .sidebar-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid rgba(0,212,170,0.3); }
+        .logo { font-size: 22px; font-weight: 900; color: #00d4aa; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+        .logo-subtitle { font-size: 10px; color: #7a9ba8; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+            border-radius: 8px; cursor: pointer; font-size: 13px; color: #b0c4ce;
+            transition: all 0.2s; margin-bottom: 2px;
+        }
+        .nav-item:hover { background: rgba(0,212,170,0.08); color: #fff; }
+        .nav-item.active { background: rgba(0,212,170,0.15); color: #00d4aa; font-weight: 600; border-left: 3px solid #00d4aa; }
+        .nav-item .icon { font-size: 16px; width: 22px; text-align: center; }
+        .nav-section-title {
+            font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+            color: #5a7a8a; margin: 18px 0 8px 14px; font-weight: 700;
+        }
+        .nav-divider { height: 1px; background: rgba(0,212,170,0.1); margin: 12px 0; }
+
+        /* MAIN */
+        .main { margin-left: 260px; padding: 30px; width: calc(100% - 260px); overflow-y: auto; height: 100vh; }
+
+        /* SECTIONS */
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+
+        /* HEADER */
+        .section-header { margin-bottom: 28px; }
+        .section-header h1 { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+        .section-header p { font-size: 14px; color: #7a9ba8; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+        .badge-teal { background: rgba(0,212,170,0.15); color: #00d4aa; }
+        .badge-amber { background: rgba(255,183,77,0.15); color: #ffb74d; }
+        .badge-red { background: rgba(239,83,80,0.15); color: #ef5350; }
+        .badge-blue { background: rgba(66,165,245,0.15); color: #42a5f5; }
+        .badge-purple { background: rgba(171,71,188,0.15); color: #ab47bc; }
+        .badge-green { background: rgba(102,187,106,0.15); color: #66bb6a; }
+
+        /* CARDS */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; margin-bottom: 28px; }
+        .card {
+            background: rgba(15, 31, 53, 0.8);
+            border: 1px solid rgba(0,212,170,0.12);
+            border-radius: 12px; padding: 22px;
+            transition: all 0.2s;
+        }
+        .card:hover { border-color: rgba(0,212,170,0.3); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .card h3 { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .card p { font-size: 13px; color: #9ab0bc; line-height: 1.6; }
+        .card .meta { font-size: 11px; color: #5a7a8a; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .card a { color: #00d4aa; text-decoration: none; font-size: 12px; }
+        .card a:hover { text-decoration: underline; }
+
+        /* STAT ROW */
+        .stat-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
+        .stat-box {
+            background: rgba(15,31,53,0.6); border: 1px solid rgba(0,212,170,0.08);
+            border-radius: 10px; padding: 18px; text-align: center;
+        }
+        .stat-box .number { font-size: 32px; font-weight: 800; color: #00d4aa; }
+        .stat-box .label { font-size: 11px; color: #7a9ba8; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+        /* TABLE */
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+        .data-table th {
+            text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            color: #5a7a8a; padding: 10px 14px; border-bottom: 1px solid rgba(0,212,170,0.15);
+        }
+        .data-table td {
+            padding: 12px 14px; font-size: 13px; color: #b0c4ce;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .data-table tr:hover td { background: rgba(0,212,170,0.03); }
+
+        /* STATUS DOTS */
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .status-completed { background: #66bb6a; }
+        .status-in-progress { background: #42a5f5; }
+        .status-todo { background: #ffb74d; }
+        .status-stale { background: #ef5350; }
+
+        /* TOGGLE SECTIONS */
+        .toggle-header {
+            cursor: pointer; padding: 14px 18px; background: rgba(15,31,53,0.6);
+            border: 1px solid rgba(0,212,170,0.08); border-radius: 10px;
+            margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;
+            transition: all 0.2s;
+        }
+        .toggle-header:hover { border-color: rgba(0,212,170,0.25); }
+        .toggle-header h3 { font-size: 15px; font-weight: 600; color: #fff; }
+        .toggle-header .arrow { color: #00d4aa; font-size: 14px; transition: transform 0.2s; }
+        .toggle-header.open .arrow { transform: rotate(90deg); }
+        .toggle-content { display: none; padding: 16px 18px; margin-bottom: 16px; }
+        .toggle-content.open { display: block; }
+
+        /* TIMELINE */
+        .timeline { position: relative; padding-left: 30px; margin-bottom: 24px; }
+        .timeline::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: rgba(0,212,170,0.2); }
+        .timeline-item { position: relative; margin-bottom: 20px; }
+        .timeline-item::before {
+            content: ''; position: absolute; left: -24px; top: 4px;
+            width: 10px; height: 10px; border-radius: 50%; background: #00d4aa;
+            border: 2px solid #0a1628;
+        }
+        .timeline-item .date { font-size: 11px; color: #5a7a8a; margin-bottom: 4px; }
+        .timeline-item .event { font-size: 13px; color: #b0c4ce; line-height: 1.5; }
+        .timeline-item .event strong { color: #fff; }
+
+        /* SEARCH */
+        .search-box {
+            width: 100%; padding: 10px 16px; background: rgba(15,31,53,0.6);
+            border: 1px solid rgba(0,212,170,0.15); border-radius: 8px;
+            color: #e8e8e8; font-size: 13px; margin-bottom: 20px; outline: none;
+        }
+        .search-box:focus { border-color: rgba(0,212,170,0.4); }
+        .search-box::placeholder { color: #5a7a8a; }
+
+        /* NOTION LINK */
+        .notion-link {
+            display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+            background: rgba(0,212,170,0.08); border-radius: 6px; color: #00d4aa;
+            font-size: 12px; text-decoration: none; transition: all 0.2s;
+        }
+        .notion-link:hover { background: rgba(0,212,170,0.15); }
+
+        /* PRIORITY BAR */
+        .priority-bar { display: flex; gap: 4px; margin-top: 8px; }
+        .priority-segment { height: 6px; border-radius: 3px; }
+
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; width: 100%; }
+            .card-grid { grid-template-columns: 1fr; }
+            .stat-row { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+<!-- BEGIN MYN-NAV (auto-injected 2026-04-21) -->
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; -webkit-font-smoothing: antialiased; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__inner::-webkit-scrollbar { height: 4px; } .myn-nav__inner::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.25); border-radius: 2px; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-variant-numeric: tabular-nums; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Center</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="master-directory.html" data-page="master-directory">Directory</a>
+  <a href="analytics-dashboard.html" data-page="analytics-dashboard">Analytics</a>
+  <a href="lead-gen-dashboard.html" data-page="lead-gen-dashboard">Leads</a>
+  <a href="hotel-activities-dashboard.html" data-page="hotel-activities-dashboard">Hotels</a>
+  <a href="business-economics-dashboard.html" data-page="business-economics-dashboard">Economics</a>
+  <a href="team-handoff-dashboard.html" data-page="team-handoff-dashboard">Team</a>
+  <a href="architecture-dashboard.html" data-page="architecture-dashboard">Architecture</a>
+  <a href="agent-control-plane.html" data-page="agent-control-plane">Agents</a>
+  <a href="supabase-dashboard.html" data-page="supabase-dashboard">Supabase</a>
+  <a href="paperclip-dashboard.html" data-page="paperclip-dashboard">Paperclip</a>
+  <a href="review-queue.html" data-page="review-queue">Review</a>
+  <a href="4-21-26-full-audit.html" data-page="4-21-26-full-audit">Audit</a>
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date" id="myn-nav-date"></span>
+</div>
+</nav>
+<script>
+(function(){
+  var path = (location.pathname.split('/').pop() || 'index.html').replace('.html','');
+  var links = document.querySelectorAll('.myn-nav a[data-page]');
+  for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('data-page') === path) links[i].classList.add('is-active'); }
+  var d = new Date(); var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var el = document.getElementById('myn-nav-date'); if (el) el.textContent = m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+})();
+</script>
+<!-- END MYN-NAV -->
+
+<div class="container">
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">MYN</div>
+            <div class="logo-subtitle">Team Handoff Dashboard</div>
+        </div>
+
+        <div class="nav-section-title">Overview</div>
+        <div class="nav-item active" onclick="switchTab('overview')"><span class="icon">📊</span> Executive Summary</div>
+
+        <div class="nav-section-title">Team Members</div>
+        <div class="nav-item" onclick="switchTab('neha')"><span class="icon">🎨</span> Neha (Design + Social)</div>
+        <div class="nav-item" onclick="switchTab('naveen')"><span class="icon">💰</span> Naveen (Procurement)</div>
+        <div class="nav-item" onclick="switchTab('avi')"><span class="icon">📋</span> Avi (Strategy/BD)</div>
+        <div class="nav-item" onclick="switchTab('procurement')"><span class="icon">🏛️</span> Procurement & Grants</div>
+
+        <div class="nav-section-title">Work Streams</div>
+        <div class="nav-item" onclick="switchTab('hotels')"><span class="icon">🏨</span> Hotels Strategy</div>
+        <div class="nav-item" onclick="switchTab('seo')"><span class="icon">🔍</span> SEO & Website</div>
+        <div class="nav-item" onclick="switchTab('conferences')"><span class="icon">🎤</span> Conference Pipeline</div>
+        <div class="nav-item" onclick="switchTab('brand')"><span class="icon">✨</span> Brand & Content</div>
+
+        <div class="nav-section-title">Data & Assets</div>
+        <div class="nav-item" onclick="switchTab('notion-pages')"><span class="icon">📄</span> All Notion Pages</div>
+        <div class="nav-item" onclick="switchTab('action-items')"><span class="icon">☑️</span> Open Action Items</div>
+
+        <div class="nav-divider"></div>
+        <div class="nav-section-title">Navigation</div>
+        <div class="nav-item" onclick="window.open('file:///C:/Users/ram/Desktop/Strategy%20AGI/agentfield/myn-agent-os/index.html')"><span class="icon">🤖</span> Agent OS</div>
+        <div class="nav-item" onclick="window.open('file:///C:/Users/ram/Desktop/Command%20Center/myn-command-center/agentfield-dashboard.html')"><span class="icon">⚙️</span> AgentField Dashboard</div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+
+        <!-- ========== OVERVIEW ========== -->
+        <div id="overview" class="content-section active">
+            <div class="section-header">
+                <h1>Team Handoff Dashboard</h1>
+                <p>Summary of work completed by Neha (Design/Social), Naveen (Procurement/Hotels), and Avi (Strategy/BD) — what they worked on, where things stand, and what data exists in the system.</p>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-box"><div class="number">17</div><div class="label">Neha Pages</div></div>
+                <div class="stat-box"><div class="number">2</div><div class="label">Naveen Pages</div></div>
+                <div class="stat-box"><div class="number">7</div><div class="label">Avi Pages</div></div>
+                <div class="stat-box"><div class="number">25+</div><div class="label">Fathom Recordings</div></div>
+                <div class="stat-box"><div class="number">8</div><div class="label">Conference Pages</div></div>
+                <div class="stat-box"><div class="number">5</div><div class="label">Procurement Pages</div></div>
+                <div class="stat-box"><div class="number">12+</div><div class="label">Open Action Items</div></div>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>🎨 Neha — Designer & Social Media Manager</h3>
+                    <p>Worked across <strong>hotels strategy, SEO, website redesign, social media, branding, and content</strong>. Key deliverables include the Sunrise Yoga deck, footer redesign (completed), SEO analysis, newsletter drafts, and Schema/AEO strategy. Social/VA page is the largest with meeting notes spanning Oct 2025 – Jan 2026.</p>
+                    <div class="meta">
+                        <span class="badge badge-green">Footer: Completed</span>
+                        <span class="badge badge-blue">SEO Analysis: Done</span>
+                        <span class="badge badge-amber">Deck v1: Pending Review</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>💰 Naveen — CRM & Procurement</h3>
+                    <p>Focused on <strong>hotel procurement pathways, conference pipeline, vendor networks, and LinkedIn outreach</strong>. Key work: hospitality conference research, preferred-vendor entry mapping, Wise Wellness competitive analysis, and procurement portal logins. Many LinkedIn contacts to follow up with.</p>
+                    <div class="meta">
+                        <span class="badge badge-amber">LinkedIn Follow-ups: Pending</span>
+                        <span class="badge badge-amber">Procurement Logins: Save to Bitwarden</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🏨 Hotels Strategy (Joint)</h3>
+                    <p>Naveen + Neha collaborated on <strong>hotel go-to-market strategy</strong>. Core approach: pivot from cold calling to creating guest demand (pull model) via poolside yoga. Target: beach & luxury resorts in SoCal. Strategic pillars: demand gen, conference pipeline, preferred-vendor entry, content/social.</p>
+                    <div class="meta">
+                        <span class="badge badge-blue">Status: In Progress</span>
+                        <span class="badge badge-teal">Strategy: Defined</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>📋 Avi — Strategy & Business Development</h3>
+                    <p>Longest-serving collaborator (Nov 2023 – Oct 2024). Built <strong>PMF Narrative framework</strong> (Helmer's 7 Powers applied to MYN), hotel sales pricing tiers, marketplace strategy, CRM evaluation, university partnership coordination. 25+ Fathom recordings document the entire strategic evolution of MYN.</p>
+                    <div class="meta">
+                        <span class="badge badge-green">PMF Framework: Complete</span>
+                        <span class="badge badge-blue">25+ Recordings</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🎤 Conference Pipeline</h3>
+                    <p>Extensive research into hospitality conferences. Key events: ALIS (LA, Jan 2026), CHLA SoCal (Jul 2025), Hospitality Show (Denver, Oct 2025), SYTAR/IAYT yoga therapy conference. Outreach Engine for HOSP 2025 was planned but left in Todo status. Conference IAYT data fully extracted.</p>
+                    <div class="meta">
+                        <span class="badge badge-red">Outreach Engine: Not Started</span>
+                        <span class="badge badge-green">IAYT Data: Extracted</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🏛️ Procurement & Grants</h3>
+                    <p>Government procurement capabilities across <strong>SAM.gov, CaleProcure, and SCORE</strong>. Active certifications (SAM #12E57, CA #2044226). 14 NAICS codes, capabilities statements for Hotels and Government/Health, and 4+ active 2026 opportunities including California "Live Well" and LA28 Olympics.</p>
+                    <div class="meta">
+                        <span class="badge badge-green">SAM: Active</span>
+                        <span class="badge badge-green">CA Cert: Active</span>
+                        <span class="badge badge-amber">4+ Opportunities</span>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin-bottom:16px;">Where You Left Off</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="date">Feb 2026 (Last Edits)</div>
+                    <div class="event"><strong>Hotels - Naveen + Neha</strong> page last updated. Conference research tables, retreat planning, and marketing assets compiled. Target accounts shortlisted: Hyatt LB, Hotel Maya, Fairmont, La Valencia, Pendry SD.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Jan 2026</div>
+                    <div class="event"><strong>Naveen Hotels Procurement</strong> page notes: "lots of LinkedIn contacts to follow up with, procurement logins need to be saved on Bitwarden." Action items database created. Wise Wellness pivot analysis noted.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Jan 2026</div>
+                    <div class="event"><strong>Enrichment/GHL/Email</strong> page updated with CRM enrichment workflows and cold email infrastructure.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Nov 2025</div>
+                    <div class="event"><strong>Hotels Strategy meeting</strong> (Oct 2 call w/ Naveen). Defined push→pull pivot, poolside yoga concept, conference strategy. <strong>Neha assigned Sunrise Yoga deck v1.</strong></div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Nov 2025</div>
+                    <div class="event"><strong>SEO Analysis</strong> completed. Session data by vertical: Hotels 45, Corporate 20, Kids 37, Clinical 113, Wearables 10-12, Therapist 13.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Nov 2025</div>
+                    <div class="event"><strong>SYTAR/IAYT Conference</strong> data fully extracted — 8 theme clusters, participants database, session schedules. <strong>Conference Outreach Engine</strong> spec created but left blank (Todo status).</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Oct 2025</div>
+                    <div class="event"><strong>Neha Strategy sessions</strong> began (Zoom meetings recorded via Fathom). Topics: design, SEO, ads, social media management, website redesign.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== NEHA ========== -->
+        <div id="neha" class="content-section">
+            <div class="section-header">
+                <h1>🎨 Neha — Work Summary</h1>
+                <p>Designer & Social Media Manager. Worked across hotels, SEO, website, branding, and content. 17 Notion pages associated.</p>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-box"><div class="number">17</div><div class="label">Notion Pages</div></div>
+                <div class="stat-box"><div class="number">6</div><div class="label">Work Streams</div></div>
+                <div class="stat-box"><div class="number">1</div><div class="label">Completed</div></div>
+                <div class="stat-box"><div class="number">5+</div><div class="label">Pending Items</div></div>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin-bottom:16px;">Work by Category</h2>
+
+            <!-- Hotels -->
+            <div class="toggle-header" onclick="toggleSection(this)">
+                <h3>🏨 Hotels Strategy & Assets</h3>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="toggle-content">
+                <table class="data-table">
+                    <tr><th>Page</th><th>Key Content</th><th>Status</th></tr>
+                    <tr>
+                        <td>Hotels - Naveen + Neha</td>
+                        <td>Assigned: "Sunrise Yoga deck v1 for review." Part of joint hotel strategy with Naveen — conference pipeline, retreat planning, target accounts.</td>
+                        <td><span class="status-dot status-in-progress"></span>In Progress</td>
+                    </tr>
+                    <tr>
+                        <td>Hotel SaaS GHL</td>
+                        <td>White-label SaaS specs for hotels via GoHighLevel. MVP feature requirements, dashboard specifications.</td>
+                        <td><span class="status-dot status-todo"></span>Spec Only</td>
+                    </tr>
+                    <tr>
+                        <td>Newsletter end of year</td>
+                        <td>3 newsletter draft options for hotel re-engagement, conference learnings, wellness industry trends.</td>
+                        <td><span class="status-dot status-completed"></span>Drafted</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- SEO & Website -->
+            <div class="toggle-header" onclick="toggleSection(this)">
+                <h3>🔍 SEO & Website</h3>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="toggle-content">
+                <table class="data-table">
+                    <tr><th>Page</th><th>Key Content</th><th>Status</th></tr>
+                    <tr>
+                        <td>SEO Analysis - Nov '25</td>
+                        <td>Full site SEO audit. Sessions by vertical: Hotels 45, Corporate 20, Kids 37, Clinical 113, Wearables 10-12, Therapist 13.</td>
+                        <td><span class="status-dot status-completed"></span>Completed</td>
+                    </tr>
+                    <tr>
+                        <td>Schema - SEO/AEO API</td>
+                        <td>Answer Engine Optimization architecture. Structured data schema, API endpoints for answer engines, citation formatting. Forward-looking strategy.</td>
+                        <td><span class="status-dot status-todo"></span>Strategy Doc</td>
+                    </tr>
+                    <tr>
+                        <td>Website Redesign</td>
+                        <td>Large page (94K+ chars) covering full website redesign planning — layout, UX, content architecture, page structure.</td>
+                        <td><span class="status-dot status-in-progress"></span>In Progress</td>
+                    </tr>
+                    <tr>
+                        <td>Footer Style</td>
+                        <td>Complete footer structure for all verticals (Hotels, Corporate, Schools, Healthcare). Partner forms per segment.</td>
+                        <td><span class="status-dot status-completed"></span>Completed</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Brand & Design -->
+            <div class="toggle-header" onclick="toggleSection(this)">
+                <h3>✨ Brand & Design Assets</h3>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="toggle-content">
+                <table class="data-table">
+                    <tr><th>Page</th><th>Key Content</th><th>Status</th></tr>
+                    <tr>
+                        <td>Logo</td>
+                        <td>Brand assets: MYN logo images, Facebook/LinkedIn/Twitter covers, logo banner zip file.</td>
+                        <td><span class="status-dot status-completed"></span>Assets Available</td>
+                    </tr>
+                    <tr>
+                        <td>Womb Health FM</td>
+                        <td>Large page (66K+ chars). Womb Health FM brand content and strategy — related podcast/media project.</td>
+                        <td><span class="status-dot status-in-progress"></span>Content Created</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Social & Content -->
+            <div class="toggle-header" onclick="toggleSection(this)">
+                <h3>📱 Social Media & Content</h3>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="toggle-content">
+                <table class="data-table">
+                    <tr><th>Page</th><th>Key Content</th><th>Status</th></tr>
+                    <tr>
+                        <td>Neha - Social/VA</td>
+                        <td>Main page (275K+ chars). Meeting notes, social media strategy, VA tasks, content planning. Spanning Oct 2025 – Jan 2026. This is the primary work log.</td>
+                        <td><span class="status-dot status-in-progress"></span>Ongoing Work Log</td>
+                    </tr>
+                    <tr>
+                        <td>LBSOY / Local</td>
+                        <td>Long Beach School of Yoga / Local business strategy (83K+ chars). Community engagement, local marketing.</td>
+                        <td><span class="status-dot status-in-progress"></span>Strategy Doc</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Strategy & Research -->
+            <div class="toggle-header" onclick="toggleSection(this)">
+                <h3>📈 Strategy & Research</h3>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="toggle-content">
+                <table class="data-table">
+                    <tr><th>Page</th><th>Key Content</th><th>Status</th></tr>
+                    <tr>
+                        <td>VC Thinking: Scott Hoffman</td>
+                        <td>Content strategy from mentor. Tribe building, funnel architecture. Neha listed for "design, SEO, ads" in team structure.</td>
+                        <td><span class="status-dot status-completed"></span>Reference Doc</td>
+                    </tr>
+                    <tr>
+                        <td>Notebook LM - Scaling</td>
+                        <td>10X scaling strategy, EHR platform as IP asset, partnership strategy. Meeting intel from Nov 25 Neha/Naveen session.</td>
+                        <td><span class="status-dot status-completed"></span>Reference Doc</td>
+                    </tr>
+                    <tr>
+                        <td>Enrichment/GHL/Email</td>
+                        <td>CRM enrichment workflows, GoHighLevel setup, email infrastructure (66K+ chars). Conference scraping mentioned.</td>
+                        <td><span class="status-dot status-in-progress"></span>Infrastructure</td>
+                    </tr>
+                    <tr>
+                        <td>Yoga Therapy</td>
+                        <td>Massive page (604K+ chars). Yoga therapy program content, clinical research, IAYT conference data.</td>
+                        <td><span class="status-dot status-in-progress"></span>Knowledge Base</td>
+                    </tr>
+                    <tr>
+                        <td>Resources for MYN</td>
+                        <td>Resource compilation page. Could not fetch — may need manual check.</td>
+                        <td><span class="status-dot status-todo"></span>Unverified</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- ========== NAVEEN ========== -->
+        <div id="naveen" class="content-section">
+            <div class="section-header">
+                <h1>💰 Naveen — Work Summary</h1>
+                <p>CRM & Booking / Procurement. Skills: Project Management, Business Development, Operations. Tools: Microsoft Project, AI, Notion.</p>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-box"><div class="number">2</div><div class="label">Notion Pages</div></div>
+                <div class="stat-box"><div class="number">3</div><div class="label">Skill Areas</div></div>
+                <div class="stat-box"><div class="number">5+</div><div class="label">Action Items</div></div>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>💰 Naveen Hotels Procurement</h3>
+                    <p><strong>Contact:</strong> naveenkrathi@gmail.com, +919632587788</p>
+                    <p style="margin-top:8px"><strong>Role:</strong> CRM & Booking</p>
+                    <p style="margin-top:8px"><strong>Skills:</strong> Project Management, Business Development, Operations</p>
+                    <p style="margin-top:8px"><strong>Upcoming potential:</strong> "Could handle grant finding and proposals via AI, and sourcing/procurement. Has worked in healthcare — could do schools project too."</p>
+                    <p style="margin-top:8px"><strong>Next steps noted:</strong> "Lots of LinkedIn contacts to follow up with. Procurement logins need to be saved on Bitwarden."</p>
+                    <div class="meta">
+                        <a class="notion-link" href="https://www.notion.so/27c3ed34037580d4bd44d77069548424" target="_blank">📄 Open in Notion</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🏨 Hotels - Naveen + Neha (Joint)</h3>
+                    <p>Collaborative hotel strategy page. Contains strategic pillars, conference research, retreat planning, marketing assets, and target account shortlist.</p>
+                    <p style="margin-top:8px"><strong>Key strategy:</strong> Pivot from cold calling to creating guest demand (pull). Lead product: Sunrise/Sunset Poolside Yoga. Target: beach & luxury resorts w/ strong poolside revenue.</p>
+                    <div class="meta">
+                        <a class="notion-link" href="https://www.notion.so/27f3ed34037580a19bb2f950f90cedff" target="_blank">📄 Open in Notion</a>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin-bottom:16px;">Naveen's Action Items (from Oct 2 Meeting)</h2>
+            <table class="data-table">
+                <tr><th>Action Item</th><th>Context</th><th>Status</th></tr>
+                <tr>
+                    <td>Local conference list — first pass + organizer outreach draft</td>
+                    <td>Hotels Strategy: conference pipeline building</td>
+                    <td><span class="status-dot status-in-progress"></span>Research Done</td>
+                </tr>
+                <tr>
+                    <td>Vendor network research outline by brand</td>
+                    <td>Map procurement pathways by hotel brand — requirements, tiers, contacts</td>
+                    <td><span class="status-dot status-todo"></span>Incomplete</td>
+                </tr>
+                <tr>
+                    <td>Contact HX Connect conference organizers</td>
+                    <td>From Oct 2 meeting — outreach to hospitality show contacts</td>
+                    <td><span class="status-dot status-todo"></span>Unknown</td>
+                </tr>
+                <tr>
+                    <td>Follow up LinkedIn contacts</td>
+                    <td>"Lots of LinkedIn contacts to follow up with" — per procurement page notes</td>
+                    <td><span class="status-dot status-stale"></span>Stale</td>
+                </tr>
+                <tr>
+                    <td>Save procurement logins to Bitwarden</td>
+                    <td>Procurement portal credentials need secure storage</td>
+                    <td><span class="status-dot status-stale"></span>Not Done</td>
+                </tr>
+            </table>
+
+            <h2 style="color:#fff; font-size:18px; margin-bottom:16px;">Wise Wellness — Competitive Note</h2>
+            <div class="card" style="max-width:600px">
+                <h3>🔍 Wise Wellness Pivot Analysis</h3>
+                <p>Naveen noted Wise Wellness as a comparable — "basically what MYN could evolve into if you mash together: marketplace, consulting agency, and media platform with sponsorship revenue." Flagged as strategic reference.</p>
+            </div>
+        </div>
+
+        <!-- ========== HOTELS ========== -->
+        <div id="hotels" class="content-section">
+            <div class="section-header">
+                <h1>🏨 Hotels Strategy</h1>
+                <p>Joint work by Naveen + Neha on hotel go-to-market. Core approach: pull model via poolside yoga activations at beach & luxury resorts.</p>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>🎯 Strategic Pillars</h3>
+                    <p><strong>1. Demand Gen:</strong> Quarterly retreat as content engine + proof of demand. Pilot poolside activations at Westin LB, Hyatt LB.</p>
+                    <p style="margin-top:6px"><strong>2. Conference Pipeline:</strong> Start local (CHLA, SoCal) → national (THS, ALIS). Morning yoga at events.</p>
+                    <p style="margin-top:6px"><strong>3. Preferred-Vendor Entry:</strong> Map procurement pathways by brand — requirements, tiers, contacts.</p>
+                    <p style="margin-top:6px"><strong>4. Content & Social:</strong> Real footage from retreats/pilots. FOMO-driven social around poolside experiences.</p>
+                </div>
+                <div class="card">
+                    <h3>📍 Target Accounts (Shortlist)</h3>
+                    <p><strong>Wave 1 (SoCal):</strong></p>
+                    <p>Hyatt Regency LB, Hotel Maya, Fairmont Century Plaza, La Valencia, Pendry SD</p>
+                    <p style="margin-top:8px"><strong>Wave 2:</strong></p>
+                    <p>OC resorts with ResortPass listings, boutique rooftops in LA/WeHo</p>
+                </div>
+                <div class="card">
+                    <h3>📧 Post-Conference Email (Draft)</h3>
+                    <p>Template ready for hospitality show follow-up. Mentions Chris Barton's keynote, positions MYN as turnkey yoga/meditation/wellness for properties. Includes Ram's contact + CEO signature.</p>
+                    <div class="meta"><span class="badge badge-green">Template Ready</span></div>
+                </div>
+                <div class="card">
+                    <h3>🏖️ Retreat Planning</h3>
+                    <p><strong>Fairmont + Insight Timer retreat</strong> concept. ResortPass integration research done (also Dayuse.com, HotelsByDay, Swimply, ClassPass). BookYogaRetreats.com and InsightTimer retreat listings identified as channels.</p>
+                    <div class="meta"><span class="badge badge-amber">Planning Phase</span></div>
+                </div>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin-bottom:16px;">Vendor Leverage Strategy</h2>
+            <div class="card" style="max-width:700px">
+                <h3>🔑 How to Become a Preferred Vendor</h3>
+                <p>1. <strong>Anchor with one flagship property</strong> (e.g., Westin) and document measurable impact.</p>
+                <p>2. <strong>Co-market results:</strong> Press releases, social features, wellness-week highlights.</p>
+                <p>3. <strong>Bundle solutions:</strong> Yoga + sound bath + aqua fitness under one invoice.</p>
+                <p>4. <strong>Sync with loyalty programs:</strong> Marriott Bonvoy, Hilton Honors experiences.</p>
+                <p>5. <strong>Offer data reporting:</strong> Even a simple "wellness engagement dashboard" gives corporate teams something to track.</p>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin: 20px 0 16px;">Marketing Assets Available</h2>
+            <table class="data-table">
+                <tr><th>Asset</th><th>Type</th><th>Status</th></tr>
+                <tr><td>My Yoga Network Services PDF</td><td>Services deck</td><td><span class="status-dot status-completed"></span>Available</td></tr>
+                <tr><td>MYN Pricing Deck (Canva)</td><td>Pricing presentation</td><td><span class="status-dot status-completed"></span>Available</td></tr>
+                <tr><td>Sunrise Yoga Deck v1</td><td>Beach resort pitch deck</td><td><span class="status-dot status-todo"></span>Neha assigned, pending</td></tr>
+                <tr><td>Conference outreach email template</td><td>Email draft</td><td><span class="status-dot status-completed"></span>Ready</td></tr>
+                <tr><td>Business cards</td><td>Print materials</td><td><span class="status-dot status-todo"></span>To order (NextDayFlyers)</td></tr>
+                <tr><td>Marketing video (60-90 sec)</td><td>Video</td><td><span class="status-dot status-todo"></span>Not started</td></tr>
+                <tr><td>"Got Wellness?" T-shirt</td><td>Event swag</td><td><span class="status-dot status-todo"></span>Not started</td></tr>
+            </table>
+        </div>
+
+        <!-- ========== SEO ========== -->
+        <div id="seo" class="content-section">
+            <div class="section-header">
+                <h1>🔍 SEO & Website Work</h1>
+                <p>SEO analysis, website redesign, footer structure, and Answer Engine Optimization — primarily Neha's domain.</p>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>📊 SEO Analysis — Nov 2025</h3>
+                    <p>Full site audit completed. Session data by vertical:</p>
+                    <table class="data-table" style="margin-top:10px">
+                        <tr><th>Vertical</th><th>Sessions</th></tr>
+                        <tr><td>Clinical/Healthcare</td><td><strong>113</strong></td></tr>
+                        <tr><td>Hotels</td><td>45</td></tr>
+                        <tr><td>Kids/After-school</td><td>37</td></tr>
+                        <tr><td>Corporate</td><td>20</td></tr>
+                        <tr><td>Therapist Directory</td><td>13</td></tr>
+                        <tr><td>Wearables</td><td>10-12</td></tr>
+                    </table>
+                    <div class="meta"><span class="badge badge-green">Completed</span></div>
+                </div>
+                <div class="card">
+                    <h3>🏗️ Footer Style</h3>
+                    <p>Complete footer structure designed for all verticals: Hotels, Corporate, Schools, Healthcare. Each includes partner-specific forms and CTAs. This was fully completed.</p>
+                    <div class="meta"><span class="badge badge-green">Completed</span></div>
+                </div>
+                <div class="card">
+                    <h3>🌐 Website Redesign</h3>
+                    <p>Large planning document (94K+ chars) covering layout, UX, content architecture, and page structure for myn.com. Still in progress at time of handoff.</p>
+                    <div class="meta"><span class="badge badge-blue">In Progress</span></div>
+                </div>
+                <div class="card">
+                    <h3>🤖 Schema / AEO API</h3>
+                    <p>Answer Engine Optimization strategy. Structured data schema for search engines, API endpoints for answer engines (Google AI, Perplexity, etc.), citation formatting specs. Forward-looking architecture.</p>
+                    <div class="meta"><span class="badge badge-purple">Strategy Doc</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== CONFERENCES ========== -->
+        <div id="conferences" class="content-section">
+            <div class="section-header">
+                <h1>🎤 Conference Pipeline</h1>
+                <p>All conference-related pages from Notion — hospitality events, IAYT/SYTAR, outreach engines, and planning docs.</p>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-box"><div class="number">8</div><div class="label">Conference Pages</div></div>
+                <div class="stat-box"><div class="number">4</div><div class="label">Key Events</div></div>
+                <div class="stat-box"><div class="number">1</div><div class="label">Data Extracted</div></div>
+                <div class="stat-box"><div class="number">1</div><div class="label">Outreach Engine</div></div>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin-bottom:16px;">Conference Events Tracked</h2>
+            <table class="data-table">
+                <tr><th>Conference</th><th>Location</th><th>Date</th><th>Cost</th><th>Status</th></tr>
+                <tr>
+                    <td><strong>ALIS</strong> (Americas Lodging Investment Summit)</td>
+                    <td>Los Angeles, CA</td>
+                    <td>Jan 26-28, 2026</td>
+                    <td>$2,875 - $3,995</td>
+                    <td><span class="badge badge-amber">Tracked</span></td>
+                </tr>
+                <tr>
+                    <td><strong>CHLA SoCal</strong> (Southern CA Hotelier)</td>
+                    <td>Ontario, CA</td>
+                    <td>Jul 15, 2025</td>
+                    <td>$500+ sponsor</td>
+                    <td><span class="badge badge-amber">Tracked</span></td>
+                </tr>
+                <tr>
+                    <td><strong>CHLA NorCal</strong></td>
+                    <td>San Ramon, CA</td>
+                    <td>Nov 6, 2025</td>
+                    <td>$500+ sponsor</td>
+                    <td><span class="badge badge-amber">Tracked</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Hospitality Show</strong></td>
+                    <td>Denver, CO</td>
+                    <td>Oct 26-28, 2025</td>
+                    <td>$749 all access</td>
+                    <td><span class="badge badge-green">Attended</span></td>
+                </tr>
+                <tr>
+                    <td><strong>SYTAR 2025</strong> (IAYT Yoga Therapy)</td>
+                    <td>TBD</td>
+                    <td>2025</td>
+                    <td>—</td>
+                    <td><span class="badge badge-green">Data Extracted</span></td>
+                </tr>
+            </table>
+
+            <h2 style="color:#fff; font-size:18px; margin: 24px 0 16px;">Conference Notion Pages</h2>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>📋 Conference Planning/Strategy</h3>
+                    <p>Under Procurement (Chioma). Main planning hub for conference approach and strategy.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/" target="_blank">📄 Find in Notion</a></div>
+                </div>
+                <div class="card">
+                    <h3>🧠 Conference Intelligence Project</h3>
+                    <p>Under Infrastructure Team Projects. Intelligence gathering framework for conferences.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/" target="_blank">📄 Find in Notion</a></div>
+                </div>
+                <div class="card">
+                    <h3>📝 Conference Notes — Current</h3>
+                    <p>Under Conference Planning/Strategy. Active notes from conference attendance and follow-ups.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/" target="_blank">📄 Find in Notion</a></div>
+                </div>
+                <div class="card">
+                    <h3>🧘 Conference IAYT (SYTAR 2025)</h3>
+                    <p>Fully extracted program guide. 8 theme clusters, participants database, session schedules, creative visualization ideas. Under Yoga Therapy project.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/2b33ed340375800ba3d7f699b79885ac" target="_blank">📄 Open in Notion</a></div>
+                </div>
+                <div class="card">
+                    <h3>🚀 Conference Outreach Engine — HOSP 2025</h3>
+                    <p>Pre/during/post-event outreach spec with lists, scripts, follow-ups. Timeline: Nov 3 – Dec 1, 2025. <strong>Status: Todo (blank page).</strong></p>
+                    <div class="meta">
+                        <span class="badge badge-red">Not Started</span>
+                        <a class="notion-link" href="https://www.notion.so/2d41ff8887e844d99e641f4e795c4dec" target="_blank" style="margin-left:8px">📄 Open in Notion</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🏢 Corporate & Conferences</h3>
+                    <p>Capability page under Procurement. On-site classes, keynotes, workshops, recovery labs. Delivery: On-site + Hybrid. <strong>Blank page.</strong></p>
+                    <div class="meta">
+                        <span class="badge badge-red">Blank</span>
+                        <a class="notion-link" href="https://www.notion.so/5340450d8eab445eb8723003b4e0db8c" target="_blank" style="margin-left:8px">📄 Open in Notion</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🏨 Hotels - Naveen + Neha</h3>
+                    <p>Contains conference research section with SoCal conferences table, outreach draft email, and conference databases (US Hospitality Conferences + Procurement Directory).</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/27f3ed34037580a19bb2f950f90cedff" target="_blank">📄 Open in Notion</a></div>
+                </div>
+                <div class="card">
+                    <h3>🧘 Yoga Therapy</h3>
+                    <p>Contains "Yoga Therapy Conference" section. Massive page (604K chars) — the largest in the workspace. Core knowledge base for clinical yoga therapy.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/21d3ed34037580eca0fee8c65ed86318" target="_blank">📄 Open in Notion</a></div>
+                </div>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin: 24px 0 16px;">SYTAR/IAYT Theme Clusters</h2>
+            <div class="card-grid">
+                <div class="card"><h3>1. Salutogenesis</h3><p>Movement from illness to wellness. Yoga chikitsa. Integration with modern healthcare systems.</p></div>
+                <div class="card"><h3>2. Social Justice</h3><p>DEIA competencies, cultural appropriation vs appreciation, Juneteenth liberation themes.</p></div>
+                <div class="card"><h3>3. Pain Science</h3><p>Modern pain science + yoga. Neuroplasticity, vagus nerve regulation. Chronic conditions.</p></div>
+                <div class="card"><h3>4. Mental Health</h3><p>Anxiety, depression, trauma-informed yoga, grief support, addiction recovery.</p></div>
+                <div class="card"><h3>5. Research Methods</h3><p>Qualitative research in yoga therapy. Making the invisible visible. Philosophy in trials.</p></div>
+                <div class="card"><h3>6. Business of YT</h3><p>Entrepreneurship, niche development, client adherence, marketing, sustainable models.</p></div>
+                <div class="card"><h3>7. Specialized Populations</h3><p>End-of-life, ALS, women's health, queer/marginalized communities, veterans.</p></div>
+                <div class="card"><h3>8. Clinical Skills</h3><p>Difficult conversations, narrative competence, NVC, assessment strategies, interprofessional collab.</p></div>
+            </div>
+        </div>
+
+        <!-- ========== BRAND ========== -->
+        <div id="brand" class="content-section">
+            <div class="section-header">
+                <h1>✨ Brand & Content</h1>
+                <p>Brand assets, logo files, social media strategy, and content created by Neha.</p>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>🎨 Logo & Brand Assets</h3>
+                    <p>MYN logo images available in multiple formats. Social media covers for Facebook, LinkedIn, Twitter. Logo banner zip file stored in Notion.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/87a7006c" target="_blank">📄 Open in Notion</a></div>
+                </div>
+                <div class="card">
+                    <h3>📱 Social Media (Neha - Social/VA)</h3>
+                    <p>Primary work log page (275K chars). Contains meeting notes, social media strategy discussions, VA task assignments, and content planning from Oct 2025 – Jan 2026.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/71dbae37" target="_blank">📄 Open in Notion</a></div>
+                </div>
+                <div class="card">
+                    <h3>🏡 LBSOY / Local Business</h3>
+                    <p>Long Beach School of Yoga and local business strategy (83K chars). Community engagement planning, local marketing approach, neighborhood partnerships.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/2213ed34" target="_blank">📄 Open in Notion</a></div>
+                </div>
+                <div class="card">
+                    <h3>🎙️ Womb Health FM</h3>
+                    <p>Related media/podcast project (66K chars). Brand content and strategy for Womb Health FM — a content channel focused on women's health.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/2323ed34" target="_blank">📄 Open in Notion</a></div>
+                </div>
+                <div class="card">
+                    <h3>📰 Newsletter Drafts</h3>
+                    <p>3 end-of-year newsletter options: (1) Hotel re-engagement, (2) Conference learnings recap, (3) Wellness industry trends. Ready for selection and sending.</p>
+                    <div class="meta">
+                        <span class="badge badge-green">Drafted</span>
+                        <a class="notion-link" href="https://www.notion.so/2bb3ed34" target="_blank" style="margin-left:8px">📄 Open in Notion</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>💡 VC Thinking: Scott Hoffman</h3>
+                    <p>Mentor strategy notes. Content strategy, tribe building, funnel architecture. Team structure defined with Neha on "design, SEO, ads." Authority-building playbook.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/2643ed34" target="_blank">📄 Open in Notion</a></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== AVI ========== -->
+        <div id="avi" class="content-section">
+            <div class="section-header">
+                <h1>📋 Avi — Work Summary</h1>
+                <p>Strategy / Business Development / Product Manager. Core contributor from Nov 2023 – Oct 2024. 25+ Fathom recordings, PMF framework, marketplace strategy, hotel sales, website redesign.</p>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-box"><div class="number">25+</div><div class="label">Fathom Recordings</div></div>
+                <div class="stat-box"><div class="number">7</div><div class="label">Notion Pages</div></div>
+                <div class="stat-box"><div class="number">12</div><div class="label">Months Active</div></div>
+                <div class="stat-box"><div class="number">5</div><div class="label">Work Streams</div></div>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>👤 Profile</h3>
+                    <p><strong>Email:</strong> avijpm45@gmail.com</p>
+                    <p><strong>MYN Email:</strong> avi@myyoganetwork.com</p>
+                    <p><strong>Role:</strong> Strategy/BD, Product Manager</p>
+                    <p><strong>Skills:</strong> Business Development, Marketing, Branding, Operations</p>
+                    <p><strong>Tools:</strong> Google, LinkedIn, Notion</p>
+                    <p><strong>Scheduling:</strong> <a href="https://appt.link/meet-with-avi-j/60-Mins-with-Avi" target="_blank" style="color:#00d4aa">60 min</a> | <a href="https://appt.link/meet-with-avi-j/30-Mins-with-Avi" target="_blank" style="color:#00d4aa">30 min</a></p>
+                </div>
+                <div class="card">
+                    <h3>📜 PMF Narrative (Key Deliverable)</h3>
+                    <p>Comprehensive Product-Market Fit framework using Helmer's 7 Powers. Defines MYN across 6 dimensions: Problem, Audience, Value Prop, Competitive Advantage, Growth Strategy, Business Model. Applied to MYN with CEO-level analysis.</p>
+                    <p style="margin-top:8px"><strong>Key insight:</strong> "You are not building a yoga company. You are building wellness infrastructure for institutions."</p>
+                    <div class="meta">
+                        <span class="badge badge-green">Complete</span>
+                        <a class="notion-link" href="https://www.notion.so/2bdc172d2d4944bd806d2a219d85206f" target="_blank" style="margin-left:8px">📄 Open in Notion</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🏨 Hotel Sales & Pricing</h3>
+                    <p>Developed hotel pricing tiers: $150 regular classes, $250 corporate/one-off, $250+$800-$3K marketing/PR bundle. Proposed MYN as full-service marketing + wellness provider. ResortPass strategy, destination fees landing page, vendor procurement outreach.</p>
+                    <p style="margin-top:8px"><strong>Sales tactics:</strong> Urgency ("only 3 hotels in your area"), video outreach, testimonial collection from Westin guests, Canadian hotel expansion.</p>
+                </div>
+                <div class="card">
+                    <h3>💻 Website & Product</h3>
+                    <p>Managed multiple website iterations with Muhammad (developer). Figma feedback cycles, landing page edits, homepage redesign, FAQ pages, success pages, yoga teacher onboarding flow. Tag Manager implementation.</p>
+                    <p style="margin-top:8px"><strong>Key idea:</strong> PubMed API integration — when users click conditions (e.g. "back pain"), link to clinical research. Marketplace vs. service model debate.</p>
+                </div>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin-bottom:16px;">Fathom Recordings Timeline</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="date">Oct 9, 2024</div>
+                    <div class="event"><strong>Ram ↔ Avi connect</strong> — Business updates and strategy. Last recorded sync.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Sep 23, 2024</div>
+                    <div class="event"><strong>Ram ↔ Neha ↔ Avi</strong> — Zammaya platform acquisition discussion. Three-way strategy session.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Sep 17-18, 2024</div>
+                    <div class="event"><strong>Ram ↔ Avi connect</strong> — Sales team progress, challenges with data reliability.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Sep 10-11, 2024</div>
+                    <div class="event"><strong>Avi ↔ Mouhammad + Ram ↔ Avi</strong> — Website homepage updates, Avi and Muhammad changes review. Website launching Friday.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Sep 4, 2024</div>
+                    <div class="event"><strong>Ram Avi connect</strong> — Website update and testing process. 2-3 day buffer for final feedback.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Aug 16-21, 2024</div>
+                    <div class="event"><strong>3 sessions</strong> — Figma comments resolved, Max feedback on design, Dash 14 data reliability concerns.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Jul 1-31, 2024</div>
+                    <div class="event"><strong>4 sessions</strong> — One-page content pieces review, blog post process, Sina yoga instructor meeting plans, Figma feedback from Max.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Jun 7-27, 2024</div>
+                    <div class="event"><strong>8 sessions</strong> — Muhammad not responsive, Judy partnership, first sales call feedback, blog strategy, Anita outreach. Most intensive period.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">May 21-31, 2024</div>
+                    <div class="event"><strong>3 sessions</strong> — Hotel website review, Anita connection, marketplace positioning.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Mar 7-12, 2024</div>
+                    <div class="event"><strong>2 sessions</strong> — Yoga therapist referrals, insurance strategy, physician relationships. Early strategy work.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="date">Nov 16, 2023</div>
+                    <div class="event"><strong>First meeting</strong> — Initial connection. Video recording and audio available in Notion.</div>
+                </div>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin: 24px 0 16px;">Key Strategy Contributions</h2>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>🎯 B2B vs B2C Framework</h3>
+                    <p>Defined the marketplace vs. service debate: B2C (patients → therapists), B2B (hotels, doctors). Advocated focusing on "faster to money" segment first. Validated through mentor calls (Dimitri on PMF, Gennady on hotel partnerships).</p>
+                </div>
+                <div class="card">
+                    <h3>📊 Customer Interview Strategy</h3>
+                    <p>Via Dimitri mentor call: talk to 20 customers deeply (1hr each), understand outcomes not solutions, segment by pain, offer pilot programs, scale through referrals. Jobs-to-be-Done framework applied to MYN.</p>
+                </div>
+                <div class="card">
+                    <h3>💰 Hotel Partnership Strategy</h3>
+                    <p>Via Gennady mentor call: buy targeted lists (BookMyData), white papers for credibility, attend trade events, survey hotel guests, LinkedIn group engagement, partnership manager targeting at hotel chains.</p>
+                </div>
+                <div class="card">
+                    <h3>🤖 Lead Gen & CRM Research</h3>
+                    <p>Evaluated Apollo.io, Instantly.ai, Snov.io for B2B lead gen. Social media prospecting, Google Maps lead gen, FSA/HSA account targeting. CRM software evaluation for pipeline management.</p>
+                </div>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin: 24px 0 16px;">Avi's Notion Pages</h2>
+            <table class="data-table">
+                <tr><th>Page</th><th>Content</th><th>Status</th><th>Link</th></tr>
+                <tr>
+                    <td>Avi - Strategy/BD</td>
+                    <td>Team profile page. Role: CRM & Booking. Skills: BD, Marketing, Branding, Ops.</td>
+                    <td><span class="badge badge-blue">Profile</span></td>
+                    <td><a class="notion-link" href="https://www.notion.so/95aaf470774a4edfbb17332eb8af11b9" target="_blank">Open</a></td>
+                </tr>
+                <tr>
+                    <td>Avi Updates</td>
+                    <td>Main work log (very large). Meeting notes, strategies, pricing, CRM research, mentor calls, sales tactics.</td>
+                    <td><span class="badge badge-blue">Work Log</span></td>
+                    <td><a class="notion-link" href="https://www.notion.so/df38171e4731465688f209473c0ccfdf" target="_blank">Open</a></td>
+                </tr>
+                <tr>
+                    <td>Avi's Workspace</td>
+                    <td>Contains Marketplace database (Raw Database - Marketplace).</td>
+                    <td><span class="badge badge-blue">Workspace</span></td>
+                    <td><a class="notion-link" href="https://www.notion.so/72e3f77fc1e24921acdd4db1a6a60e94" target="_blank">Open</a></td>
+                </tr>
+                <tr>
+                    <td>Product Market Fit Narrative</td>
+                    <td>PMF framework (Helmer's 7 Powers). 6-dimension analysis applied to MYN. Key strategic document.</td>
+                    <td><span class="badge badge-green">Complete</span></td>
+                    <td><a class="notion-link" href="https://www.notion.so/2bdc172d2d4944bd806d2a219d85206f" target="_blank">Open</a></td>
+                </tr>
+                <tr>
+                    <td>Yoga_Sales_Pipeline_Tasks</td>
+                    <td>Sales pipeline database under Hotel Sales.</td>
+                    <td><span class="badge badge-blue">Database</span></td>
+                    <td><a class="notion-link" href="https://www.notion.so/1ca3ed34037580aa9894ddc99d9c0ccf" target="_blank">Open</a></td>
+                </tr>
+                <tr>
+                    <td>Lead Gen: Pubmed/Dashboard/Social</td>
+                    <td>University deliverables — PubMed scraping, dashboard, social sentiment lead gen.</td>
+                    <td><span class="badge badge-amber">Deliverable</span></td>
+                    <td><a class="notion-link" href="https://www.notion.so/659ae937dc63452c8f957d45d933d8c3" target="_blank">Open</a></td>
+                </tr>
+                <tr>
+                    <td>Landing Page Edits</td>
+                    <td>Website landing page edits and feedback under Avi Updates.</td>
+                    <td><span class="badge badge-blue">Dev</span></td>
+                    <td>Under Avi Updates</td>
+                </tr>
+            </table>
+
+            <h2 style="color:#fff; font-size:18px; margin: 24px 0 16px;">All Ram ↔ Avi Fathom Recordings (25+)</h2>
+            <table class="data-table">
+                <tr><th>Date</th><th>Title</th><th>Key Topic</th></tr>
+                <tr><td>Oct 9, 2024</td><td>Ram ↔ Avi connect</td><td>Business updates, strategy review</td></tr>
+                <tr><td>Sep 23, 2024</td><td>Ram ↔ Neha ↔ Avi</td><td>Zammaya acquisition discussion</td></tr>
+                <tr><td>Sep 17, 2024</td><td>Ram ↔ Avi connect</td><td>Sales team progress, data challenges</td></tr>
+                <tr><td>Sep 11, 2024</td><td>Ram ↔ Avi connect</td><td>Website updates review (Avi+Muhammad)</td></tr>
+                <tr><td>Sep 10, 2024</td><td>Avi ↔ Mouhammad</td><td>Homepage updates needed</td></tr>
+                <tr><td>Sep 4, 2024</td><td>Ram Avi connect</td><td>Website launch prep, testing</td></tr>
+                <tr><td>Aug 21, 2024</td><td>Ram Avi connect</td><td>Dash 14 data reliability</td></tr>
+                <tr><td>Aug 19, 2024</td><td>Ram Avi connect</td><td>Weekly sync</td></tr>
+                <tr><td>Aug 16, 2024</td><td>Ram Avi connect</td><td>Figma feedback resolved</td></tr>
+                <tr><td>Jul 31, 2024</td><td>Ram ↔ Avi connect</td><td>Sina meeting, Figma from Max</td></tr>
+                <tr><td>Jul 23, 2024</td><td>Ram ↔ Avi connect</td><td>Blog post writing process</td></tr>
+                <tr><td>Jul 1, 2024</td><td>Ram Avi connect</td><td>One-page content pieces</td></tr>
+                <tr><td>Jun 27, 2024</td><td>Ram Avi Connect</td><td>Weekly sync</td></tr>
+                <tr><td>Jun 21, 2024</td><td>Ram Avi connect</td><td>Strategy session</td></tr>
+                <tr><td>Jun 20, 2024</td><td>Avi Ram connect</td><td>First sales call feedback</td></tr>
+                <tr><td>Jun 19, 2024</td><td>Avi Ram connect</td><td>Weekly sync</td></tr>
+                <tr><td>Jun 18, 2024</td><td>Avi Ram connect</td><td>Judy partnership discussion</td></tr>
+                <tr><td>Jun 17, 2024</td><td>Avi Ram connect</td><td>Muhammad delivery issues</td></tr>
+                <tr><td>Jun 7, 2024</td><td>Ram - Avi Sync</td><td>Weekly sync</td></tr>
+                <tr><td>May 31, 2024</td><td>Avi Ram connect</td><td>Anita outreach strategy</td></tr>
+                <tr><td>May 27, 2024</td><td>Avi Ram connect</td><td>Hotel website review</td></tr>
+                <tr><td>May 21, 2024</td><td>Sync with Ram</td><td>General sync</td></tr>
+                <tr><td>Mar 12, 2024</td><td>Ram Avi sync</td><td>Yoga therapy effectiveness, insurance</td></tr>
+                <tr><td>Mar 7, 2024</td><td>Ram - Avi Sync</td><td>Physician referrals, free sessions</td></tr>
+                <tr><td>Nov 16, 2023</td><td>First meeting</td><td>Initial connection (video + audio)</td></tr>
+            </table>
+        </div>
+
+        <!-- ========== PROCUREMENT ========== -->
+        <div id="procurement" class="content-section">
+            <div class="section-header">
+                <h1>🏛️ Procurement & Grants</h1>
+                <p>Government procurement, grant opportunities, capabilities statements, certifications, and bid readiness — managed across Naveen, Chioma, and Ram.</p>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-box"><div class="number">5</div><div class="label">Notion Pages</div></div>
+                <div class="stat-box"><div class="number">2</div><div class="label">Certifications</div></div>
+                <div class="stat-box"><div class="number">14</div><div class="label">NAICS Codes</div></div>
+                <div class="stat-box"><div class="number">4+</div><div class="label">Active Opportunities</div></div>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin-bottom:16px;">Certifications & Registration</h2>
+            <table class="data-table">
+                <tr><th>Certifying Agency</th><th>Certificate #</th><th>Expiration</th><th>Status</th></tr>
+                <tr>
+                    <td><strong>SAM.gov</strong> (System for Award Management)</td>
+                    <td>12E57</td>
+                    <td>May 12, 2026</td>
+                    <td><span class="badge badge-green">Active</span></td>
+                </tr>
+                <tr>
+                    <td><strong>State of California</strong> (Small Business)</td>
+                    <td>2044226</td>
+                    <td>Mar 31, 2027</td>
+                    <td><span class="badge badge-green">Active</span></td>
+                </tr>
+            </table>
+
+            <h2 style="color:#fff; font-size:18px; margin: 24px 0 16px;">Capabilities Statement</h2>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>🏨 Hotels Capabilities</h3>
+                    <p>Wellness programming for hospitality: on-site/virtual yoga, retreat coordination, guest wellness activations. Targeted at hotel chains, luxury resorts, and conference venues.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/5d9ee0436717417c8577a9ae06dec8f8" target="_blank">📄 Database in Notion</a></div>
+                </div>
+                <div class="card">
+                    <h3>🛡️ Government / Health Capabilities</h3>
+                    <p>Yoga therapy, stress reduction, PTSD/TBI support, occupational health programs. Aligned with PSC codes Q533, Q518, Q519. Education & training curriculum for schools, military, corporate.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/7d2f7dae9d3c46b386792fa2b9394c6b" target="_blank">📄 Database in Notion</a></div>
+                </div>
+                <div class="card">
+                    <h3>✅ Past Performance</h3>
+                    <p><strong>Westin Hotels:</strong> Guest wellness programming. <strong>LBUSD:</strong> After-school yoga K-5. <strong>VA Holistic Health:</strong> Veteran wellness services. <strong>Corporate:</strong> Stress reduction & team performance.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/8f761613bfab4b028131183ee07a9f52" target="_blank">📄 Database in Notion</a></div>
+                </div>
+                <div class="card">
+                    <h3>💵 Rate Card & Services Catalog</h3>
+                    <p>Full rate card database with pricing tiers by service type, duration, and delivery model (on-site, virtual, hybrid).</p>
+                    <div class="meta"><a class="notion-link" href="https://www.notion.so/5e031136eabc4f9d9bb3663a66301abf" target="_blank">📄 Database in Notion</a></div>
+                </div>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin: 24px 0 16px;">NAICS & PSC Codes</h2>
+            <div class="toggle-header" onclick="toggleSection(this)">
+                <h3>🏷️ Primary NAICS: 621999 — All Other Miscellaneous Ambulatory Health Care Services</h3>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="toggle-content">
+                <table class="data-table">
+                    <tr><th>NAICS Code</th><th>Description</th><th>Category</th></tr>
+                    <tr><td>621999</td><td>All Other Miscellaneous Ambulatory Health Care (PRIMARY)</td><td>Health & Wellness</td></tr>
+                    <tr><td>621399</td><td>Offices of All Other Miscellaneous Health Practitioners</td><td>Health & Wellness</td></tr>
+                    <tr><td>611699</td><td>All Other Miscellaneous Schools and Instruction</td><td>Education</td></tr>
+                    <tr><td>611110</td><td>Elementary & Secondary Schools</td><td>Education</td></tr>
+                    <tr><td>611310</td><td>Colleges, Universities, and Professional Schools</td><td>Education</td></tr>
+                    <tr><td>611620</td><td>Sports and Recreation Instruction</td><td>Fitness</td></tr>
+                    <tr><td>611710</td><td>Educational Support Services</td><td>Education</td></tr>
+                    <tr><td>713940</td><td>Fitness and Recreational Sports Centers</td><td>Fitness</td></tr>
+                    <tr><td>721110</td><td>Hotels and Motels</td><td>Hospitality</td></tr>
+                    <tr><td>624190</td><td>Other Individual and Family Services</td><td>Community</td></tr>
+                    <tr><td>813410</td><td>Civic and Social Organizations</td><td>Community</td></tr>
+                    <tr><td>812191</td><td>Diet and Weight Reducing Centers</td><td>Personal Care</td></tr>
+                    <tr><td>812199</td><td>Other Personal Care Services</td><td>Personal Care</td></tr>
+                    <tr><td>621330</td><td>Offices of Mental Health Practitioners</td><td>Health</td></tr>
+                </table>
+                <p style="margin-top:12px; font-size:12px; color:#5a7a8a;"><strong>PSC Codes:</strong> Q533 (Occupational Health), Q518 (Physical Medicine), Q519 (Behavioral Health), U008 (Curriculum Dev), U006 (Vocational Training), G099, R408 (Program Mgmt), 7810 (Sports Equipment), 6910 (Training Aids)</p>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin: 24px 0 16px;">2026 Active Opportunities</h2>
+            <table class="data-table">
+                <tr><th>Opportunity</th><th>Entity</th><th>Type</th><th>Status</th></tr>
+                <tr>
+                    <td><strong>California "Live Well" Statewide Wellness</strong></td>
+                    <td>CalHR</td>
+                    <td>State Employee Wellness — local vendor for on-site yoga/mindfulness</td>
+                    <td><span class="badge badge-green">Active</span></td>
+                </tr>
+                <tr>
+                    <td><strong>BHSA Mental Health & Wellness</strong></td>
+                    <td>Sonoma County</td>
+                    <td>3-yr contract starting Jul 2026, yoga therapy for at-risk populations</td>
+                    <td><span class="badge badge-amber">RFP Closed Feb 2026</span></td>
+                </tr>
+                <tr>
+                    <td><strong>NIH/NCCIH Mind & Body Clinical Trials</strong></td>
+                    <td>NIH</td>
+                    <td>PAR-25-274 feasibility trials — expires Nov 18, 2026</td>
+                    <td><span class="badge badge-blue">Open</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Local Micro-Grants (Solano, SF)</strong></td>
+                    <td>CalMHSA / SF.gov</td>
+                    <td>$2,500–$5,000 community wellness grants (BIPOC/LGBTQIA+)</td>
+                    <td><span class="badge badge-blue">Open</span></td>
+                </tr>
+                <tr>
+                    <td><strong>LA28 Olympics Procurement</strong></td>
+                    <td>SCORE / LA28</td>
+                    <td>Government procurement opportunity — bid submitted via SCORE</td>
+                    <td><span class="badge badge-amber">Tracked</span></td>
+                </tr>
+            </table>
+
+            <h2 style="color:#fff; font-size:18px; margin: 24px 0 16px;">Procurement Notion Pages</h2>
+            <table class="data-table">
+                <tr><th>Page</th><th>Content</th><th>Owner</th><th>Link</th></tr>
+                <tr>
+                    <td>Procurement Ingest — Capabilities</td>
+                    <td>8 databases: Hotel capabilities, Gov/Health capabilities, Past Performance, Rate Card, NAICS/PSC, Certifications, Supplier Diversity, Subcontractors</td>
+                    <td>Chioma</td>
+                    <td><a class="notion-link" href="https://www.notion.so/2f13ed34037580d0ae6afeb63a1e6b32" target="_blank">Open</a></td>
+                </tr>
+                <tr>
+                    <td>Procurement (not hotels)</td>
+                    <td>Capabilities statement, NAICS codes, SAM/CA certifications, government procurement dates. Olympics, schools, government focus.</td>
+                    <td>Naveen / Chioma</td>
+                    <td><a class="notion-link" href="https://www.notion.so/27d3ed3403758078836df66f351ded17" target="_blank">Open</a></td>
+                </tr>
+                <tr>
+                    <td>Research Grant Opportunities & Specs</td>
+                    <td>RFP finding process, requirements analysis, past awardees, program specifications. Contains "Opportunities Scan & Bid Readiness Brief."</td>
+                    <td>Ram</td>
+                    <td><a class="notion-link" href="https://www.notion.so/3053ed340375801884a8c74287332db3" target="_blank">Open</a></td>
+                </tr>
+                <tr>
+                    <td>MYN Ecosystem: Customer Experiences Mapping</td>
+                    <td>Parent page. Persona & buyer journey framework, personas, procurement ingest. Messaging framework for all 4 segments.</td>
+                    <td>Chioma</td>
+                    <td><a class="notion-link" href="https://www.notion.so/2f33ed340375808b969bcb0b2698fc68" target="_blank">Open</a></td>
+                </tr>
+                <tr>
+                    <td>Corporate & Conferences</td>
+                    <td>Capability page under Procurement. On-site classes, keynotes, workshops. Currently blank.</td>
+                    <td>—</td>
+                    <td><a class="notion-link" href="https://www.notion.so/5340450d8eab445eb8723003b4e0db8c" target="_blank">Open</a></td>
+                </tr>
+            </table>
+
+            <h2 style="color:#fff; font-size:18px; margin: 24px 0 16px;">Supplier Diversity Program</h2>
+            <div class="card" style="max-width:700px">
+                <h3>🌍 Diversity & Inclusion Framework</h3>
+                <p>MYN actively seeks and supports minority-owned, woman-owned, veteran-owned, LGBTQ+-owned, disability-owned, and small/disadvantaged enterprises.</p>
+                <p style="margin-top:8px"><strong>Verification via:</strong> NMSDC, WBENC, SBA, NGLCC, and state-level agencies.</p>
+                <p style="margin-top:8px"><strong>Program includes:</strong> Supplier registry (categorized + scored), onboarding + verification, quarterly/annual impact reporting, public "Become a Supplier" form, partnerships with councils/chambers.</p>
+            </div>
+
+            <h2 style="color:#fff; font-size:18px; margin: 24px 0 16px;">Key Portals & Links</h2>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>🔗 SAM.gov</h3>
+                    <p>Federal procurement registration. Active through May 2026.</p>
+                    <div class="meta"><a class="notion-link" href="https://sam.gov" target="_blank">sam.gov</a></div>
+                </div>
+                <div class="card">
+                    <h3>🔗 CaleProcure</h3>
+                    <p>California state procurement portal. Small business cert #2044226.</p>
+                    <div class="meta"><a class="notion-link" href="https://caleprocure.ca.gov/pages/index.aspx" target="_blank">caleprocure.ca.gov</a></div>
+                </div>
+                <div class="card">
+                    <h3>🔗 SCORE Long Beach</h3>
+                    <p>Government procurement opportunities including LA28 Olympics. Regular SCORE email alerts for bids.</p>
+                    <div class="meta"><a class="notion-link" href="https://www.score.org" target="_blank">score.org</a></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== ALL NOTION PAGES ========== -->
+        <div id="notion-pages" class="content-section">
+            <div class="section-header">
+                <h1>📄 All Notion Pages Index</h1>
+                <p>Complete inventory of all pages associated with Neha, Naveen, and conference work.</p>
+            </div>
+
+            <input type="text" class="search-box" placeholder="Search pages..." oninput="filterPages(this.value)">
+
+            <h2 style="color:#fff; font-size:16px; margin-bottom:12px;">Neha's Pages (17)</h2>
+            <table class="data-table" id="neha-pages-table">
+                <tr><th>#</th><th>Page Title</th><th>Category</th><th>Size</th<!-- FLOATING QUICK-ACCESS PANEL -->
+<style>
+    .quick-access-fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #00d4aa, #00a885);
+        border: none;
+        border-radius: 50%;
+        color: #0a1628;
+        font-size: 24px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(0, 212, 170, 0.4);
+        z-index: 9999;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .quick-access-fab:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 30px rgba(0, 212, 170, 0.6);
+    }
+    .quick-access-panel {
+        position: fixed;
+        bottom: 92px;
+        right: 24px;
+        width: 320px;
+        max-height: 0;
+        overflow: hidden;
+        background: rgba(10, 22, 40, 0.98);
+        border: 1px solid rgba(0, 212, 170, 0.25);
+        border-radius: 16px;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+        transition: max-height 0.35s ease, padding 0.35s ease, opacity 0.35s ease;
+        opacity: 0;
+        padding: 0 20px;
+    }
+    .quick-access-panel.open {
+        max-height: 520px;
+        opacity: 1;
+        padding: 20px;
+    }
+    .qa-header {
+        font-size: 13px;
+        font-weight: 700;
+        color: #00d4aa;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(0, 212, 170, 0.15);
+    }
+    .qa-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #c0d0dd;
+        font-size: 13px;
+        transition: all 0.15s;
+    }
+    .qa-link:hover {
+        background: rgba(0, 212, 170, 0.1);
+        color: #fff;
+    }
+    .qa-link .qa-icon { font-size: 16px; width: 22px; text-align: center; }
+    .qa-link .qa-badge {
+        margin-left: auto;
+        background: rgba(255, 107, 53, 0.2);
+        color: #ff6b35;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 8px;
+    }
+    .qa-section-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #5a7a8a;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 12px 0 4px 12px;
+    }
+</style>
+
+<button class="quick-access-fab" onclick="document.getElementById('quick-access-panel').classList.toggle('open')" title="Quick Access — All Dashboards">⚡</button>
+
+<div class="quick-access-panel" id="quick-access-panel">
+    <div class="qa-header">Quick Access — All Boards</div>
+    <a href="unified-command-center.html" class="qa-link" style="background:rgba(0,212,170,0.08);margin-bottom:4px;">
+        <span class="qa-icon">🎯</span> <strong>Unified Command Center</strong>
+    </a>
+    <div class="qa-section-label">Operational</div>
+    <a href="agentic-os-dashboard.html" class="qa-link"><span class="qa-icon">🤖</span> Agentic OS Dashboard</a>
+    <a href="agentfield-dashboard.html" class="qa-link"><span class="qa-icon">⚙️</span> AgentField Control Plane</a>
+    <a href="review-queue.html" class="qa-link"><span class="qa-icon">📋</span> Review Queue <span class="qa-badge">2</span></a>
+    <div class="qa-section-label">Strategy & Business</div>
+    <a href="business-economics-dashboard.html" class="qa-link"><span class="qa-icon">💰</span> Business Economics</a>
+    <a href="dashboard-master.html" class="qa-link"><span class="qa-icon">📊</span> Master Dashboard</a>
+    <div class="qa-section-label">Reference</div>
+    <a href="index.html" class="qa-link"><span class="qa-icon">🏠</span> Marketing Index</a>
+    <a href="architecture-dashboard.html" class="qa-link"><span class="qa-icon">🏗️</span> Architecture & Skills</a>
+    <a href="supabase-dashboard.html" class="qa-link"><span class="qa-icon">🗄️</span> Supabase Dashboard</a>
+    <a href="team-handoff-dashboard.html" class="qa-link"><span class="qa-icon">👥</span> Team Handoff</a>
+    <a href="master-directory.html" class="qa-link"><span class="qa-icon">📁</span> Master Directory</a>
+</div>
+<!-- END QUICK-ACCESS PANEL -->
+
+</body>
+</html>

@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYN Lead Gen & Cold Outreach — Command Center</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #0f1f35 100%);
+            color: #f5f5f5;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: rgba(10, 22, 40, 0.95);
+            border-bottom: 1px solid rgba(0, 212, 170, 0.2);
+            padding: 20px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .header h1 { font-size: 22px; font-weight: 700; color: #00d4aa; }
+        .header .subtitle { font-size: 12px; color: #7a9ba8; }
+        .header .date { color: #7a9ba8; font-size: 12px; }
+        .back-link { color: #00d4aa; text-decoration: none; font-size: 13px; padding: 6px 12px; border: 1px solid rgba(0, 212, 170, 0.3); border-radius: 6px; }
+        .back-link:hover { background: rgba(0, 212, 170, 0.1); }
+
+        /* ===== TABS ===== */
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid rgba(0, 212, 170, 0.15);
+            background: rgba(15, 31, 53, 0.5);
+            overflow-x: auto;
+            padding: 0 32px;
+            position: sticky;
+            top: 70px;
+            z-index: 99;
+        }
+
+        .tab {
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #7a9ba8;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab:hover { color: #fff; }
+        .tab.active { color: #00d4aa; border-bottom-color: #00d4aa; font-weight: 600; }
+
+        /* ===== CONTENT ===== */
+        .content { padding: 32px; max-width: 1400px; margin: 0 auto; }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        /* ===== GRIDS ===== */
+        .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 28px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 28px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 28px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 28px; }
+
+        /* ===== STAT CARDS ===== */
+        .stat-card {
+            background: rgba(15, 31, 53, 0.8);
+            border: 1px solid rgba(0, 212, 170, 0.12);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .stat-card:hover { border-color: rgba(0, 212, 170, 0.3); transform: translateY(-1px); }
+        .stat-card .number { font-size: 28px; font-weight: 700; color: #00d4aa; }
+        .stat-card .number.warn { color: #ff6b35; }
+        .stat-card .number.danger { color: #ff4757; }
+        .stat-card .number.safe { color: #2ed573; }
+        .stat-card .label { font-size: 11px; color: #7a9ba8; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-card .sublabel { font-size: 10px; color: #5a7a8a; margin-top: 4px; }
+
+        /* ===== CARDS ===== */
+        .card {
+            background: rgba(15, 31, 53, 0.8);
+            border: 1px solid rgba(0, 212, 170, 0.12);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.2s;
+        }
+
+        .card:hover { border-color: rgba(0, 212, 170, 0.3); }
+        .card h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .card h3 .icon { font-size: 18px; }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 212, 170, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ===== TABLE ===== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 12px;
+            color: #00d4aa;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(0, 212, 170, 0.2);
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: #c0d0dc;
+        }
+
+        tr:hover td { background: rgba(0, 212, 170, 0.03); }
+
+        /* ===== STATUS BADGES ===== */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-active { background: rgba(46, 213, 115, 0.15); color: #2ed573; }
+        .badge-completed { background: rgba(0, 212, 170, 0.15); color: #00d4aa; }
+        .badge-error { background: rgba(255, 71, 87, 0.15); color: #ff4757; }
+        .badge-draft { background: rgba(122, 155, 168, 0.15); color: #7a9ba8; }
+        .badge-bounced { background: rgba(255, 107, 53, 0.15); color: #ff6b35; }
+        .badge-warm { background: rgba(255, 165, 2, 0.15); color: #ffa502; }
+        .badge-cold { background: rgba(112, 161, 255, 0.15); color: #70a1ff; }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-container { margin: 12px 0; }
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .progress-fill.green { background: linear-gradient(90deg, #00d4aa, #2ed573); }
+        .progress-fill.orange { background: linear-gradient(90deg, #ff6b35, #ffa502); }
+        .progress-fill.blue { background: linear-gradient(90deg, #3498db, #70a1ff); }
+        .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: #7a9ba8; margin-top: 4px; }
+
+        /* ===== PIPELINE ===== */
+        .pipeline {
+            display: flex;
+            gap: 2px;
+            margin: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .pipeline-stage {
+            flex: 1;
+            padding: 16px 12px;
+            text-align: center;
+            position: relative;
+        }
+
+        .pipeline-stage .stage-number { font-size: 24px; font-weight: 700; }
+        .pipeline-stage .stage-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; opacity: 0.8; }
+
+        .stage-raw { background: rgba(112, 161, 255, 0.2); color: #70a1ff; }
+        .stage-verified { background: rgba(0, 212, 170, 0.2); color: #00d4aa; }
+        .stage-contacted { background: rgba(255, 165, 2, 0.2); color: #ffa502; }
+        .stage-replied { background: rgba(46, 213, 115, 0.2); color: #2ed573; }
+        .stage-opp { background: rgba(155, 89, 182, 0.2); color: #b57edc; }
+        .stage-converted { background: rgba(0, 212, 170, 0.3); color: #00d4aa; }
+
+        /* ===== TOOL GRID ===== */
+        .tool-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .tool-item:hover { border-color: rgba(0, 212, 170, 0.2); background: rgba(0, 212, 170, 0.03); }
+        .tool-icon { font-size: 20px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: rgba(0, 212, 170, 0.1); }
+        .tool-info { flex: 1; }
+        .tool-name { font-size: 13px; font-weight: 600; color: #fff; }
+        .tool-desc { font-size: 11px; color: #7a9ba8; margin-top: 2px; }
+        .tool-status { font-size: 11px; font-weight: 600; }
+        .tool-status.healthy { color: #2ed573; }
+        .tool-status.idle { color: #ffa502; }
+        .tool-status.issue { color: #ff4757; }
+
+        /* ===== TIMELINE ===== */
+        .timeline-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .timeline-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-top: 5px;
+            flex-shrink: 0;
+        }
+
+        .timeline-content { flex: 1; }
+        .timeline-title { font-size: 13px; color: #fff; }
+        .timeline-meta { font-size: 11px; color: #7a9ba8; margin-top: 2px; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1200px) {
+            .grid-5 { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .grid-5 { grid-template-columns: repeat(2, 1fr); }
+            .grid-3 { grid-template-columns: 1fr; }
+            .pipeline { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<!-- BEGIN MYN-NAV (auto-injected 2026-04-21) -->
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; -webkit-font-smoothing: antialiased; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__inner::-webkit-scrollbar { height: 4px; } .myn-nav__inner::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.25); border-radius: 2px; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-variant-numeric: tabular-nums; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Center</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="master-directory.html" data-page="master-directory">Directory</a>
+  <a href="analytics-dashboard.html" data-page="analytics-dashboard">Analytics</a>
+  <a href="lead-gen-dashboard.html" data-page="lead-gen-dashboard">Leads</a>
+  <a href="hotel-activities-dashboard.html" data-page="hotel-activities-dashboard">Hotels</a>
+  <a href="business-economics-dashboard.html" data-page="business-economics-dashboard">Economics</a>
+  <a href="team-handoff-dashboard.html" data-page="team-handoff-dashboard">Team</a>
+  <a href="architecture-dashboard.html" data-page="architecture-dashboard">Architecture</a>
+  <a href="agent-control-plane.html" data-page="agent-control-plane">Agents</a>
+  <a href="supabase-dashboard.html" data-page="supabase-dashboard">Supabase</a>
+  <a href="paperclip-dashboard.html" data-page="paperclip-dashboard">Paperclip</a>
+  <a href="review-queue.html" data-page="review-queue">Review</a>
+  <a href="4-21-26-full-audit.html" data-page="4-21-26-full-audit">Audit</a>
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date" id="myn-nav-date"></span>
+</div>
+</nav>
+<script>
+(function(){
+  var path = (location.pathname.split('/').pop() || 'index.html').replace('.html','');
+  var links = document.querySelectorAll('.myn-nav a[data-page]');
+  for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('data-page') === path) links[i].classList.add('is-active'); }
+  var d = new Date(); var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var el = document.getElementById('myn-nav-date'); if (el) el.textContent = m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+})();
+</script>
+<!-- END MYN-NAV -->
+
+<!-- HEADER -->
+<div class="header">
+    <div class="header-left">
+        <div>
+            <h1>📡 Lead Gen & Cold Outreach</h1>
+            <div class="subtitle">MYN Command Center — Therapist Re-Engagement Pipeline</div>
+        </div>
+    </div>
+    <div>
+        <a href="unified-command-center.html" class="back-link">← Command Center</a>
+        <span class="date" id="currentDate"></span>
+    </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+    <div class="tab active" onclick="showTab('overview')">📊 Overview</div>
+    <div class="tab" onclick="showTab('instantly')">📨 Instantly Campaigns</div>
+    <div class="tab" onclick="showTab('verification')">✅ Email Verification</div>
+    <div class="tab" onclick="showTab('legacy')">🗄️ Legacy Data</div>
+    <div class="tab" onclick="showTab('infrastructure')">⚙️ Email Infrastructure</div>
+    <div class="tab" onclick="showTab('strategy')">🎯 Re-Engagement Strategy</div>
+</div>
+
+<div class="content">
+
+<!-- ===== TAB: OVERVIEW ===== -->
+<div class="tab-pane active" id="tab-overview">
+
+    <div class="section-title">📡 Lead Pipeline — Full Funnel</div>
+    <div class="pipeline">
+        <div class="pipeline-stage stage-raw">
+            <div class="stage-number">3,133</div>
+            <div class="stage-label">Raw Legacy Leads</div>
+        </div>
+        <div class="pipeline-stage stage-verified">
+            <div class="stage-number" id="verified-count">0</div>
+            <div class="stage-label">Verified Clean</div>
+        </div>
+        <div class="pipeline-stage stage-contacted">
+            <div class="stage-number">547</div>
+            <div class="stage-label">Contacted (Instantly)</div>
+        </div>
+        <div class="pipeline-stage stage-replied">
+            <div class="stage-number">32</div>
+            <div class="stage-label">Replied</div>
+        </div>
+        <div class="pipeline-stage stage-opp">
+            <div class="stage-number">13</div>
+            <div class="stage-label">Opportunities</div>
+        </div>
+        <div class="pipeline-stage stage-converted">
+            <div class="stage-number">$6,500</div>
+            <div class="stage-label">Pipeline Value</div>
+        </div>
+    </div>
+
+    <div class="grid-5">
+        <div class="stat-card">
+            <div class="number">3,133</div>
+            <div class="label">Total Legacy Contacts</div>
+            <div class="sublabel">From myn.com MySQL DB</div>
+        </div>
+        <div class="stat-card">
+            <div class="number safe">158</div>
+            <div class="label">Tier 1 — Warm</div>
+            <div class="sublabel">Had accounts + instructors</div>
+        </div>
+        <div class="stat-card">
+            <div class="number warn">551</div>
+            <div class="label">Tier 2 — Engaged</div>
+            <div class="sublabel">Clicked legacy emails</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">2,424</div>
+            <div class="label">Tier 3 — Cold</div>
+            <div class="sublabel">CRM contacts, no signal</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">547</div>
+            <div class="label">Sent via Instantly</div>
+            <div class="sublabel">Last 12 months</div>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <!-- Instantly Performance -->
+        <div class="card">
+            <h3><span class="icon">📨</span> Instantly — Overall Performance</h3>
+            <table>
+                <tr><td>Total Sent</td><td style="text-align:right; font-weight:700; color:#fff;">547</td></tr>
+                <tr><td>Open Rate</td><td style="text-align:right; font-weight:700; color:#ffa502;">5.12%</td></tr>
+                <tr><td>Reply Rate</td><td style="text-align:right; font-weight:700; color:#2ed573;">5.85%</td></tr>
+                <tr><td>Click Rate</td><td style="text-align:right; font-weight:700; color:#ff4757;">0%</td></tr>
+                <tr><td>Opportunities</td><td style="text-align:right; font-weight:700; color:#b57edc;">13</td></tr>
+                <tr><td>Pipeline Value</td><td style="text-align:right; font-weight:700; color:#00d4aa;">$6,500</td></tr>
+                <tr><td>Conversions</td><td style="text-align:right; font-weight:700; color:#ff4757;">$0</td></tr>
+            </table>
+        </div>
+
+        <!-- Email Verification Progress -->
+        <div class="card">
+            <h3><span class="icon">✅</span> Email Verification — Reoon</h3>
+            <div style="margin-bottom: 16px;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                    <span style="font-size:13px; color:#fff;">Verification Progress</span>
+                    <span style="font-size:13px; color:#00d4aa;" id="verify-pct">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill green" id="verify-bar" style="width: 0%;"></div>
+                </div>
+                <div class="progress-label">
+                    <span id="verify-done">0 verified</span>
+                    <span>3,133 total</span>
+                </div>
+            </div>
+            <table>
+                <tr><td>Daily Credits</td><td style="text-align:right; font-weight:700; color:#2ed573;">499/500</td></tr>
+                <tr><td>Instant Credits</td><td style="text-align:right; font-weight:700; color:#00d4aa;">100</td></tr>
+                <tr><td>Lifetime Used</td><td style="text-align:right; color:#7a9ba8;">35</td></tr>
+                <tr><td>Estimated Completion</td><td style="text-align:right; color:#ffa502;">~7 days</td></tr>
+                <tr><td>Schedule</td><td style="text-align:right; color:#fff;">Daily @ 6:04 AM</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card">
+        <h3><span class="icon">⏱️</span> Recent Activity</h3>
+        <div class="timeline-item">
+            <div class="timeline-dot" style="background:#00d4aa;"></div>
+            <div class="timeline-content">
+                <div class="timeline-title">Reoon verification scheduled — daily @ 6:04 AM</div>
+                <div class="timeline-meta">March 28, 2026 — 490 emails/day, ~7 day completion</div>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot" style="background:#ffa502;"></div>
+            <div class="timeline-content">
+                <div class="timeline-title">Legacy CRM extracted — 3,133 unique emails tiered</div>
+                <div class="timeline-meta">March 28, 2026 — From sideoutb_myn.sql backup</div>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot" style="background:#70a1ff;"></div>
+            <div class="timeline-content">
+                <div class="timeline-title">Instantly data audited — 12 campaigns, 6 active</div>
+                <div class="timeline-meta">March 28, 2026 — 547 total sent, 5.85% reply rate</div>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-dot" style="background:#2ed573;"></div>
+            <div class="timeline-content">
+                <div class="timeline-title">Email health verified — all 8 accounts 100% healthy</div>
+                <div class="timeline-meta">March 28, 2026 — 95% inbox placement, 0% spam</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== TAB: INSTANTLY CAMPAIGNS ===== -->
+<div class="tab-pane" id="tab-instantly">
+
+    <div class="section-title">📨 Instantly Campaign Breakdown</div>
+
+    <div class="grid-4">
+        <div class="stat-card">
+            <div class="number">12</div>
+            <div class="label">Total Campaigns</div>
+        </div>
+        <div class="stat-card">
+            <div class="number safe">5.12%</div>
+            <div class="label">Avg Open Rate</div>
+        </div>
+        <div class="stat-card">
+            <div class="number safe">5.85%</div>
+            <div class="label">Avg Reply Rate</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">$6,500</div>
+            <div class="label">Pipeline Value</div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+        <h3><span class="icon">🏨</span> Hotel / Hospitality Campaigns</h3>
+        <table>
+            <tr><th>Campaign</th><th>Sent</th><th>Open%</th><th>Reply%</th><th>Opps</th><th>Value</th><th>Status</th></tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">MYN - Cold Email</td>
+                <td>75</td><td style="color:#2ed573;">37.33%</td><td>0%</td><td>0</td><td>$0</td>
+                <td><span class="badge badge-completed">Completed</span></td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">Hospitality All Attendees</td>
+                <td>206</td><td>—</td><td>4.9%</td><td>0</td><td>$0</td>
+                <td><span class="badge badge-completed">Completed</span></td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">Hotel 226 Clicked</td>
+                <td>—</td><td>—</td><td>—</td><td>2</td><td>$500</td>
+                <td><span class="badge badge-active">Active</span></td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">March - Hotel VPs</td>
+                <td>106</td><td>—</td><td>—</td><td>0</td><td>$0</td>
+                <td><span class="badge badge-error">Error</span></td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">Missing Link (from opened 226)</td>
+                <td>—</td><td>—</td><td>—</td><td>0</td><td>$0</td>
+                <td><span class="badge badge-error">Error</span></td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">Highgate</td>
+                <td>—</td><td>—</td><td>—</td><td>0</td><td>$0</td>
+                <td><span class="badge badge-error">Error</span></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+        <h3><span class="icon">🧒</span> Kids Yoga Program Campaigns</h3>
+        <table>
+            <tr><th>Campaign</th><th>Sent</th><th>Open%</th><th>Reply%</th><th>Opps</th><th>Value</th><th>Status</th></tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">Bixby Welcome Intro ⭐</td>
+                <td>36</td><td>—</td><td style="color:#2ed573; font-weight:700;">25.0%</td><td style="color:#b57edc; font-weight:700;">7</td><td style="color:#00d4aa; font-weight:700;">$3,500</td>
+                <td><span class="badge badge-completed">Completed</span></td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">Longfellow Kid's Yoga</td>
+                <td>20</td><td>—</td><td>0%</td><td>0</td><td>$0</td>
+                <td><span class="badge badge-completed">Completed</span></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+        <h3><span class="icon">🧘</span> Therapist / CRM Campaigns</h3>
+        <table>
+            <tr><th>Campaign</th><th>Sent</th><th>Open%</th><th>Reply%</th><th>Opps</th><th>Value</th><th>Status</th></tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">First CRM Email Leads</td>
+                <td>210</td><td>—</td><td>3.81%</td><td>3</td><td>$1,500</td>
+                <td><span class="badge badge-bounced">Bounced 34%</span></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3><span class="icon">📝</span> Draft Campaigns (Not Sent)</h3>
+        <table>
+            <tr><th>Campaign</th><th>Status</th><th>Notes</th></tr>
+            <tr>
+                <td style="color:#fff;">My Campaign</td>
+                <td><span class="badge badge-draft">Draft</span></td>
+                <td style="color:#7a9ba8;">Unused</td>
+            </tr>
+            <tr>
+                <td style="color:#fff;">MYN Email Requested</td>
+                <td><span class="badge badge-draft">Draft</span></td>
+                <td style="color:#7a9ba8;">Unused</td>
+            </tr>
+            <tr>
+                <td style="color:#fff;">Graduates-LBSOY</td>
+                <td><span class="badge badge-draft">Draft</span></td>
+                <td style="color:#7a9ba8;">LBSOY graduates list</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!-- ===== TAB: VERIFICATION ===== -->
+<div class="tab-pane" id="tab-verification">
+
+    <div class="section-title">✅ Reoon Email Verification Pipeline</div>
+
+    <div class="grid-4">
+        <div class="stat-card">
+            <div class="number">3,133</div>
+            <div class="label">Total to Verify</div>
+        </div>
+        <div class="stat-card">
+            <div class="number" id="v-done">0</div>
+            <div class="label">Verified</div>
+        </div>
+        <div class="stat-card">
+            <div class="number safe" id="v-safe">—</div>
+            <div class="label">Safe to Send</div>
+        </div>
+        <div class="stat-card">
+            <div class="number danger" id="v-invalid">—</div>
+            <div class="label">Invalid / Risky</div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+        <h3><span class="icon">📈</span> Daily Batch Progress</h3>
+        <div style="margin-bottom: 16px;">
+            <div class="progress-bar" style="height:12px;">
+                <div class="progress-fill green" id="v-bar" style="width: 0%;"></div>
+            </div>
+            <div class="progress-label">
+                <span id="v-label">Scheduled — first run at 6:04 AM</span>
+                <span>3,133 emails</span>
+            </div>
+        </div>
+        <table id="batch-log">
+            <tr><th>Run Date</th><th>Batch</th><th>Safe</th><th>Risky</th><th>Invalid</th><th>Unknown</th><th>Errors</th></tr>
+            <tr><td colspan="7" style="text-align:center; color:#7a9ba8; padding:20px;">First batch runs at 6:04 AM — results will appear here</td></tr>
+        </table>
+    </div>
+
+    <div class="grid-3">
+        <div class="card">
+            <h3><span class="icon">🟢</span> Tier 1 — Warm</h3>
+            <div style="font-size:28px; font-weight:700; color:#2ed573; margin-bottom:8px;">158</div>
+            <div style="font-size:12px; color:#7a9ba8; margin-bottom:12px;">Registered users + instructors</div>
+            <div class="progress-bar"><div class="progress-fill green" style="width:5%;"></div></div>
+            <div class="progress-label"><span>Verify first</span><span>Highest priority</span></div>
+        </div>
+        <div class="card">
+            <h3><span class="icon">🟡</span> Tier 2 — Engaged</h3>
+            <div style="font-size:28px; font-weight:700; color:#ffa502; margin-bottom:8px;">551</div>
+            <div style="font-size:12px; color:#7a9ba8; margin-bottom:12px;">Clicked links in legacy emails</div>
+            <div class="progress-bar"><div class="progress-fill orange" style="width:17.6%;"></div></div>
+            <div class="progress-label"><span>Verify second</span><span>Days 2-3</span></div>
+        </div>
+        <div class="card">
+            <h3><span class="icon">🔵</span> Tier 3 — Cold</h3>
+            <div style="font-size:28px; font-weight:700; color:#70a1ff; margin-bottom:8px;">2,424</div>
+            <div style="font-size:12px; color:#7a9ba8; margin-bottom:12px;">CRM contacts, no engagement signal</div>
+            <div class="progress-bar"><div class="progress-fill blue" style="width:77.4%;"></div></div>
+            <div class="progress-label"><span>Verify last</span><span>Days 3-7</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== TAB: LEGACY DATA ===== -->
+<div class="tab-pane" id="tab-legacy">
+
+    <div class="section-title">🗄️ Legacy myn.com Database — sideoutb_myn</div>
+
+    <div class="grid-4">
+        <div class="stat-card">
+            <div class="number">54</div>
+            <div class="label">MySQL Tables</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">19,013</div>
+            <div class="label">Emails Sent</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">161</div>
+            <div class="label">Campaigns Run</div>
+        </div>
+        <div class="stat-card">
+            <div class="number">1,698</div>
+            <div class="label">Link Clicks</div>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h3><span class="icon">👤</span> User Accounts</h3>
+            <table>
+                <tr><td>Registered Users</td><td style="text-align:right; font-weight:700; color:#fff;">111</td></tr>
+                <tr><td>User Profiles</td><td style="text-align:right; font-weight:700; color:#fff;">103</td></tr>
+                <tr><td>Instructor Directory</td><td style="text-align:right; font-weight:700; color:#fff;">49</td></tr>
+                <tr><td>Uploaded Documents</td><td style="text-align:right; font-weight:700; color:#fff;">110</td></tr>
+                <tr><td>CRM Contacts</td><td style="text-align:right; font-weight:700; color:#fff;">4,915</td></tr>
+                <tr><td>Unique Emails (deduplicated)</td><td style="text-align:right; font-weight:700; color:#00d4aa;">3,133</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <h3><span class="icon">📧</span> Legacy Email System</h3>
+            <table>
+                <tr><td>Total Emails Sent</td><td style="text-align:right; font-weight:700; color:#fff;">19,013</td></tr>
+                <tr><td>Campaigns</td><td style="text-align:right; font-weight:700; color:#fff;">161</td></tr>
+                <tr><td>Email Templates</td><td style="text-align:right; font-weight:700; color:#fff;">24</td></tr>
+                <tr><td>URL Clicks Tracked</td><td style="text-align:right; font-weight:700; color:#fff;">1,698</td></tr>
+                <tr><td>Senders</td><td style="text-align:right; color:#7a9ba8;">info@, ram@, john@</td></tr>
+                <tr><td>Avg Touches/Contact</td><td style="text-align:right; color:#ffa502;">~3.9x</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3><span class="icon">📁</span> Extracted Data Files</h3>
+        <table>
+            <tr><th>File</th><th>Contents</th><th>Records</th></tr>
+            <tr><td style="color:#00d4aa;">Therapist_Profiles.txt</td><td>User accounts + profiles + instructor bios</td><td>111 users + 49 instructors</td></tr>
+            <tr><td style="color:#00d4aa;">CRM_Contacts.txt</td><td>All contacts grouped by tag</td><td>3,075</td></tr>
+            <tr><td style="color:#00d4aa;">Email_Campaigns.txt</td><td>Campaign names, templates, subjects</td><td>161 campaigns</td></tr>
+            <tr><td style="color:#00d4aa;">URLs.txt</td><td>Website URLs + clicked email links</td><td>1,698 clicks</td></tr>
+            <tr><td style="color:#00d4aa;">Therapist_Documents.txt</td><td>Uploaded certs, resumes, photos</td><td>110 docs</td></tr>
+            <tr><td style="color:#00d4aa;">Master_Email_List_Tiered.csv</td><td>All emails with tier + metadata</td><td>3,133</td></tr>
+        </table>
+    </div>
+</div>
+
+<!-- ===== TAB: INFRASTRUCTURE ===== -->
+<div class="tab-pane" id="tab-infrastructure">
+
+    <div class="section-title">⚙️ Email Infrastructure Health</div>
+
+    <div class="grid-3">
+        <div class="stat-card">
+            <div class="number safe">95%</div>
+            <div class="label">Inbox Placement</div>
+            <div class="sublabel">ram@myyoganetwork.com</div>
+        </div>
+        <div class="stat-card">
+            <div class="number safe">0%</div>
+            <div class="label">Spam Rate</div>
+            <div class="sublabel">Clean reputation</div>
+        </div>
+        <div class="stat-card">
+            <div class="number safe">8/8</div>
+            <div class="label">Accounts Healthy</div>
+            <div class="sublabel">100% health score</div>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h3><span class="icon">📬</span> Instantly Sending Accounts</h3>
+            <table>
+                <tr><th>Account</th><th>Daily Limit</th><th>Warmup</th><th>Health</th></tr>
+                <tr><td style="color:#fff;">ram@myyoganetwork.com</td><td>30/day</td><td>21</td><td style="color:#2ed573; font-weight:700;">100%</td></tr>
+                <tr><td style="color:#fff;">team@myyoganetwork.com</td><td>30/day</td><td>19</td><td style="color:#2ed573; font-weight:700;">100%</td></tr>
+                <tr><td style="color:#fff;">longbeachschoolofyoga@gmail.com</td><td>30/day</td><td>21</td><td style="color:#2ed573; font-weight:700;">100%</td></tr>
+                <tr><td style="color:#fff;">ram@myyoganetwork.ai</td><td>15/day</td><td>45</td><td style="color:#2ed573; font-weight:700;">100%</td></tr>
+                <tr><td style="color:#fff;">ram@myyoganetwork.co</td><td>15/day</td><td>45</td><td style="color:#2ed573; font-weight:700;">100%</td></tr>
+                <tr><td style="color:#fff;">ram@myyoganetwork.io</td><td>15/day</td><td>45</td><td style="color:#2ed573; font-weight:700;">100%</td></tr>
+                <tr><td style="color:#fff;">ram@myyoganetworkfit.com</td><td>15/day</td><td>45</td><td style="color:#2ed573; font-weight:700;">100%</td></tr>
+                <tr><td style="color:#fff;">ram@myyoganetworkwellness.com</td><td>15/day</td><td>45</td><td style="color:#2ed573; font-weight:700;">100%</td></tr>
+            </table>
+            <div style="margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06); font-size:12px; color:#7a9ba8;">
+                Total daily capacity: <span style="color:#00d4aa; font-weight:700;">~180 emails/day</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3><span class="icon">🔧</span> CRM & Email Stack</h3>
+            <div class="tool-item">
+                <div class="tool-icon">📨</div>
+                <div class="tool-info">
+                    <div class="tool-name">Instantly</div>
+                    <div class="tool-desc">Cold email delivery + domain warm-up</div>
+                </div>
+                <div class="tool-status healthy">● Healthy</div>
+            </div>
+            <div class="tool-item">
+                <div class="tool-icon">📮</div>
+                <div class="tool-info">
+                    <div class="tool-name">Premium Inboxes</div>
+                    <div class="tool-desc">6 Google Workspace inboxes — $21/mo</div>
+                </div>
+                <div class="tool-status healthy">● Active</div>
+            </div>
+            <div class="tool-item">
+                <div class="tool-icon">✅</div>
+                <div class="tool-info">
+                    <div class="tool-name">Reoon</div>
+                    <div class="tool-desc">Email verification — 500 daily credits</div>
+                </div>
+                <div class="tool-status healthy">● Ready</div>
+            </div>
+            <div class="tool-item">
+                <div class="tool-icon">🌐</div>
+                <div class="tool-info">
+                    <div class="tool-name">Porkbun</div>
+                    <div class="tool-desc">Domain registration (.ai, .co, .io, .fit, .wellness)</div>
+                </div>
+                <div class="tool-status healthy">● Active</div>
+            </div>
+            <div class="tool-item">
+                <div class="tool-icon">🔍</div>
+                <div class="tool-info">
+                    <div class="tool-name">TryKitt.ai</div>
+                    <div class="tool-desc">Email enrichment (1st choice, cheaper)</div>
+                </div>
+                <div class="tool-status idle">● Idle</div>
+            </div>
+            <div class="tool-item">
+                <div class="tool-icon">🔍</div>
+                <div class="tool-info">
+                    <div class="tool-name">IcyPeas</div>
+                    <div class="tool-desc">Email enrichment (2nd choice)</div>
+                </div>
+                <div class="tool-status idle">● Idle</div>
+            </div>
+            <div class="tool-item">
+                <div class="tool-icon">📊</div>
+                <div class="tool-info">
+                    <div class="tool-name">GHL (GoHighLevel)</div>
+                    <div class="tool-desc">CRM — Agency access</div>
+                </div>
+                <div class="tool-status healthy">● Connected</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== TAB: STRATEGY ===== -->
+<div class="tab-pane" id="tab-strategy">
+
+    <div class="section-title">🎯 Therapist Re-Engagement Strategy</div>
+
+    <div class="card" style="margin-bottom:20px; border-color: rgba(0, 212, 170, 0.3);">
+        <h3><span class="icon">🎯</span> Mission</h3>
+        <p style="font-size:14px; line-height:1.6; color:#c0d0dc;">
+            Reactivate ~3,133 cold yoga therapist leads from the legacy myn.com CRM database.
+            All outreach runs through Instantly. Three-tier campaign architecture targeting warm registered users first,
+            then engaged clickers, then the cold mass list.
+        </p>
+    </div>
+
+    <div class="grid-3">
+        <div class="card" style="border-left: 3px solid #2ed573;">
+            <h3><span class="icon">🟢</span> Campaign A: "Welcome Back"</h3>
+            <div style="font-size:12px; color:#2ed573; font-weight:600; margin-bottom:8px;">TIER 1 — 158 CONTACTS</div>
+            <p style="font-size:13px; color:#c0d0dc; line-height:1.5; margin-bottom:12px;">
+                Personal re-intro referencing their history on old MYN. "You were one of the first therapists — we've rebuilt everything."
+            </p>
+            <table style="font-size:12px;">
+                <tr><td>Sequence</td><td style="text-align:right; color:#fff;">3 steps / 10 days</td></tr>
+                <tr><td>Target Reply Rate</td><td style="text-align:right; color:#2ed573;">30–40%</td></tr>
+                <tr><td>Status</td><td style="text-align:right;"><span class="badge badge-draft">Pending Verification</span></td></tr>
+            </table>
+        </div>
+        <div class="card" style="border-left: 3px solid #ffa502;">
+            <h3><span class="icon">🟡</span> Campaign B: "We Remember You"</h3>
+            <div style="font-size:12px; color:#ffa502; font-weight:600; margin-bottom:8px;">TIER 2 — 551 CONTACTS</div>
+            <p style="font-size:13px; color:#c0d0dc; line-height:1.5; margin-bottom:12px;">
+                Reference the topic they engaged with. Social proof from therapists already on platform + hotel demand signals.
+            </p>
+            <table style="font-size:12px;">
+                <tr><td>Sequence</td><td style="text-align:right; color:#fff;">3 steps / 14 days</td></tr>
+                <tr><td>Target Reply Rate</td><td style="text-align:right; color:#ffa502;">10–15%</td></tr>
+                <tr><td>Status</td><td style="text-align:right;"><span class="badge badge-draft">Pending Verification</span></td></tr>
+            </table>
+        </div>
+        <div class="card" style="border-left: 3px solid #70a1ff;">
+            <h3><span class="icon">🔵</span> Campaign C: "Fresh Start"</h3>
+            <div style="font-size:12px; color:#70a1ff; font-weight:600; margin-bottom:8px;">TIER 3 — 2,424 CONTACTS</div>
+            <p style="font-size:13px; color:#c0d0dc; line-height:1.5; margin-bottom:12px;">
+                Cold outreach with industry angle: "Hotels are hiring yoga therapists." Value-first, no pitch until step 3.
+            </p>
+            <table style="font-size:12px;">
+                <tr><td>Sequence</td><td style="text-align:right; color:#fff;">4 steps / 21 days</td></tr>
+                <tr><td>Target Reply Rate</td><td style="text-align:right; color:#70a1ff;">3–5%</td></tr>
+                <tr><td>Status</td><td style="text-align:right;"><span class="badge badge-draft">Pending Verification</span></td></tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px;">
+        <h3><span class="icon">📋</span> Execution Phases</h3>
+        <table>
+            <tr><th>Phase</th><th>Timeline</th><th>Action</th><th>Status</th></tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">1. List Hygiene</td>
+                <td>Week 1</td>
+                <td>Verify 3,133 emails via Reoon (490/day)</td>
+                <td><span class="badge badge-active">In Progress</span></td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">2. Campaign Build</td>
+                <td>Week 2</td>
+                <td>Draft 3 sequences in Instantly (A, B, C)</td>
+                <td><span class="badge badge-draft">Pending</span></td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">3. Sending</td>
+                <td>Weeks 3–6</td>
+                <td>Campaign A first (warmest), then B, then C. 30–50/day.</td>
+                <td><span class="badge badge-draft">Pending</span></td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">4. Reply Handling</td>
+                <td>Ongoing</td>
+                <td>Book calls, send profile links, tag non-interested</td>
+                <td><span class="badge badge-draft">Pending</span></td>
+            </tr>
+            <tr>
+                <td style="color:#fff; font-weight:600;">5. Measurement</td>
+                <td>Week 7+</td>
+                <td>Target: $15K–25K pipeline, beat legacy 8.9% CTR</td>
+                <td><span class="badge badge-draft">Pending</span></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3><span class="icon">📊</span> Target Metrics</h3>
+        <div class="grid-4" style="margin-top:12px;">
+            <div style="text-align:center; padding:12px;">
+                <div style="font-size:24px; font-weight:700; color:#2ed573;">45+</div>
+                <div style="font-size:11px; color:#7a9ba8; margin-top:4px;">TOTAL OPPORTUNITIES</div>
+            </div>
+            <div style="text-align:center; padding:12px;">
+                <div style="font-size:24px; font-weight:700; color:#00d4aa;">$15K–25K</div>
+                <div style="font-size:11px; color:#7a9ba8; margin-top:4px;">PIPELINE VALUE</div>
+            </div>
+            <div style="text-align:center; padding:12px;">
+                <div style="font-size:24px; font-weight:700; color:#ffa502;">10%+</div>
+                <div style="font-size:11px; color:#7a9ba8; margin-top:4px;">OVERALL REPLY RATE</div>
+            </div>
+            <div style="text-align:center; padding:12px;">
+                <div style="font-size:24px; font-weight:700; color:#70a1ff;">< 5%</div>
+                <div style="font-size:11px; color:#7a9ba8; margin-top:4px;">BOUNCE RATE TARGET</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div><!-- /content -->
+
+<script>
+    // Tab switching
+    function showTab(name) {
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + name).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    // Set current date
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    // Simulate verification progress (replace with real data fetch later)
+    function updateVerificationProgress(done, total) {
+        const pct = ((done / total) * 100).toFixed(1);
+        document.getElementById('verified-count').textContent = done.toLocaleString();
+        document.getElementById('verify-pct').textContent = pct + '%';
+        document.getElementById('verify-bar').style.width = pct + '%';
+        document.getElementById('verify-done').textContent = done.toLocaleString() + ' verified';
+        document.getElementById('v-done').textContent = done.toLocaleString();
+        document.getElementById('v-bar').style.width = pct + '%';
+        document.getElementById('v-label').textContent = done.toLocaleString() + ' of 3,133 verified (' + pct + '%)';
+    }
+
+    // On load, check for verification progress file
+    // (This would be replaced with a real API call or file read in production)
+    updateVerificationProgress(0, 3133);
+</script>
+
+</body>
+</html>

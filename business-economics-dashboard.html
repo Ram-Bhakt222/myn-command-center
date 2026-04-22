@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYN Business Economics Dashboard — Live Pipeline & Unit Economics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #0f1f35 100%);
+            color: #e8e8e8;
+            min-height: 100vh;
+        }
+        .container { display: flex; height: 100vh; }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: rgba(10, 22, 40, 0.95);
+            border-right: 1px solid rgba(0, 212, 170, 0.2);
+            overflow-y: auto;
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            left: 0; top: 0; z-index: 100;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.3);
+        }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.3); border-radius: 3px; }
+        .sidebar-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid rgba(0,212,170,0.3); }
+        .logo { font-size: 22px; font-weight: 900; color: #00d4aa; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+        .logo-subtitle { font-size: 10px; color: #7a9ba8; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+            border-radius: 8px; cursor: pointer; font-size: 13px; color: #b0c4ce;
+            transition: all 0.2s; margin-bottom: 2px;
+        }
+        .nav-item:hover { background: rgba(0,212,170,0.08); color: #fff; }
+        .nav-item.active { background: rgba(0,212,170,0.15); color: #00d4aa; font-weight: 600; border-left: 3px solid #00d4aa; }
+        .nav-item .icon { font-size: 16px; width: 22px; text-align: center; }
+        .nav-section-title {
+            font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+            color: #5a7a8a; margin: 18px 0 8px 14px; font-weight: 700;
+        }
+        .nav-divider { height: 1px; background: rgba(0,212,170,0.1); margin: 12px 0; }
+
+        /* MAIN */
+        .main { margin-left: 260px; padding: 30px; width: calc(100% - 260px); overflow-y: auto; height: 100vh; }
+
+        /* SECTIONS */
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+
+        /* HEADER */
+        .section-header { margin-bottom: 28px; }
+        .section-header h1 { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+        .section-header p { font-size: 14px; color: #7a9ba8; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+        .badge-teal { background: rgba(0,212,170,0.15); color: #00d4aa; }
+        .badge-amber { background: rgba(255,183,77,0.15); color: #ffb74d; }
+        .badge-red { background: rgba(239,83,80,0.15); color: #ef5350; }
+        .badge-blue { background: rgba(66,165,245,0.15); color: #42a5f5; }
+        .badge-purple { background: rgba(171,71,188,0.15); color: #ab47bc; }
+        .badge-green { background: rgba(102,187,106,0.15); color: #66bb6a; }
+
+        /* CARDS */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; margin-bottom: 28px; }
+        .card-grid-3 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+        .card {
+            background: rgba(15, 31, 53, 0.8);
+            border: 1px solid rgba(0,212,170,0.12);
+            border-radius: 12px; padding: 22px;
+            transition: all 0.2s;
+        }
+        .card:hover { border-color: rgba(0,212,170,0.3); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .card h3 { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .card p { font-size: 13px; color: #9ab0bc; line-height: 1.6; }
+        .card .meta { font-size: 11px; color: #5a7a8a; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .card a { color: #00d4aa; text-decoration: none; font-size: 12px; }
+        .card a:hover { text-decoration: underline; }
+
+        /* STAT ROW */
+        .stat-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-bottom: 28px; }
+        .stat-box {
+            background: rgba(15,31,53,0.6); border: 1px solid rgba(0,212,170,0.08);
+            border-radius: 10px; padding: 18px; text-align: center;
+        }
+        .stat-box .number { font-size: 32px; font-weight: 800; color: #00d4aa; }
+        .stat-box .number.amber { color: #ffb74d; }
+        .stat-box .number.red { color: #ef5350; }
+        .stat-box .number.blue { color: #42a5f5; }
+        .stat-box .number.green { color: #66bb6a; }
+        .stat-box .number.purple { color: #ab47bc; }
+        .stat-box .label { font-size: 11px; color: #7a9ba8; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+        /* TABLE */
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+        .data-table th {
+            text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            color: #5a7a8a; padding: 10px 14px; border-bottom: 1px solid rgba(0,212,170,0.15);
+        }
+        .data-table td {
+            padding: 12px 14px; font-size: 13px; color: #b0c4ce;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .data-table tr:hover td { background: rgba(0,212,170,0.03); }
+
+        /* STATUS PILLS */
+        .pill { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .pill-signed { background: rgba(102,187,106,0.2); color: #66bb6a; }
+        .pill-viewed { background: rgba(66,165,245,0.2); color: #42a5f5; }
+        .pill-sent { background: rgba(255,183,77,0.2); color: #ffb74d; }
+        .pill-declined { background: rgba(239,83,80,0.2); color: #ef5350; }
+
+        /* PROGRESS BAR */
+        .progress-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.05); overflow: hidden; display: flex; }
+        .progress-segment { height: 100%; transition: width 0.3s; }
+
+        /* CHART-LIKE BAR */
+        .bar-chart { margin-bottom: 24px; }
+        .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+        .bar-label { width: 160px; font-size: 12px; color: #b0c4ce; text-align: right; flex-shrink: 0; }
+        .bar-track { flex: 1; height: 28px; background: rgba(255,255,255,0.03); border-radius: 6px; overflow: hidden; position: relative; }
+        .bar-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 10px; font-size: 11px; font-weight: 700; color: #fff; transition: width 0.6s ease; }
+        .bar-value { font-size: 12px; color: #7a9ba8; width: 80px; text-align: right; flex-shrink: 0; }
+
+        /* TOGGLE */
+        .toggle-header {
+            cursor: pointer; padding: 14px 18px; background: rgba(15,31,53,0.6);
+            border: 1px solid rgba(0,212,170,0.08); border-radius: 10px;
+            margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;
+            transition: all 0.2s;
+        }
+        .toggle-header:hover { border-color: rgba(0,212,170,0.25); }
+        .toggle-header h3 { font-size: 15px; font-weight: 600; color: #fff; }
+        .toggle-header .arrow { color: #00d4aa; font-size: 14px; transition: transform 0.2s; }
+        .toggle-header.open .arrow { transform: rotate(90deg); }
+        .toggle-content { display: none; padding: 16px 18px; margin-bottom: 16px; }
+        .toggle-content.open { display: block; }
+
+        /* ECON METRIC */
+        .econ-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .econ-row:last-child { border-bottom: none; }
+        .econ-label { font-size: 13px; color: #9ab0bc; }
+        .econ-value { font-size: 13px; font-weight: 700; color: #fff; }
+        .econ-value.highlight { color: #00d4aa; }
+        .econ-value.warn { color: #ffb74d; }
+
+        /* NOTION LINK */
+        .notion-link {
+            display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+            background: rgba(0,212,170,0.08); border-radius: 6px; color: #00d4aa;
+            font-size: 12px; text-decoration: none; transition: all 0.2s;
+        }
+        .notion-link:hover { background: rgba(0,212,170,0.15); }
+
+        /* PIPELINE FUNNEL */
+        .funnel { margin: 20px 0 28px; }
+        .funnel-step { display: flex; align-items: center; margin-bottom: 6px; }
+        .funnel-bar { height: 36px; border-radius: 6px; display: flex; align-items: center; padding: 0 14px; font-size: 13px; font-weight: 600; color: #fff; transition: width 0.5s ease; }
+        .funnel-count { font-size: 12px; color: #7a9ba8; margin-left: 12px; }
+
+        /* SUB-HEADING */
+        h2.sub { font-size: 18px; font-weight: 700; color: #e0e0e0; margin: 28px 0 16px; padding-bottom: 8px; border-bottom: 1px solid rgba(0,212,170,0.1); }
+        h2.sub span { color: #00d4aa; }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; width: 100%; }
+            .card-grid { grid-template-columns: 1fr; }
+            .stat-row { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+<!-- BEGIN MYN-NAV (auto-injected 2026-04-21) -->
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; -webkit-font-smoothing: antialiased; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__inner::-webkit-scrollbar { height: 4px; } .myn-nav__inner::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.25); border-radius: 2px; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-variant-numeric: tabular-nums; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Center</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="master-directory.html" data-page="master-directory">Directory</a>
+  <a href="analytics-dashboard.html" data-page="analytics-dashboard">Analytics</a>
+  <a href="lead-gen-dashboard.html" data-page="lead-gen-dashboard">Leads</a>
+  <a href="hotel-activities-dashboard.html" data-page="hotel-activities-dashboard">Hotels</a>
+  <a href="business-economics-dashboard.html" data-page="business-economics-dashboard">Economics</a>
+  <a href="team-handoff-dashboard.html" data-page="team-handoff-dashboard">Team</a>
+  <a href="architecture-dashboard.html" data-page="architecture-dashboard">Architecture</a>
+  <a href="agent-control-plane.html" data-page="agent-control-plane">Agents</a>
+  <a href="supabase-dashboard.html" data-page="supabase-dashboard">Supabase</a>
+  <a href="paperclip-dashboard.html" data-page="paperclip-dashboard">Paperclip</a>
+  <a href="review-queue.html" data-page="review-queue">Review</a>
+  <a href="4-21-26-full-audit.html" data-page="4-21-26-full-audit">Audit</a>
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date" id="myn-nav-date"></span>
+</div>
+</nav>
+<script>
+(function(){
+  var path = (location.pathname.split('/').pop() || 'index.html').replace('.html','');
+  var links = document.querySelectorAll('.myn-nav a[data-page]');
+  for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('data-page') === path) links[i].classList.add('is-active'); }
+  var d = new Date(); var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var el = document.getElementById('myn-nav-date'); if (el) el.textContent = m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+})();
+</script>
+<!-- END MYN-NAV -->
+
+<div class="container">
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">MYN</div>
+            <div class="logo-subtitle">Business Economics Dashboard</div>
+        </div>
+
+        <div class="nav-section-title">Overview</div>
+        <div class="nav-item active" onclick="switchTab('overview')"><span class="icon">📊</span> Executive Summary</div>
+
+        <div class="nav-section-title">Pipeline</div>
+        <div class="nav-item" onclick="switchTab('pipeline')"><span class="icon">🏨</span> Hotel Pipeline</div>
+        <div class="nav-item" onclick="switchTab('leads')"><span class="icon">📋</span> All Leads (Live)</div>
+
+        <div class="nav-section-title">Economics</div>
+        <div class="nav-item" onclick="switchTab('unit-economics')"><span class="icon">💰</span> Unit Economics</div>
+        <div class="nav-item" onclick="switchTab('revenue-model')"><span class="icon">📈</span> Revenue Impact Model</div>
+        <div class="nav-item" onclick="switchTab('pricing')"><span class="icon">🏷️</span> Pricing & Packages</div>
+
+        <div class="nav-section-title">Operations</div>
+        <div class="nav-item" onclick="switchTab('workstreams')"><span class="icon">⚡</span> Workstreams</div>
+        <div class="nav-item" onclick="switchTab('hotel-scoring')"><span class="icon">🎯</span> Hotel Scoring</div>
+        <div class="nav-item" onclick="switchTab('roi-model')"><span class="icon">🧮</span> ROI Calculator</div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+
+        <!-- ==================== OVERVIEW ==================== -->
+        <div id="overview" class="content-section active">
+            <div class="section-header">
+                <h1>Business Economics Dashboard <span class="badge badge-teal">LIVE</span></h1>
+                <p>Real-time pipeline data from Notion &bull; Unit economics &bull; Revenue impact models &bull; Last sync: Mar 25, 2026</p>
+            </div>
+
+            <!-- PIPELINE SNAPSHOT -->
+            <div class="stat-row">
+                <div class="stat-box">
+                    <div class="number green">2</div>
+                    <div class="label">Contracts Signed</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number blue">5</div>
+                    <div class="label">Contracts Viewed</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number amber">9</div>
+                    <div class="label">Contracts Sent</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number red">2</div>
+                    <div class="label">Declined</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number">18</div>
+                    <div class="label">Total Leads</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number purple">$7.5K+</div>
+                    <div class="label">Monthly Rev / Hotel</div>
+                </div>
+            </div>
+
+            <!-- PIPELINE FUNNEL -->
+            <h2 class="sub"><span>Pipeline Funnel</span></h2>
+            <div class="funnel">
+                <div class="funnel-step">
+                    <div class="funnel-bar" style="width: 100%; background: linear-gradient(90deg, rgba(0,212,170,0.3), rgba(0,212,170,0.15));">Total Leads: 18</div>
+                </div>
+                <div class="funnel-step">
+                    <div class="funnel-bar" style="width: 89%; background: linear-gradient(90deg, rgba(255,183,77,0.4), rgba(255,183,77,0.15));">Contracts Sent: 16</div>
+                    <div class="funnel-count">89% of leads</div>
+                </div>
+                <div class="funnel-step">
+                    <div class="funnel-bar" style="width: 39%; background: linear-gradient(90deg, rgba(66,165,245,0.4), rgba(66,165,245,0.15));">Viewed / Engaged: 7</div>
+                    <div class="funnel-count">39% conversion</div>
+                </div>
+                <div class="funnel-step">
+                    <div class="funnel-bar" style="width: 11%; background: linear-gradient(90deg, rgba(102,187,106,0.5), rgba(102,187,106,0.2));">Signed / Won: 2</div>
+                    <div class="funnel-count">11% close rate</div>
+                </div>
+            </div>
+
+            <!-- KEY METRICS -->
+            <h2 class="sub"><span>Unit Economics Snapshot</span></h2>
+            <div class="card-grid card-grid-3">
+                <div class="card">
+                    <h3>💵 Per-Class Revenue</h3>
+                    <div class="econ-row">
+                        <span class="econ-label">30 min class</span>
+                        <span class="econ-value highlight">$150</span>
+                    </div>
+                    <div class="econ-row">
+                        <span class="econ-label">45–60 min class</span>
+                        <span class="econ-value highlight">$200</span>
+                    </div>
+                    <div class="econ-row">
+                        <span class="econ-label">Instructor cost</span>
+                        <span class="econ-value warn">~$55</span>
+                    </div>
+                    <div class="econ-row">
+                        <span class="econ-label">Gross margin (30 min)</span>
+                        <span class="econ-value highlight">$95 (63%)</span>
+                    </div>
+                    <div class="econ-row">
+                        <span class="econ-label">Gross margin (60 min)</span>
+                        <span class="econ-value highlight">$145 (73%)</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>🏨 Monthly Hotel Value</h3>
+                    <div class="econ-row">
+                        <span class="econ-label">Daily program (30×30d)</span>
+                        <span class="econ-value highlight">$4,500/mo</span>
+                    </div>
+                    <div class="econ-row">
+                        <span class="econ-label">Instructor cost (30d)</span>
+                        <span class="econ-value warn">$1,650/mo</span>
+                    </div>
+                    <div class="econ-row">
+                        <span class="econ-label">Net margin (daily)</span>
+                        <span class="econ-value highlight">$2,850/mo</span>
+                    </div>
+                    <div class="econ-row">
+                        <span class="econ-label">+ F&B impact</span>
+                        <span class="econ-value">+$1,944/mo</span>
+                    </div>
+                    <div class="econ-row">
+                        <span class="econ-label">+ Spa capture</span>
+                        <span class="econ-value">+$6,300/mo</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>📊 Won Accounts</h3>
+                    <div class="econ-row">
+                        <span class="econ-label">Hilton Vacation Club Tahoe</span>
+                        <span class="econ-value highlight">Signed</span>
+                    </div>
+                    <p style="font-size: 12px; color: #7a9ba8; margin: 4px 0;">1×/week water classes starting 6/21</p>
+                    <div class="econ-row" style="margin-top: 8px;">
+                        <span class="econ-label">The Westin Seaport</span>
+                        <span class="econ-value highlight">Signed</span>
+                    </div>
+                    <p style="font-size: 12px; color: #7a9ba8; margin: 4px 0;">1×/week pilates</p>
+                    <div class="meta">+ Westin Long Beach (existing daily)</div>
+                </div>
+            </div>
+
+            <!-- HOT LEADS -->
+            <h2 class="sub"><span>Hot Leads</span> — Contract Viewed, Awaiting Decision</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Hotel</th>
+                        <th>Contact</th>
+                        <th>Status</th>
+                        <th>Last Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Four Seasons Seattle</strong></td>
+                        <td>Jonathan Jumawan</td>
+                        <td><span class="pill pill-viewed">Viewed</span></td>
+                        <td style="max-width: 300px; font-size: 12px;">"Would like to move forward with booking yoga classes this summer"</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ritz-Carlton, Los Angeles</strong></td>
+                        <td>Leslie Arevalo</td>
+                        <td><span class="pill pill-viewed">Viewed</span></td>
+                        <td style="max-width: 300px; font-size: 12px;">Discussing with internal team, requested callback</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Kimpton Hotel Enso</strong></td>
+                        <td>Darius Shalforoosh</td>
+                        <td><span class="pill pill-viewed">Viewed</span></td>
+                        <td style="max-width: 300px; font-size: 12px;">Had call with Ram 5/28, getting new contract from lawyers</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hilton Garden Inn LA</strong></td>
+                        <td>Bryan Barrera</td>
+                        <td><span class="pill pill-viewed">Viewed</span></td>
+                        <td style="max-width: 300px; font-size: 12px;">"Will share with owners and get back with update"</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Julie Ondrako</strong></td>
+                        <td>Julie Ondrako</td>
+                        <td><span class="pill pill-viewed">Viewed</span></td>
+                        <td style="max-width: 300px; font-size: 12px;">LinkedIn lead, had meeting, contract sent 6/10/25</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ==================== HOTEL PIPELINE ==================== -->
+        <div id="pipeline" class="content-section">
+            <div class="section-header">
+                <h1>Hotel Pipeline <span class="badge badge-teal">LIVE DATA</span></h1>
+                <p>All active hotel leads from Notion CRM &bull; Sorted by pipeline stage</p>
+            </div>
+
+            <!-- Pipeline by Status -->
+            <h2 class="sub"><span>Pipeline by Status</span></h2>
+            <div class="bar-chart">
+                <div class="bar-row">
+                    <div class="bar-label">Signed (Won)</div>
+                    <div class="bar-track"><div class="bar-fill" style="width: 11%; background: linear-gradient(90deg, #66bb6a, #43a047);">2</div></div>
+                    <div class="bar-value">$300+/wk</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">Viewed (Hot)</div>
+                    <div class="bar-track"><div class="bar-fill" style="width: 28%; background: linear-gradient(90deg, #42a5f5, #1e88e5);">5</div></div>
+                    <div class="bar-value">$750+/wk potential</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">Sent (Warm)</div>
+                    <div class="bar-track"><div class="bar-fill" style="width: 50%; background: linear-gradient(90deg, #ffb74d, #ff9800);">9</div></div>
+                    <div class="bar-value">$1,350+/wk potential</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">Declined</div>
+                    <div class="bar-track"><div class="bar-fill" style="width: 11%; background: linear-gradient(90deg, #ef5350, #c62828);">2</div></div>
+                    <div class="bar-value">—</div>
+                </div>
+            </div>
+
+            <!-- Won Deals -->
+            <h2 class="sub"><span>Won Deals</span></h2>
+            <div class="card-grid">
+                <div class="card" style="border-color: rgba(102,187,106,0.3);">
+                    <h3>✅ Hilton Vacation Club Lake Tahoe</h3>
+                    <p><strong>Contact:</strong> Amy Salinas<br>
+                    <strong>Program:</strong> 1×/week water classes, starting 6/21<br>
+                    <strong>Note:</strong> They already have yoga — water classes is the wedge<br>
+                    <strong>Source:</strong> Cold Call</p>
+                </div>
+                <div class="card" style="border-color: rgba(102,187,106,0.3);">
+                    <h3>✅ The Westin Seaport (Boston)</h3>
+                    <p><strong>Contact:</strong> Lily Cappuccio<br>
+                    <strong>Program:</strong> 1×/week pilates<br>
+                    <strong>Source:</strong> Cold Call<br>
+                    <strong>Strategic note:</strong> Leverage in Boston market alongside Dagny</p>
+                </div>
+            </div>
+
+            <!-- Hottest Leads -->
+            <h2 class="sub"><span>Hottest Leads</span> — Contract Viewed</h2>
+            <div class="card-grid">
+                <div class="card" style="border-color: rgba(66,165,245,0.3);">
+                    <h3>🔥 Four Seasons Seattle</h3>
+                    <p><strong>Contact:</strong> Jonathan Jumawan<br>
+                    <strong>Status:</strong> "Would like to move forward with booking yoga classes for this summer"<br>
+                    <strong>Follow-up:</strong> 6/18 — sent more info, awaiting response<br>
+                    <strong>Last contact:</strong> 9/23/25</p>
+                </div>
+                <div class="card" style="border-color: rgba(66,165,245,0.3);">
+                    <h3>🔥 The Ritz-Carlton, Los Angeles</h3>
+                    <p><strong>Contact:</strong> Leslie Arevalo<br>
+                    <strong>Status:</strong> Discussing with internal team, wants to review again<br>
+                    <strong>Follow-up:</strong> Requested callback next week<br>
+                    <strong>Action:</strong> Follow-Up Call</p>
+                </div>
+                <div class="card" style="border-color: rgba(66,165,245,0.3);">
+                    <h3>🔥 Kimpton Hotel Enso | Japantown</h3>
+                    <p><strong>Contact:</strong> Darius Shalforoosh<br>
+                    <strong>Status:</strong> Had call with Ram 5/28, getting new contract from lawyers<br>
+                    <strong>Follow-up:</strong> 6/18<br>
+                    <strong>Fathom:</strong> <a href="https://fathom.video/share/3Q8Av97Q9UeynXywgu1KybRxNwbUk2Wk" target="_blank">View Recording</a></p>
+                </div>
+                <div class="card" style="border-color: rgba(66,165,245,0.3);">
+                    <h3>🔥 Hilton Garden Inn LA / Hollywood</h3>
+                    <p><strong>Contact:</strong> Bryan Barrera<br>
+                    <strong>Status:</strong> "Will share with owners and get back with update"<br>
+                    <strong>Follow-up:</strong> 6/18 — contract was sent<br>
+                    <strong>Last contact:</strong> 9/23/25</p>
+                </div>
+            </div>
+
+            <!-- Warm Leads -->
+            <h2 class="sub"><span>Warm Leads</span> — Contract Sent, Awaiting View</h2>
+            <table class="data-table">
+                <thead>
+                    <tr><th>Hotel</th><th>Contact</th><th>Next Action</th><th>Follow-Up</th><th>Key Note</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Hyatt Regency Newport Beach</td><td>Paul Deutsch</td><td><span class="pill pill-sent">Follow-Up</span></td><td>6/18</td>
+                        <td style="font-size: 12px;">Still interested, been busy, requested follow up</td>
+                    </tr>
+                    <tr>
+                        <td>Westin Waltham Boston</td><td>EJ Brown</td><td><span class="pill pill-sent">Follow-Up</span></td><td>6/18</td>
+                        <td style="font-size: 12px;">Leverage: "We work with Westin Seaport + Dagny in Boston"</td>
+                    </tr>
+                    <tr>
+                        <td>Westin Monache, Mammoth</td><td>Tim Ruiz</td><td><span class="pill pill-sent">Follow-Up</span></td><td>6/18</td>
+                        <td style="font-size: 12px;">Seasonal interest — plan for winter</td>
+                    </tr>
+                    <tr>
+                        <td>The Westin O'Hare</td><td>Alexa Hasting</td><td><span class="pill pill-sent">Follow-Up</span></td><td>6/18</td>
+                        <td style="font-size: 12px;">Info forwarded around team</td>
+                    </tr>
+                    <tr>
+                        <td>Kimpton Palladian (Downtown)</td><td>Mike Walzl</td><td><span class="pill pill-sent">Follow-Up</span></td><td>6/18</td>
+                        <td style="font-size: 12px;">Wants on-demand; verify email</td>
+                    </tr>
+                    <tr>
+                        <td>Four Seasons Jackson Hole</td><td>Kimberly Jenkins</td><td><span class="pill pill-sent">Follow-Up</span></td><td>9/10</td>
+                        <td style="font-size: 12px;">"Would like to keep info on file should needs change"</td>
+                    </tr>
+                    <tr>
+                        <td>Kimpton Monaco Denver</td><td>David Coonan</td><td><span class="pill pill-sent">Follow-Up</span></td><td>6/18</td>
+                        <td style="font-size: 12px;">Got email with prices 4/28, last contact 9/23</td>
+                    </tr>
+                    <tr>
+                        <td>San Luis Resort &amp; Spa</td><td>Kristie Medrano</td><td><span class="pill pill-sent">Escalate</span></td><td>10/1</td>
+                        <td style="font-size: 12px;">Waiting to see how own program does</td>
+                    </tr>
+                    <tr>
+                        <td>Westin Chicago Lombard</td><td>Megan Mirro</td><td><span class="pill pill-sent">Escalate</span></td><td>6/2</td>
+                        <td style="font-size: 12px;">Wants proof at other Westins; waiting on destination fee</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ==================== ALL LEADS ==================== -->
+        <div id="leads" class="content-section">
+            <div class="section-header">
+                <h1>All Leads <span class="badge badge-blue">18 RECORDS</span></h1>
+                <p>Complete CRM data from Notion: Contracts Sent + Appointments Made</p>
+            </div>
+
+            <table class="data-table" id="leads-table">
+                <thead>
+                    <tr>
+                        <th>Name</th><th>Hotel / Lead</th><th>Status</th><th>Source</th><th>Next Action</th><th>Next Follow-Up</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Amy Salinas</td><td>Hilton Vacation Club Lake Tahoe</td><td><span class="pill pill-signed">Signed</span></td><td>Cold Call</td><td>Won</td><td>6/2/25</td></tr>
+                    <tr><td>Lily Cappuccio</td><td>The Westin Seaport</td><td><span class="pill pill-signed">Signed</span></td><td>Cold Call</td><td>Won</td><td>—</td></tr>
+                    <tr><td>Jonathan Jumawan</td><td>Four Seasons Hotel Seattle</td><td><span class="pill pill-viewed">Viewed</span></td><td>Cold Call</td><td>Follow-Up Call</td><td>6/18/25</td></tr>
+                    <tr><td>Leslie Arevalo</td><td>The Ritz-Carlton, Los Angeles</td><td><span class="pill pill-viewed">Viewed</span></td><td>Cold Call</td><td>Follow-Up Call</td><td>6/18/25</td></tr>
+                    <tr><td>Darius Shalforoosh</td><td>Kimpton Hotel Enso | Japantown</td><td><span class="pill pill-viewed">Viewed</span></td><td>Cold Call</td><td>Follow-Up Call</td><td>6/18/25</td></tr>
+                    <tr><td>Bryan Barrera</td><td>Hilton Garden Inn LA/Hollywood</td><td><span class="pill pill-viewed">Viewed</span></td><td>Cold Call</td><td>Follow-Up Call</td><td>6/18/25</td></tr>
+                    <tr><td>Julie Ondrako</td><td>(LinkedIn Lead)</td><td><span class="pill pill-viewed">Viewed</span></td><td>LinkedIn</td><td>Escalate</td><td>6/25/25</td></tr>
+                    <tr><td>Paul Deutsch</td><td>Hyatt Regency Newport Beach</td><td><span class="pill pill-sent">Sent</span></td><td>Cold Call</td><td>Follow-Up Call</td><td>6/18/25</td></tr>
+                    <tr><td>EJ Brown</td><td>Westin Waltham Boston</td><td><span class="pill pill-sent">Sent</span></td><td>Cold Call</td><td>Follow-Up Call</td><td>6/18/25</td></tr>
+                    <tr><td>Tim Ruiz</td><td>The Westin Monache, Mammoth</td><td><span class="pill pill-sent">Sent</span></td><td>Cold Call</td><td>Follow-Up Call</td><td>6/18/25</td></tr>
+                    <tr><td>Alexa Hasting</td><td>The Westin O'Hare</td><td><span class="pill pill-sent">Sent</span></td><td>Cold Call</td><td>Follow-Up Call</td><td>6/18/25</td></tr>
+                    <tr><td>Mike Walzl</td><td>Kimpton Palladian | Downtown</td><td><span class="pill pill-sent">Sent</span></td><td>Cold Call</td><td>Follow-Up Call</td><td>6/18/25</td></tr>
+                    <tr><td>Kimberly Jenkins</td><td>Four Seasons Jackson Hole</td><td><span class="pill pill-sent">Sent</span></td><td>Cold Call</td><td>Follow-Up Call</td><td>9/10/25</td></tr>
+                    <tr><td>David Coonan</td><td>Kimpton Monaco Denver</td><td><span class="pill pill-sent">Sent</span></td><td>Cold Call</td><td>Follow-Up Call</td><td>6/18/25</td></tr>
+                    <tr><td>Kristie Medrano</td><td>San Luis Resort, Spa & Conf.</td><td><span class="pill pill-sent">Sent</span></td><td>Cold Call</td><td>Escalate</td><td>10/1/25</td></tr>
+                    <tr><td>Megan Mirro</td><td>Westin Chicago Lombard</td><td><span class="pill pill-sent">Sent</span></td><td>Cold Call</td><td>Escalate</td><td>6/2/25</td></tr>
+                    <tr><td>Vanessa Gill</td><td>W Miami</td><td><span class="pill pill-declined">Declined</span></td><td>Cold Call</td><td>Closed</td><td>—</td></tr>
+                    <tr><td>Andrea Serito</td><td>Four Seasons Chicago</td><td><span class="pill pill-declined">Declined</span></td><td>Cold Call</td><td>Closed</td><td>—</td></tr>
+                </tbody>
+            </table>
+
+            <div class="meta" style="margin-top: 16px;">
+                <a class="notion-link" href="https://www.notion.so/27f3ed340375809c8870e0f24424caec" target="_blank">📋 View in Notion: Contracts + Appointments Database</a>
+            </div>
+        </div>
+
+        <!-- ==================== UNIT ECONOMICS ==================== -->
+        <div id="unit-economics" class="content-section">
+            <div class="section-header">
+                <h1>Unit Economics <span class="badge badge-green">CORE</span></h1>
+                <p>Per-class, per-hotel, and per-division economics from live business data</p>
+            </div>
+
+            <h2 class="sub"><span>Per-Class Economics</span></h2>
+            <div class="card-grid card-grid-3">
+                <div class="card">
+                    <h3>30-Min Class</h3>
+                    <div class="econ-row"><span class="econ-label">Revenue</span><span class="econ-value highlight">$150</span></div>
+                    <div class="econ-row"><span class="econ-label">Instructor cost</span><span class="econ-value warn">$55</span></div>
+                    <div class="econ-row"><span class="econ-label">Gross profit</span><span class="econ-value highlight">$95</span></div>
+                    <div class="econ-row"><span class="econ-label">Gross margin</span><span class="econ-value highlight">63.3%</span></div>
+                </div>
+                <div class="card">
+                    <h3>45-Min Class</h3>
+                    <div class="econ-row"><span class="econ-label">Revenue</span><span class="econ-value highlight">$175</span></div>
+                    <div class="econ-row"><span class="econ-label">Instructor cost</span><span class="econ-value warn">$55</span></div>
+                    <div class="econ-row"><span class="econ-label">Gross profit</span><span class="econ-value highlight">$120</span></div>
+                    <div class="econ-row"><span class="econ-label">Gross margin</span><span class="econ-value highlight">68.6%</span></div>
+                </div>
+                <div class="card">
+                    <h3>60-Min Class</h3>
+                    <div class="econ-row"><span class="econ-label">Revenue</span><span class="econ-value highlight">$200</span></div>
+                    <div class="econ-row"><span class="econ-label">Instructor cost</span><span class="econ-value warn">$55</span></div>
+                    <div class="econ-row"><span class="econ-label">Gross profit</span><span class="econ-value highlight">$145</span></div>
+                    <div class="econ-row"><span class="econ-label">Gross margin</span><span class="econ-value highlight">72.5%</span></div>
+                </div>
+            </div>
+
+            <h2 class="sub"><span>Per-Hotel Monthly Economics</span> (Daily Program)</h2>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>📊 Daily Program Model (30 classes/mo)</h3>
+                    <div class="econ-row"><span class="econ-label">Monthly revenue (30min × 30)</span><span class="econ-value highlight">$4,500</span></div>
+                    <div class="econ-row"><span class="econ-label">Instructor cost (30 × $55)</span><span class="econ-value warn">$1,650</span></div>
+                    <div class="econ-row"><span class="econ-label">Net to MYN</span><span class="econ-value highlight">$2,850/mo</span></div>
+                    <div class="econ-row"><span class="econ-label">Annual per hotel</span><span class="econ-value highlight">$34,200</span></div>
+                    <div class="meta">Based on $150/class rate (30 min)</div>
+                </div>
+                <div class="card">
+                    <h3>📊 Premium Model (60min × 30/mo)</h3>
+                    <div class="econ-row"><span class="econ-label">Monthly revenue</span><span class="econ-value highlight">$6,000</span></div>
+                    <div class="econ-row"><span class="econ-label">Instructor cost</span><span class="econ-value warn">$1,650</span></div>
+                    <div class="econ-row"><span class="econ-label">Net to MYN</span><span class="econ-value highlight">$4,350/mo</span></div>
+                    <div class="econ-row"><span class="econ-label">Annual per hotel</span><span class="econ-value highlight">$52,200</span></div>
+                    <div class="meta">Based on $200/class rate (60 min)</div>
+                </div>
+            </div>
+
+            <h2 class="sub"><span>Bulk / Discounted Model</span></h2>
+            <div class="card">
+                <h3>💡 Hotel-Funded as Guest Perk (Alternative)</h3>
+                <p>Some hotels prefer a flat monthly rate instead of per-class billing. The bulk rate option:</p>
+                <div class="econ-row" style="margin-top: 12px;"><span class="econ-label">Flat fee per class</span><span class="econ-value">$75/session</span></div>
+                <div class="econ-row"><span class="econ-label">Bulk monthly rate (daily)</span><span class="econ-value">~$1,500/mo</span></div>
+                <div class="econ-row"><span class="econ-label">Gross margin at bulk</span><span class="econ-value warn">~$20/class (27%)</span></div>
+                <div class="meta">Lower margin but higher volume commitment; resort fee allocation covers cost</div>
+            </div>
+
+            <h2 class="sub"><span>Westin Long Beach</span> — Active Benchmark</h2>
+            <div class="card">
+                <h3>🏨 Existing Contract (Daily Program)</h3>
+                <div class="econ-row"><span class="econ-label">Frequency</span><span class="econ-value">Daily classes</span></div>
+                <div class="econ-row"><span class="econ-label">Context</span><span class="econ-value">Destination fee model</span></div>
+                <div class="econ-row"><span class="econ-label">Status</span><span class="econ-value highlight">Active (staff change risk)</span></div>
+                <div class="meta">Original "beginner's luck" deal — destination fee context. Challenge: replicating with staff/ownership changes.</div>
+            </div>
+        </div>
+
+        <!-- ==================== REVENUE IMPACT MODEL ==================== -->
+        <div id="revenue-model" class="content-section">
+            <div class="section-header">
+                <h1>Revenue Impact Model <span class="badge badge-purple">PER HOTEL</span></h1>
+                <p>How MYN generates value across hotel departments — F&B, Spa, Events, Marketing</p>
+            </div>
+
+            <h2 class="sub"><span>Monthly Revenue Impact by Department</span></h2>
+            <div class="bar-chart">
+                <div class="bar-row">
+                    <div class="bar-label">Spa Capture</div>
+                    <div class="bar-track"><div class="bar-fill" style="width: 80%; background: linear-gradient(90deg, #ab47bc, #7b1fa2);">$6,300</div></div>
+                    <div class="bar-value">$6,300/mo</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">MYN Net Revenue</div>
+                    <div class="bar-track"><div class="bar-fill" style="width: 55%; background: linear-gradient(90deg, #00d4aa, #009688);">$2,850–$4,350</div></div>
+                    <div class="bar-value">$2,850–$4,350/mo</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">Group Events</div>
+                    <div class="bar-track"><div class="bar-fill" style="width: 30%; background: linear-gradient(90deg, #42a5f5, #1e88e5);">$2,000</div></div>
+                    <div class="bar-value">$2,000/event</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">F&B Upsell</div>
+                    <div class="bar-track"><div class="bar-fill" style="width: 25%; background: linear-gradient(90deg, #ffb74d, #f57c00);">$1,944</div></div>
+                    <div class="bar-value">$1,944/mo</div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">Sponsorship Offset</div>
+                    <div class="bar-track"><div class="bar-fill" style="width: 15%; background: linear-gradient(90deg, #66bb6a, #388e3c);">$500–2K</div></div>
+                    <div class="bar-value">$500–$2,000/mo</div>
+                </div>
+            </div>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h3>🍽️ F&B (Ancillary Revenue)</h3>
+                    <div class="econ-row"><span class="econ-label">Avg attendees/class</span><span class="econ-value">12–20</span></div>
+                    <div class="econ-row"><span class="econ-label">F&B conversion</span><span class="econ-value">30–60%</span></div>
+                    <div class="econ-row"><span class="econ-label">Avg incremental check</span><span class="econ-value">$12–$25</span></div>
+                    <div class="econ-row"><span class="econ-label">Monthly impact</span><span class="econ-value highlight">$1,944</span></div>
+                    <div class="meta">16 classes/mo × 15 attendees × 45% conv × $18 avg</div>
+                </div>
+                <div class="card">
+                    <h3>🧖 Spa Revenue Capture</h3>
+                    <div class="econ-row"><span class="econ-label">Spa conversion from class</span><span class="econ-value">10–25%</span></div>
+                    <div class="econ-row"><span class="econ-label">Avg spa ticket</span><span class="econ-value">$150–$220</span></div>
+                    <div class="econ-row"><span class="econ-label">Monthly impact</span><span class="econ-value highlight">$6,300</span></div>
+                    <div class="meta">240 attendees × 15% conv × $175 avg</div>
+                </div>
+                <div class="card">
+                    <h3>🎤 Group Sales & Events</h3>
+                    <div class="econ-row"><span class="econ-label">Add-on price/attendee</span><span class="econ-value">$25–$75</span></div>
+                    <div class="econ-row"><span class="econ-label">Group size</span><span class="econ-value">20–60</span></div>
+                    <div class="econ-row"><span class="econ-label">Single event impact</span><span class="econ-value highlight">$2,000</span></div>
+                    <div class="meta">40 attendees × $50 wellness add-on</div>
+                </div>
+                <div class="card">
+                    <h3>💰 Cost Offset: Resort Fee</h3>
+                    <p>Daily or weekly classes included in destination/resort fee. Protects fee perception, reduces guest complaints, increases value without raising costs.</p>
+                    <div class="meta">Framing: "Converts resort fees from liability into tangible guest benefit"</div>
+                </div>
+                <div class="card">
+                    <h3>📱 Marketing & PR Value</h3>
+                    <p>Social-friendly activations, influencer-ready programming, review mentions ("best yoga," "great wellness"). Brand differentiation vs comp set.</p>
+                    <div class="meta">Framing: "Wellness doubles as experiential marketing with measurable brand lift"</div>
+                </div>
+                <div class="card">
+                    <h3>🤝 Sponsorship & Brand Offset</h3>
+                    <div class="econ-row"><span class="econ-label">Monthly sponsor support</span><span class="econ-value">$500–$2,000</span></div>
+                    <p style="margin-top: 8px;">Sponsored classes, product sampling, seasonal brand partnerships.</p>
+                    <div class="meta">External partners subsidize programming</div>
+                </div>
+            </div>
+
+            <h2 class="sub"><span>Total Value Per Hotel</span> (All Departments Combined)</h2>
+            <div class="card" style="border-color: rgba(0,212,170,0.3); background: rgba(0,212,170,0.05);">
+                <h3>🏨 Combined Monthly Value to Hotel</h3>
+                <div class="econ-row"><span class="econ-label">F&B uplift</span><span class="econ-value">+$1,944</span></div>
+                <div class="econ-row"><span class="econ-label">Spa capture</span><span class="econ-value">+$6,300</span></div>
+                <div class="econ-row"><span class="econ-label">Group events (1/mo)</span><span class="econ-value">+$2,000</span></div>
+                <div class="econ-row"><span class="econ-label">Sponsorship offset</span><span class="econ-value">+$1,000</span></div>
+                <div class="econ-row"><span class="econ-label">Marketing/PR (est.)</span><span class="econ-value">+$2,000</span></div>
+                <div style="border-top: 2px solid rgba(0,212,170,0.3); margin-top: 12px; padding-top: 12px;">
+                    <div class="econ-row"><span class="econ-label" style="font-weight: 700; color: #fff;">Total monthly value to hotel</span><span class="econ-value highlight" style="font-size: 18px;">$13,244+</span></div>
+                    <div class="econ-row"><span class="econ-label" style="font-weight: 700; color: #fff;">Hotel pays MYN</span><span class="econ-value warn" style="font-size: 18px;">$4,500–$6,000</span></div>
+                    <div class="econ-row"><span class="econ-label" style="font-weight: 700; color: #fff;">Hotel ROI multiplier</span><span class="econ-value highlight" style="font-size: 18px;">2.2–2.9×</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== PRICING ==================== -->
+        <div id="pricing" class="content-section">
+            <div class="section-header">
+                <h1>Pricing & Packages <span class="badge badge-amber">STRATEGY</span></h1>
+                <p>Current pricing structure and package ladder for hotel partnerships</p>
+            </div>
+
+            <h2 class="sub"><span>Current Rate Card</span></h2>
+            <div class="card-grid card-grid-3">
+                <div class="card">
+                    <h3>⏱️ 30 Minutes</h3>
+                    <div style="font-size: 36px; font-weight: 800; color: #00d4aa; margin: 12px 0;">$150</div>
+                    <p>Quick morning session, pre-breakfast slot, poolside activation</p>
+                </div>
+                <div class="card">
+                    <h3>⏱️ 45 Minutes</h3>
+                    <div style="font-size: 36px; font-weight: 800; color: #00d4aa; margin: 12px 0;">$175</div>
+                    <p>Standard group class, wellness program staple</p>
+                </div>
+                <div class="card">
+                    <h3>⏱️ 60 Minutes</h3>
+                    <div style="font-size: 36px; font-weight: 800; color: #00d4aa; margin: 12px 0;">$200</div>
+                    <p>Full therapeutic session, premium offering, retreat format</p>
+                </div>
+            </div>
+
+            <h2 class="sub"><span>Package Ladder</span></h2>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>🧪 Pilot (2–4 Weeks)</h3>
+                    <p>Low-commitment trial period. Typically 3 classes/week. Goal: prove guest response and operational fit.</p>
+                    <div class="econ-row" style="margin-top: 12px;"><span class="econ-label">Duration</span><span class="econ-value">2–4 weeks</span></div>
+                    <div class="econ-row"><span class="econ-label">Frequency</span><span class="econ-value">3×/week</span></div>
+                    <div class="econ-row"><span class="econ-label">Cost to hotel</span><span class="econ-value">$1,800–$2,400</span></div>
+                </div>
+                <div class="card">
+                    <h3>📋 Monthly Retainer</h3>
+                    <p>Standard ongoing program. Daily classes, consistent scheduling, instructor managed by MYN.</p>
+                    <div class="econ-row" style="margin-top: 12px;"><span class="econ-label">Frequency</span><span class="econ-value">Daily (7×/week)</span></div>
+                    <div class="econ-row"><span class="econ-label">Monthly cost</span><span class="econ-value highlight">$4,500–$6,000</span></div>
+                    <div class="econ-row"><span class="econ-label">Billing</span><span class="econ-value">Monthly invoice</span></div>
+                </div>
+                <div class="card">
+                    <h3>⭐ Add-Ons (Premium)</h3>
+                    <p>Events, sponsorship activations, premium instructors, branded experiences.</p>
+                    <div class="econ-row" style="margin-top: 12px;"><span class="econ-label">Event packages</span><span class="econ-value">$2,000+</span></div>
+                    <div class="econ-row"><span class="econ-label">Branded experience</span><span class="econ-value">Custom quote</span></div>
+                    <div class="econ-row"><span class="econ-label">Yoga Bio Sync™</span><span class="econ-value">20–40% uplift</span></div>
+                </div>
+            </div>
+
+            <h2 class="sub"><span>Sales Angle</span> — What Works</h2>
+            <div class="card">
+                <h3>🎯 Key Insight from Barry + Jason (Hotel Operators)</h3>
+                <p style="line-height: 1.8;"><strong>1) Lead with ROI / revenue, not "wellness" as a vibe.</strong> Hotels get pitched constantly — "guest satisfaction" alone doesn't cut through. The winning angle is <strong>revenue generation</strong>.<br><br>
+                <strong>2) Your real "in" is NOT the GM.</strong> GMs delete most cold emails. Start with the <strong>Director of Food & Beverage</strong> or Events/Programming leader — they're revenue-incentivized and can sell it upward.<br><br>
+                <strong>3) Package yoga as an "activation + F&B" engine.</strong> The hotel sees it as a way to drive ancillary spend, not just a guest amenity.</p>
+                <div class="meta">Source: B2B Hotels Notion page — Barry + Jason strategy recommendations</div>
+            </div>
+        </div>
+
+        <!-- ==================== WORKSTREAMS ==================== -->
+        <div id="workstreams" class="content-section">
+            <div class="section-header">
+                <h1>Workstreams <span class="badge badge-blue">TEAM</span></h1>
+                <p>Active workstream assignments from B2B Hotels page</p>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr><th>Workstream</th><th>Owner(s)</th><th>Output</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Business Snapshot (Truth Deck)</strong></td><td>Ram + Grace</td><td>1–2 page "where we are now" + contract economics</td></tr>
+                    <tr><td><strong>Financial Modeling + ROI</strong></td><td>Grace (+ Vaishali)</td><td>Unit economics + ROI narrative + pricing options</td></tr>
+                    <tr><td>Hotels Finance Operations - SAAS</td><td>Vaishali</td><td>Dashboards</td></tr>
+                    <tr><td><strong>Content / Brand Story + Pitch Rewrite</strong></td><td>Sunmeet</td><td>New pitch copy + messaging blocks + deck tone fixes</td></tr>
+                    <tr><td><strong>Events / Local Activation Strategy</strong></td><td>Charisma</td><td>2–3 event packages w/ partners + F&B tie-in logic</td></tr>
+                    <tr><td><strong>Data + Hotel Scoring / Research Automation</strong></td><td>Diksha</td><td>Scoring criteria + example analysis + shortlist targets</td></tr>
+                    <tr><td><strong>Kids Yoga / Procurement Tie-in</strong></td><td>Binderiya</td><td>Kids program packaging + RFP/procurement angle + ops plan</td></tr>
+                    <tr><td>Access / Links Hygiene</td><td>All students</td><td>Request access to locked docs + add LinkedIn links</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="sub"><span>Sprint Deliverables</span> (Definition of Done)</h2>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>1) Pitch Deck Rebuild</h3>
+                    <p>Page-by-page deck outline (4 pages) + one assumptions sheet (single source of truth). Numbers on page 1, pricing explicit, proof simple + believable.</p>
+                </div>
+                <div class="card">
+                    <h3>2) Rate Benchmark + Unit Economics</h3>
+                    <p>Benchmark table by region/tier/modality. Unit economics template: instructor cost + travel + admin. Gross margin per class and per month.</p>
+                </div>
+                <div class="card">
+                    <h3>3) ROI Model v1</h3>
+                    <p>ROI calculator with labeled assumptions, low/base/high ranges. Output: monthly incremental revenue range, break-even threshold, "what must be true" list.</p>
+                </div>
+                <div class="card">
+                    <h3>4) Offer Packaging + Pricing Ladder</h3>
+                    <p>Package ladder: Pilot (2–4 weeks), Retainer (monthly), Add-ons (events, sponsorship, premium instructors).</p>
+                </div>
+                <div class="card">
+                    <h3>5) Brand Audit + Luxury System</h3>
+                    <p>Website/brochure teardown. Luxury ruleset: typography, spacing/grid, image style. Shot list + locations + 1-day shoot plan.</p>
+                </div>
+                <div class="card">
+                    <h3>6) Deck Production</h3>
+                    <p>Deck v1 complete with review checklist. Numbers on page 1, pricing explicit, execution looks low-friction for hotel.</p>
+                </div>
+                <div class="card">
+                    <h3>7) Contractor SOP v0.1</h3>
+                    <p>Onboarding checklist, class standards, cancellation/sub policy, payments, incident handling, COI/waiver basics.</p>
+                </div>
+                <div class="card">
+                    <h3>8) "Pilot in a Box" + Reporting</h3>
+                    <p>Week-by-week plan, roles, guest comms, measurement framework. Sprint 2 backlog ready.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== HOTEL SCORING ==================== -->
+        <div id="hotel-scoring" class="content-section">
+            <div class="section-header">
+                <h1>Hotel Scoring Framework <span class="badge badge-teal">DIKSHA</span></h1>
+                <p>Repeatable, explainable way to prioritize which hotels MYN targets</p>
+            </div>
+
+            <h2 class="sub"><span>Scoring Dimensions</span></h2>
+            <div class="card-grid card-grid-3">
+                <div class="card">
+                    <h3>🏋️ Wellness Fit</h3>
+                    <p>Does the hotel already have wellness programming? Spa? Fitness center? Guest profile alignment with yoga/wellness.</p>
+                </div>
+                <div class="card">
+                    <h3>🍹 F&B Activation Potential</h3>
+                    <p>Post-class upsell opportunity. Poolside bar, juice bar, brunch programming. Low-traffic hour activation.</p>
+                </div>
+                <div class="card">
+                    <h3>📸 Social / Content Leverage</h3>
+                    <p>Instagram-worthy spaces, influencer potential, review volume. Brand amplification opportunity.</p>
+                </div>
+                <div class="card">
+                    <h3>📋 Procurement Readiness</h3>
+                    <p>Vendor onboarding ease, contract complexity, decision-maker accessibility. COI/insurance requirements.</p>
+                </div>
+                <div class="card">
+                    <h3>💰 Revenue Potential</h3>
+                    <p>ADR, occupancy, resort/destination fee context, group sales volume. RevPAR and TRevPAR indicators.</p>
+                </div>
+                <div class="card">
+                    <h3>🎯 Strategic Value</h3>
+                    <p>Brand name recognition, portfolio effect (Westin → more Westins), geographic expansion, reference customer value.</p>
+                </div>
+            </div>
+
+            <h2 class="sub"><span>Key Hotel Metrics</span> (What Hotels Track)</h2>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>📊 Revenue & Occupancy</h3>
+                    <div class="econ-row"><span class="econ-label">ADR (Avg Daily Rate)</span><span class="econ-value">Key pricing indicator</span></div>
+                    <div class="econ-row"><span class="econ-label">RevPAR</span><span class="econ-value">Revenue per available room</span></div>
+                    <div class="econ-row"><span class="econ-label">TRevPAR</span><span class="econ-value">Total rev per room (incl. ancillary)</span></div>
+                    <div class="econ-row"><span class="econ-label">ARPOR</span><span class="econ-value">Ancillary rev per occupied room</span></div>
+                    <div class="econ-row"><span class="econ-label">Capture rate</span><span class="econ-value">% participants who buy add-ons</span></div>
+                </div>
+                <div class="card">
+                    <h3>🎯 Program KPIs</h3>
+                    <div class="econ-row"><span class="econ-label">Incremental F&B rev/event</span><span class="econ-value">Track per activation</span></div>
+                    <div class="econ-row"><span class="econ-label">Participant-to-purchase %</span><span class="econ-value">Conversion metric</span></div>
+                    <div class="econ-row"><span class="econ-label">Email/SMS opt-ins</span><span class="econ-value">Lead capture</span></div>
+                    <div class="econ-row"><span class="econ-label">Guest satisfaction lift</span><span class="econ-value">Review mentions</span></div>
+                    <div class="econ-row"><span class="econ-label">Net profit after costs</span><span class="econ-value">Bottom line</span></div>
+                </div>
+            </div>
+
+            <h2 class="sub"><span>Deliverable Pipeline</span></h2>
+            <div class="card-grid">
+                <div class="card">
+                    <h3>Set 1: Hotel Scoring Rubric</h3>
+                    <p>Criteria, weights, definitions. Weighted scorecard table + ranked bar chart. Becomes intake filter for sales.</p>
+                </div>
+                <div class="card">
+                    <h3>Set 2: Top-25 Target Shortlist</h3>
+                    <p>Source links + data notes. Clear flags: easy win vs long-cycle. Heatmap across scoring dimensions. Usable immediately by procurement.</p>
+                </div>
+                <div class="card">
+                    <h3>Set 3: Dashboard Question Architecture</h3>
+                    <p>10 non-negotiable dashboard questions: pipeline health, program performance, conversion drop-offs, data gaps. Question → Metric → Data source map.</p>
+                </div>
+                <div class="card">
+                    <h3>Set 4: Data Schema + Instrumentation</h3>
+                    <p>BigQuery/Supabase starter schema, key fields, sample rows. Event definitions for GHL. Entity-relationship diagram.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== ROI CALCULATOR ==================== -->
+        <div id="roi-model" class="content-section">
+            <div class="section-header">
+                <h1>ROI Calculator <span class="badge badge-green">INTERACTIVE</span></h1>
+                <p>Adjust assumptions to model hotel partnership economics</p>
+            </div>
+
+            <div class="card" style="margin-bottom: 24px; padding: 28px;">
+                <h3 style="margin-bottom: 16px;">🧮 Hotel ROI Model</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <label style="font-size: 12px; color: #7a9ba8; display: block; margin-bottom: 4px;">Classes per week</label>
+                        <input type="range" id="classesPerWeek" min="1" max="14" value="7" style="width: 100%;" oninput="calculateROI()">
+                        <span id="classesPerWeekVal" style="font-size: 13px; color: #00d4aa;">7</span>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #7a9ba8; display: block; margin-bottom: 4px;">Rate per class ($)</label>
+                        <input type="range" id="ratePerClass" min="75" max="250" value="150" step="25" style="width: 100%;" oninput="calculateROI()">
+                        <span id="ratePerClassVal" style="font-size: 13px; color: #00d4aa;">$150</span>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #7a9ba8; display: block; margin-bottom: 4px;">Instructor cost ($)</label>
+                        <input type="range" id="instructorCost" min="30" max="100" value="55" step="5" style="width: 100%;" oninput="calculateROI()">
+                        <span id="instructorCostVal" style="font-size: 13px; color: #ffb74d;">$55</span>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; color: #7a9ba8; display: block; margin-bottom: 4px;">Avg attendees per class</label>
+                        <input type="range" id="avgAttendees" min="5" max="30" value="15" style="width: 100%;" oninput="calculateROI()">
+                        <span id="avgAttendeesVal" style="font-size: 13px; color: #42a5f5;">15</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-row" id="roi-results">
+                <div class="stat-box">
+                    <div class="number green" id="monthlyRev">$4,500</div>
+                    <div class="label">Monthly Revenue</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number amber" id="monthlyCost">$1,650</div>
+                    <div class="label">Monthly Cost</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="monthlyProfit">$2,850</div>
+                    <div class="label">Monthly Profit</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number green" id="marginPct">63%</div>
+                    <div class="label">Gross Margin</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number purple" id="annualRev">$34,200</div>
+                    <div class="label">Annual Profit</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number blue" id="fbUplift">$1,944</div>
+                    <div class="label">F&B Uplift/Mo</div>
+                </div>
+            </div>
+
+            <div class="card" id="roi-pitch-card" style="border-color: rgba(0,212,170,0.3); background: rgba(0,212,170,0.03);">
+                <h3>📣 Pitch Summary (Auto-Generated)</h3>
+                <p id="roi-pitch">At $150/class with 7 classes per week, the hotel invests $4,500/month. In return, they see approximately $13,244 in total monthly value across F&B uplift, spa capture, and group events — a 2.9× return on investment.</p>
+            </div>
+        </div>
+
+    </div><!-- end .main -->
+</div><!-- end .container -->
+
+<script>
+function switchTab(tabId) {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+
+function toggleSection(header) {
+    header.classList.toggle('open');
+    const content = header.nextElementSibling;
+    content.classList.toggle('open');
+}
+
+function calculateROI() {
+    const cpw = parseInt(document.getElementById('classesPerWeek').value);
+    const rpc = parseInt(document.getElementById('ratePerClass').value);
+    const ic = parseInt(document.getElementById('instructorCost').value);
+    const att = parseInt(document.getElementById('avgAttendees').value);
+
+    document.getElementById('classesPerWeekVal').textContent = cpw;
+    document.getElementById('ratePerClassVal').textContent = '$' + rpc;
+    document.getElementById('instructorCostVal').textContent = '$' + ic;
+    document.getElementById('avgAttendeesVal').textContent = att;
+
+    const monthlyClasses = cpw * 4.33;
+    const monthlyRev = Math.round(monthlyClasses * rpc);
+    const monthlyCost = Math.round(monthlyClasses * ic);
+    const monthlyProfit = monthlyRev - monthlyCost;
+    const margin = Math.round((monthlyProfit / monthlyRev) * 100);
+    const annualProfit = monthlyProfit * 12;
+
+    // F&B uplift
+    const monthlyAttendees = Math.round(monthlyClasses * att);
+    const fbUplift = Math.round(monthlyAttendees * 0.45 * 18);
+
+    // Spa capture
+    const spaCapture = Math.round(monthlyAttendees * 0.15 * 175);
+
+    // Total hotel value
+    const totalValue = monthlyRev + fbUplift + spaCapture + 2000 + 1000;
+    const roiMultiplier = (totalValue / monthlyRev).toFixed(1);
+
+    document.getElementById('monthlyRev').textContent = '$' + monthlyRev.toLocaleString();
+    document.getElementById('monthlyCost').textContent = '$' + monthlyCost.toLocaleString();
+    document.getElementById('monthlyProfit').textContent = '$' + monthlyProfit.toLocaleString();
+    document.getElementById('marginPct').textContent = margin + '%';
+    document.getElementById('annualRev').textContent = '$' + annualProfit.toLocaleString();
+    document.getElementById('fbUplift').textContent = '$' + fbUplift.toLocaleString();
+
+    document.getElementById('roi-pitch').textContent =
+        'At $' + rpc + '/class with ' + cpw + ' classes per week, the hotel invests $' + monthlyRev.toLocaleString() + '/month. ' +
+        'In return, they see approximately $' + totalValue.toLocaleString() + ' in total monthly value across F&B uplift ($' + fbUplift.toLocaleString() + '), ' +
+        'spa capture ($' + spaCapture.toLocaleString() + '), and group events — a ' + roiMultiplier + '× return on investment. ' +
+        'MYN retains $' + monthlyProfit.toLocaleString() + '/month (' + margin + '% margin) after instructor costs.';
+}
+</script>
+<!-- FLOATING QUICK-ACCESS PANEL -->
+<style>
+    .quick-access-fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #00d4aa, #00a885);
+        border: none;
+        border-radius: 50%;
+        color: #0a1628;
+        font-size: 24px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(0, 212, 170, 0.4);
+        z-index: 9999;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .quick-access-fab:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 30px rgba(0, 212, 170, 0.6);
+    }
+    .quick-access-panel {
+        position: fixed;
+        bottom: 92px;
+        right: 24px;
+        width: 320px;
+        max-height: 0;
+        overflow: hidden;
+        background: rgba(10, 22, 40, 0.98);
+        border: 1px solid rgba(0, 212, 170, 0.25);
+        border-radius: 16px;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+        transition: max-height 0.35s ease, padding 0.35s ease, opacity 0.35s ease;
+        opacity: 0;
+        padding: 0 20px;
+    }
+    .quick-access-panel.open {
+        max-height: 520px;
+        opacity: 1;
+        padding: 20px;
+    }
+    .qa-header {
+        font-size: 13px;
+        font-weight: 700;
+        color: #00d4aa;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(0, 212, 170, 0.15);
+    }
+    .qa-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #c0d0dd;
+        font-size: 13px;
+        transition: all 0.15s;
+    }
+    .qa-link:hover {
+        background: rgba(0, 212, 170, 0.1);
+        color: #fff;
+    }
+    .qa-link .qa-icon { font-size: 16px; width: 22px; text-align: center; }
+    .qa-link .qa-badge {
+        margin-left: auto;
+        background: rgba(255, 107, 53, 0.2);
+        color: #ff6b35;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 8px;
+    }
+    .qa-section-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #5a7a8a;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 12px 0 4px 12px;
+    }
+</style>
+
+<button class="quick-access-fab" onclick="document.getElementById('quick-access-panel').classList.toggle('open')" title="Quick Access — All Dashboards">⚡</button>
+
+<div class="quick-access-panel" id="quick-access-panel">
+    <div class="qa-header">Quick Access — All Boards</div>
+    <a href="unified-command-center.html" class="qa-link" style="background:rgba(0,212,170,0.08);margin-bottom:4px;">
+        <span class="qa-icon">🎯</span> <strong>Unified Command Center</strong>
+    </a>
+    <div class="qa-section-label">Operational</div>
+    <a href="agentic-os-dashboard.html" class="qa-link"><span class="qa-icon">🤖</span> Agentic OS Dashboard</a>
+    <a href="agentfield-dashboard.html" class="qa-link"><span class="qa-icon">⚙️</span> AgentField Control Plane</a>
+    <a href="review-queue.html" class="qa-link"><span class="qa-icon">📋</span> Review Queue <span class="qa-badge">2</span></a>
+    <div class="qa-section-label">Strategy & Business</div>
+    <a href="business-economics-dashboard.html" class="qa-link"><span class="qa-icon">💰</span> Business Economics</a>
+    <a href="dashboard-master.html" class="qa-link"><span class="qa-icon">📊</span> Master Dashboard</a>
+    <div class="qa-section-label">Reference</div>
+    <a href="index.html" class="qa-link"><span class="qa-icon">🏠</span> Marketing Index</a>
+    <a href="architecture-dashboard.html" class="qa-link"><span class="qa-icon">🏗️</span> Architecture & Skills</a>
+    <a href="supabase-dashboard.html" class="qa-link"><span class="qa-icon">🗄️</span> Supabase Dashboard</a>
+    <a href="team-handoff-dashboard.html" class="qa-link"><span class="qa-icon">👥</span> Team Handoff</a>
+    <a href="master-directory.html" class="qa-link"><span class="qa-icon">📁</span> Master Directory</a>
+</div>
+<!-- END QUICK-ACCESS PANEL -->
+
+</body>
+</html>

@@ -1,0 +1,34 @@
+# Internal — do not publish to GitHub
+# These folders contain sensitive config, prompts, lead lists, or approval data.
+
+# Master prompts, CEO agent persona, company config (internal IP)
+paperclip-config/
+
+# Reoon / Instantly email verification workflow data (may contain contact lists)
+email-verification/
+
+# Internal approval digests
+approvals/
+
+# Archive of deprecated dashboards (not needed publicly)
+_archive/
+
+# Agent + system architecture docs (internal strategic IP)
+AGENT_ARCHITECTURE.md
+PM_AGENT_SUPPLEMENT.md
+SYSTEM_STATUS.md
+TEMPLATES.md
+
+# Pipeline snapshots (internal sales data)
+MYN-Pipeline-Daily.md
+MYN-Pipeline-Snapshot-Week-of-*.md
+
+# PDFs may contain financial / asset data — review before un-ignoring
+*.pdf
+
+# Local OS + editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/

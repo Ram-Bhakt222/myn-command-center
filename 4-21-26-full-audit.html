@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MYN Full System Audit — April 21, 2026</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6}
+a{color:#a78bfa;text-decoration:none}a:hover{color:#c4b5fd;text-decoration:underline}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+header{text-align:center;padding:40px 20px 30px;border-bottom:1px solid #1e1e2e}
+header h1{font-size:2.2rem;background:linear-gradient(135deg,#7c5cfc,#a78bfa,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+header .date{color:#888;font-size:0.95rem}
+.stats-row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin:24px 0}
+.stat-card{background:#12121a;border:1px solid #1e1e2e;border-radius:12px;padding:16px 24px;text-align:center;min-width:130px}
+.stat-card .num{font-size:1.8rem;font-weight:700;color:#7c5cfc}.stat-card .label{font-size:0.8rem;color:#888;text-transform:uppercase;letter-spacing:1px}
+.changes-banner{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #7c5cfc44;border-radius:12px;padding:20px 28px;margin:24px 0}
+.changes-banner h3{color:#a78bfa;margin-bottom:10px;font-size:1.1rem}
+.changes-banner ul{list-style:none;padding:0}.changes-banner li{padding:4px 0;font-size:0.92rem}
+.changes-banner li::before{content:'▸ ';color:#7c5cfc}
+.search-bar{display:flex;justify-content:center;margin:20px 0}
+.search-bar input{background:#12121a;border:1px solid #2a2a3a;border-radius:8px;padding:10px 20px;width:100%;max-width:600px;color:#e0e0e0;font-size:0.95rem}
+.search-bar input::placeholder{color:#555}
+.filter-tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0 28px}
+.filter-tabs button{background:#12121a;border:1px solid #2a2a3a;border-radius:20px;padding:6px 16px;color:#999;font-size:0.82rem;cursor:pointer;transition:all .2s}
+.filter-tabs button:hover,.filter-tabs button.active{background:#7c5cfc;color:#fff;border-color:#7c5cfc}
+section{margin:32px 0}
+section h2{font-size:1.3rem;color:#c4b5fd;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #1e1e2e}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.card{background:#12121a;border:1px solid #1e1e2e;border-radius:10px;padding:16px;transition:border-color .2s}
+.card:hover{border-color:#7c5cfc55}
+.card h4{font-size:0.95rem;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.card p{font-size:0.82rem;color:#888;margin-bottom:4px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-green{background:#22c55e}.dot-purple{background:#7c5cfc}.dot-yellow{background:#eab308}.dot-blue{background:#3b82f6}.dot-red{background:#ef4444}
+.tag{display:inline-block;background:#1e1e2e;border-radius:4px;padding:2px 8px;font-size:0.72rem;color:#a78bfa;margin:2px}
+.new-tag{background:#22c55e22;color:#22c55e;border:1px solid #22c55e44}
+.sessions-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:10px}
+.session-item{background:#12121a;border:1px solid #1e1e2e;border-radius:8px;padding:12px 16px;font-size:0.85rem}
+.session-item .s-name{color:#c4b5fd;font-weight:600}.session-item .s-status{font-size:0.75rem;color:#888}
+.possibilities{background:#12121a;border:1px solid #7c5cfc33;border-radius:12px;padding:24px}
+.possibilities li{padding:6px 0;font-size:0.9rem}
+footer{text-align:center;padding:40px 20px;color:#444;font-size:0.8rem;border-top:1px solid #1e1e2e;margin-top:40px}
+</style>
+</head>
+<body>
+<!-- BEGIN MYN-NAV (auto-injected 2026-04-21) -->
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; -webkit-font-smoothing: antialiased; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__inner::-webkit-scrollbar { height: 4px; } .myn-nav__inner::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.25); border-radius: 2px; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-variant-numeric: tabular-nums; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Center</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="master-directory.html" data-page="master-directory">Directory</a>
+  <a href="analytics-dashboard.html" data-page="analytics-dashboard">Analytics</a>
+  <a href="lead-gen-dashboard.html" data-page="lead-gen-dashboard">Leads</a>
+  <a href="hotel-activities-dashboard.html" data-page="hotel-activities-dashboard">Hotels</a>
+  <a href="business-economics-dashboard.html" data-page="business-economics-dashboard">Economics</a>
+  <a href="team-handoff-dashboard.html" data-page="team-handoff-dashboard">Team</a>
+  <a href="architecture-dashboard.html" data-page="architecture-dashboard">Architecture</a>
+  <a href="agent-control-plane.html" data-page="agent-control-plane">Agents</a>
+  <a href="supabase-dashboard.html" data-page="supabase-dashboard">Supabase</a>
+  <a href="paperclip-dashboard.html" data-page="paperclip-dashboard">Paperclip</a>
+  <a href="review-queue.html" data-page="review-queue">Review</a>
+  <a href="4-21-26-full-audit.html" data-page="4-21-26-full-audit">Audit</a>
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date" id="myn-nav-date"></span>
+</div>
+</nav>
+<script>
+(function(){
+  var path = (location.pathname.split('/').pop() || 'index.html').replace('.html','');
+  var links = document.querySelectorAll('.myn-nav a[data-page]');
+  for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('data-page') === path) links[i].classList.add('is-active'); }
+  var d = new Date(); var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var el = document.getElementById('myn-nav-date'); if (el) el.textContent = m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+})();
+</script>
+<!-- END MYN-NAV -->
+
+<div class="container">
+<header>
+<h1>MYN Full System Audit</h1>
+<div class="date">Generated April 21, 2026 · Audit #8 · Automated by Cowork</div>
+</header>
+
+<div class="stats-row">
+<div class="stat-card"><div class="num">28</div><div class="label">Dashboards</div></div>
+<div class="stat-card"><div class="num">36</div><div class="label">Agents</div></div>
+<div class="stat-card"><div class="num">13</div><div class="label">Pipelines</div></div>
+<div class="stat-card"><div class="num">14</div><div class="label">Website Pages</div></div>
+<div class="stat-card"><div class="num">19</div><div class="label">Integrations</div></div>
+<div class="stat-card"><div class="num">388</div><div class="label">Cowork Sessions</div></div>
+<div class="stat-card"><div class="num">18</div><div class="label">Social Tools</div></div>
+</div>
+
+<div class="changes-banner">
+<h3>Changes Since Last Audit (April 15, 2026)</h3>
+<ul>
+<li><span class="tag new-tag">NEW</span> <code>WHFM_Company_Dashboard.html</code> — new top-level dashboard for WombHealthFM (Apr 16)</li>
+<li><span class="tag new-tag">NEW</span> <code>APPOINTMENT_SETTER_LIVE_SIM.html</code> — live simulation dashboard for appointment setter flow</li>
+<li><span class="tag new-tag">NEW</span> <code>MYN_Compressed_Operating_Architecture.docx</code> — compressed operating doc on Desktop root (Apr 17)</li>
+<li><span class="tag new-tag">NEW</span> <code>mynapi-main/</code> repo cloned to Desktop — alternate API build (Apr 20)</li>
+<li><span class="tag new-tag">NEW</span> <code>Strategy AGI/mcp-ga-gsc/</code> — Google Analytics + Search Console MCP server (new directory)</li>
+<li><span class="tag new-tag">NEW</span> <code>Strategy AGI/agents/PM_WEBDEV_AGENT.md</code> — project manager / web-dev agent spec</li>
+<li><span class="tag new-tag">NEW</span> <code>Strategy AGI/agents/EXECUTION_MAP.md</code> — agent execution map</li>
+<li><span class="tag new-tag">NEW</span> <code>Strategy AGI/03_repo_management/GIT_PUSH_GUIDE.md</code> — git deployment guide</li>
+<li><span class="tag new-tag">NEW</span> <code>Strategy AGI/07_roadmaps/GATES_2_AND_3_CHECKLIST.md</code> — gates 2 and 3 progression checklist</li>
+<li><span class="tag new-tag">NEW</span> <code>Strategy AGI/CLAY_OUTBOUND_SYSTEM.md</code> + <code>clay_ca_luxury_20_targets.xlsx</code> — CA luxury 20 Clay outbound targets</li>
+<li><span class="tag new-tag">NEW</span> <code>Strategy AGI/pipeline-daily/2026-04-17/</code> — new structured daily pipeline output format</li>
+<li><span class="tag new-tag">NEW</span> <code>Strategy AGI/pipeline-runs/lead_queue_2026-04-21_aspen.json</code> — Aspen lead queue (today)</li>
+<li><span class="tag new-tag">NEW</span> <code>Strategy AGI/MYN_Strategy_Dashboard.html</code> + <code>_latest.html</code> — strategy dashboard refresh</li>
+<li><span class="tag new-tag">NEW</span> <code>Strategy AGI/pipeline-boulder-2026-04-16.html</code> + <code>.json</code> — Boulder pipeline report</li>
+<li><span class="tag new-tag">NEW</span> <code>outreach_drafts_2026-04-15.json</code> &amp; <code>2026-04-16.json</code> — outreach draft batches</li>
+<li><span class="tag new-tag">NEW</span> <code>execution_logs/2026-04-21_daily-outreach-drafts.md</code> — today's outreach run log</li>
+<li><span class="tag new-tag">NEW</span> <code>WombhealthFM/.memory/</code> — 8 new brand memory files (brand-kit, guardrails, voice, owner, platforms, pdf-pipeline, working-preferences)</li>
+<li><span class="tag new-tag">NEW</span> <code>WombhealthFM/Amatma Mentor Calls/</code> — April 2 + April 16 call summaries and protocols</li>
+<li><span class="tag new-tag">NEW</span> <code>WombhealthFM/AFTER_CALL_SEQUENCES.md</code> — post-call messaging sequence</li>
+<li><span class="tag new-tag">NEW</span> <code>WombhealthFM/Client_IG_DM_Tracker.xlsx</code> &amp; <code>PracticeBetter_Clients.xlsx</code> — new client trackers</li>
+<li><span class="tag new-tag">NEW</span> <code>WombhealthFM/WHFM_Raw_Food_Juice_Reset.pdf</code> &amp; <code>WHFM_Raw_Phase_Recipes.pdf</code> — raw reset protocol</li>
+<li><span class="tag new-tag">NEW</span> <code>WombhealthFM/FEM_Live_Session_Notes_2026-04-02.md</code> — live session notes</li>
+<li><span class="tag new-tag">NEW</span> <code>WombhealthFM/tip_12_thyroid.png</code>, <code>tip_27_detox.png</code>, <code>tip_35_stress.png</code> — campaign tip graphics</li>
+<li><span class="tag new-tag">NEW</span> <code>Marketing Agent/blog-2026-04-20-wearable-validated-wellness-corporate-yoga.md</code> — new corporate wellness blog</li>
+<li><span class="tag new-tag">NEW</span> <code>Command Center/approvals/MYN-Approval-Digest-2026-04-17.md</code> — latest approval digest</li>
+<li>Cowork sessions grew from 340 → <strong>388</strong> (+48 runs)</li>
+<li>New session types this week: Myn market research, Plan email sequence for fertility labs, Weekly pipeline review, Weekly pipeline snapshot, Check Google Drive and Gmail access, Recreate detox guide with brand assets, Build MCP server for GA4 and Search Console, Convert lbsoy to wellness SEO engine, Write personalized client follow-up emails, Build Clay outbound system for yoga network, Review Google Analytics for myn.com</li>
+</ul>
+</div>
+
+<div class="search-bar">
+<input type="text" id="searchInput" placeholder="Search dashboards, agents, pipelines, files..." onkeyup="filterItems()">
+</div>
+<div class="filter-tabs">
+<button class="active" onclick="setFilter('all',this)">All</button>
+<button onclick="setFilter('dashboard',this)">Dashboards</button>
+<button onclick="setFilter('agent',this)">Agents</button>
+<button onclick="setFilter('pipeline',this)">Pipelines</button>
+<button onclick="setFilter('website',this)">Websites</button>
+<button onclick="setFilter('data',this)">Data</button>
+<button onclick="setFilter('api',this)">APIs</button>
+<button onclick="setFilter('doc',this)">Docs</button>
+<button onclick="setFilter('video',this)">Video</button>
+</div>
+</div>
+<div class="container">
+
+<!-- DASHBOARDS -->
+<section data-category="dashboard">
+<h2>Dashboards &amp; Command Centers (28)</h2>
+<div class="grid">
+<div class="card" data-tags="dashboard command"><h4><span class="dot dot-green"></span>Unified Command Center</h4><p>Master hub linking all dashboards</p><p><a href="unified-command-center.html">unified-command-center.html</a></p></div>
+<div class="card" data-tags="dashboard"><h4><span class="dot dot-green"></span>Master Directory</h4><p>Central file index across all folders</p><p><a href="master-directory.html">master-directory.html</a></p></div>
+<div class="card" data-tags="dashboard"><h4><span class="dot dot-green"></span>Dashboard Master</h4><p>Dashboard of dashboards</p><p><a href="dashboard-master.html">dashboard-master.html</a></p></div>
+<div class="card" data-tags="dashboard index"><h4><span class="dot dot-green"></span>Index (Hub)</h4><p>Quick-access landing page</p><p><a href="index.html">index.html</a></p></div>
+<div class="card" data-tags="dashboard agent"><h4><span class="dot dot-purple"></span>Agent Control Plane</h4><p>Real-time agent status &amp; orchestration</p><p><a href="agent-control-plane.html">agent-control-plane.html</a></p></div>
+<div class="card" data-tags="dashboard agent"><h4><span class="dot dot-purple"></span>Agent OS Dashboard</h4><p>Agentic OS overview</p><p><a href="agent-os-dashboard.html">agent-os-dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard agent"><h4><span class="dot dot-purple"></span>Agentic OS Dashboard</h4><p>Advanced agentic operating system view</p><p><a href="agentic-os-dashboard.html">agentic-os-dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard agent"><h4><span class="dot dot-purple"></span>Agentfield Dashboard</h4><p>Agent deployment &amp; skill registry</p><p><a href="agentfield-dashboard.html">agentfield-dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard analytics"><h4><span class="dot dot-green"></span>Analytics Dashboard</h4><p>GA4 &amp; site analytics</p><p><a href="analytics-dashboard.html">analytics-dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard architecture"><h4><span class="dot dot-purple"></span>Architecture Dashboard</h4><p>System architecture visual map</p><p><a href="architecture-dashboard.html">architecture-dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard business"><h4><span class="dot dot-green"></span>Business Economics Dashboard</h4><p>Revenue, margins, unit economics</p><p><a href="business-economics-dashboard.html">business-economics-dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard pipeline"><h4><span class="dot dot-green"></span>Lead Gen Dashboard</h4><p>Pipeline metrics &amp; lead tracking</p><p><a href="lead-gen-dashboard.html">lead-gen-dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard api"><h4><span class="dot dot-purple"></span>Paperclip Dashboard</h4><p>Paperclip agent platform status</p><p><a href="paperclip-dashboard.html">paperclip-dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard api"><h4><span class="dot dot-purple"></span>Supabase Dashboard</h4><p>Database &amp; auth monitoring</p><p><a href="supabase-dashboard.html">supabase-dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard"><h4><span class="dot dot-green"></span>Review Queue</h4><p>Approval &amp; review workflow tracker</p><p><a href="review-queue.html">review-queue.html</a></p></div>
+<div class="card" data-tags="dashboard team"><h4><span class="dot dot-green"></span>Team Handoff Dashboard</h4><p>Riipen cohort &amp; intern tracking</p><p><a href="team-handoff-dashboard.html">team-handoff-dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard"><h4><span class="dot dot-purple"></span>Hotel Activities Dashboard</h4><p>Hotel partnership tracking</p><p><a href="hotel-activities-dashboard.html">hotel-activities-dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard"><h4><span class="dot dot-green"></span>Scott Hoffman Knowledge Base</h4><p>Revenue gen &amp; consulting intel</p><p><a href="scott-hoffman-knowledge-base.html">scott-hoffman-knowledge-base.html</a></p></div>
+<div class="card" data-tags="dashboard doc"><h4><span class="dot dot-purple"></span>MYN Strategy Dashboard (latest)</h4><p>Latest refreshed strategy overview <span class="tag new-tag">UPDATED</span></p><p><a href="../../Strategy AGI/MYN_Strategy_Dashboard_latest.html">Strategy AGI/MYN_Strategy_Dashboard_latest.html</a></p></div>
+<div class="card" data-tags="dashboard agent"><h4><span class="dot dot-purple"></span>MYN AGI Dashboard</h4><p>AGI capabilities overview</p><p><a href="../../Strategy AGI/MYN_AGI_Dashboard.html">Strategy AGI/MYN_AGI_Dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard"><h4><span class="dot dot-purple"></span>Agentfield Dashboard (Strategy AGI)</h4><p>In-repo agentfield view</p><p><a href="../../Strategy AGI/AGENTFIELD_DASHBOARD.html">Strategy AGI/AGENTFIELD_DASHBOARD.html</a></p></div>
+<div class="card" data-tags="dashboard pipeline"><h4><span class="dot dot-green"></span>Instantly Campaign Analytics</h4><p>Cold email campaign performance</p><p><a href="../../Strategy AGI/instantly_campaign_analytics.html">Strategy AGI/instantly_campaign_analytics.html</a></p></div>
+<div class="card" data-tags="dashboard video"><h4><span class="dot dot-yellow"></span>Remotion Stitch Integration</h4><p>Video pipeline dashboard</p><p><a href="../../Strategy AGI/remotion-stitch-integration.html">Strategy AGI/remotion-stitch-integration.html</a></p></div>
+<div class="card" data-tags="dashboard"><h4><span class="dot dot-purple"></span>Google Ads Campaign Draft</h4><p>Paid advertising draft</p><p><a href="../../Strategy AGI/google-ads-campaign-draft.html">Strategy AGI/google-ads-campaign-draft.html</a></p></div>
+<div class="card" data-tags="dashboard doc"><h4><span class="dot dot-green"></span>WHFM Strategy Dashboard</h4><p>WombHealth FM growth strategy</p><p><a href="../../WombhealthFM/_docs/WHFM_Strategy_Dashboard.html">WombhealthFM/_docs/WHFM_Strategy_Dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard whfm"><h4><span class="dot dot-green"></span>WHFM Company Dashboard <span class="tag new-tag">NEW</span></h4><p>New top-level WombHealthFM company ops view</p><p><a href="../../WombhealthFM/WHFM_Company_Dashboard.html">WombhealthFM/WHFM_Company_Dashboard.html</a></p></div>
+<div class="card" data-tags="dashboard agent"><h4><span class="dot dot-yellow"></span>WHFM Agent Buildout Tracker</h4><p>8-agent system tracker for WHFM</p><p><a href="../../WombhealthFM/_agents/WHFM_Agent_Buildout_Tracker.html">WombhealthFM/_agents/WHFM_Agent_Buildout_Tracker.html</a></p></div>
+<div class="card" data-tags="dashboard whfm"><h4><span class="dot dot-green"></span>Appointment Setter Live Sim <span class="tag new-tag">NEW</span></h4><p>Live simulation of the appointment-setter conversation flow</p><p><a href="../../WombhealthFM/APPOINTMENT_SETTER_LIVE_SIM.html">WombhealthFM/APPOINTMENT_SETTER_LIVE_SIM.html</a></p></div>
+<div class="card" data-tags="dashboard data"><h4><span class="dot dot-green"></span>Qdrant Ingestion Dashboard</h4><p>Vector DB audit &amp; ingestion status</p><p><a href="../../qdrant/google-takeouts-audit-dashboard.html">qdrant/google-takeouts-audit-dashboard.html</a></p></div>
+</div>
+</section>
+
+<!-- AGENTS & SKILLS -->
+<section data-category="agent">
+<h2>Agents &amp; Skills (36)</h2>
+<div class="grid">
+<div class="card" data-tags="agent skill"><h4><span class="dot dot-purple"></span>myn-hotel-sales-brain</h4><p>Hotel outreach &amp; deal intelligence</p><p><a href="../../Strategy AGI/skills/myn-hotel-sales-brain">skills/myn-hotel-sales-brain</a></p></div>
+<div class="card" data-tags="agent skill"><h4><span class="dot dot-purple"></span>myn-executive-router</h4><p>Routes tasks to correct agent/division</p><p><a href="../../Strategy AGI/skills/myn-executive-router">skills/myn-executive-router</a></p></div>
+<div class="card" data-tags="agent skill"><h4><span class="dot dot-purple"></span>myn-founder-voice</h4><p>Brand-voice content generation</p><p><a href="../../Strategy AGI/skills/myn-founder-voice">skills/myn-founder-voice</a></p></div>
+<div class="card" data-tags="agent skill"><h4><span class="dot dot-purple"></span>myn-product-owner</h4><p>Feature prioritization &amp; roadmap</p><p><a href="../../Strategy AGI/skills/myn-product-owner">skills/myn-product-owner</a></p></div>
+<div class="card" data-tags="agent skill"><h4><span class="dot dot-purple"></span>myn-content-miner</h4><p>Content extraction &amp; repurposing</p><p><a href="../../Strategy AGI/skills/myn-content-miner">skills/myn-content-miner</a></p></div>
+<div class="card" data-tags="agent skill"><h4><span class="dot dot-purple"></span>myn-warm-lead-conversion</h4><p>Lead nurture &amp; close sequences</p><p><a href="../../Strategy AGI/skills/myn-warm-lead-conversion">skills/myn-warm-lead-conversion</a></p></div>
+<div class="card" data-tags="agent skill"><h4><span class="dot dot-purple"></span>myn-api-integration-architect</h4><p>API design &amp; integration planning</p><p><a href="../../Strategy AGI/skills/myn-api-integration-architect">skills/myn-api-integration-architect</a></p></div>
+<div class="card" data-tags="agent skill"><h4><span class="dot dot-purple"></span>myn-automation-operator</h4><p>Workflow automation orchestrator</p><p><a href="../../Strategy AGI/skills/myn-automation-operator">skills/myn-automation-operator</a></p></div>
+<div class="card" data-tags="agent skill"><h4><span class="dot dot-purple"></span>myn-frontend-reviewer</h4><p>UI/UX review &amp; feedback</p><p><a href="../../Strategy AGI/skills/myn-frontend-reviewer">skills/myn-frontend-reviewer</a></p></div>
+<div class="card" data-tags="agent skill"><h4><span class="dot dot-purple"></span>myn-proposal-engine</h4><p>RFP &amp; proposal generation</p><p><a href="../../Strategy AGI/skills/myn-proposal-engine">skills/myn-proposal-engine</a></p></div>
+<div class="card" data-tags="agent skill"><h4><span class="dot dot-purple"></span>whatsapp-mcp (skill)</h4><p>WhatsApp MCP bridge skill</p><p><a href="../../Strategy AGI/skills/whatsapp-mcp">skills/whatsapp-mcp</a></p></div>
+<div class="card" data-tags="agent"><h4><span class="dot dot-purple"></span>PM / WebDev Agent <span class="tag new-tag">NEW</span></h4><p>Project manager + web-dev agent with execution map</p><p><a href="../../Strategy AGI/agents/PM_WEBDEV_AGENT.md">agents/PM_WEBDEV_AGENT.md</a> · <a href="../../Strategy AGI/agents/EXECUTION_MAP.md">EXECUTION_MAP.md</a></p></div>
+<div class="card" data-tags="agent"><h4><span class="dot dot-purple"></span>Agentfield: 25 Python Agents</h4><p>ab_testing, cold_email_writer, competitive_intel, content_publishing, email_newsletter, executive_research, intent_router, lead_discovery, lead_researcher, linkedin_engine, marketing_agent, marketing_orchestrator, memory_store, motion_video, opportunity_scoring, outreach_gen, pmf_assessment, social_discovery, style_cloner, summarizers, video_producer, video_production, website_intel, wellness_recommender</p><p><a href="../../Strategy AGI/agentfield/agents">agentfield/agents/</a></p></div>
+</div>
+<h3 style="color:#a78bfa;margin:20px 0 12px;font-size:1rem">WombHealthFM Agents (8)</h3>
+<div class="grid">
+<div class="card" data-tags="agent whfm"><h4><span class="dot dot-purple"></span>01-chief-copy-architect</h4><p>Master copywriting agent</p></div>
+<div class="card" data-tags="agent whfm"><h4><span class="dot dot-purple"></span>02-sales-psychology</h4><p>Sales messaging &amp; psychology</p></div>
+<div class="card" data-tags="agent whfm"><h4><span class="dot dot-purple"></span>03-nurture-email</h4><p>Email nurture sequences</p></div>
+<div class="card" data-tags="agent whfm"><h4><span class="dot dot-purple"></span>04-social-caption</h4><p>Social media captions</p></div>
+<div class="card" data-tags="agent whfm"><h4><span class="dot dot-purple"></span>05-clinical-research</h4><p>Clinical evidence &amp; research</p></div>
+<div class="card" data-tags="agent whfm"><h4><span class="dot dot-purple"></span>06-course-creator</h4><p>Course content generator</p></div>
+<div class="card" data-tags="agent whfm"><h4><span class="dot dot-purple"></span>07-brand-graphics</h4><p>Brand visual design</p></div>
+<div class="card" data-tags="agent whfm"><h4><span class="dot dot-purple"></span>08-social-strategy</h4><p>Social media strategy</p></div>
+</div>
+</section>
+
+<!-- PIPELINES -->
+<section data-category="pipeline">
+<h2>Pipelines &amp; Lead Generation (13)</h2>
+<div class="grid">
+<div class="card" data-tags="pipeline hotel"><h4><span class="dot dot-green"></span>Hotel Lead Pipeline (Daily Automated)</h4><p>Daily city-scan hotel pipeline — latest: Aspen 4/21</p><p><a href="../../Strategy AGI/pipeline-runs/lead_queue_2026-04-21_aspen.json">lead_queue_2026-04-21_aspen.json</a> <span class="tag new-tag">NEW</span></p></div>
+<div class="card" data-tags="pipeline"><h4><span class="dot dot-green"></span>Pipeline Daily (Structured 4/17)</h4><p>New daily pipeline output with lead_queue, REPORT.md, slack_summary <span class="tag new-tag">NEW</span></p><p><a href="../../Strategy AGI/pipeline-daily/2026-04-17">pipeline-daily/2026-04-17/</a></p></div>
+<div class="card" data-tags="pipeline data"><h4><span class="dot dot-green"></span>Clay Hotel Pipeline Template</h4><p>Enrichment schema for hotel leads</p><p><a href="../../Marketing Agent/Clay_Pipeline_A_Hotel_Schema.xlsx">Clay_Pipeline_A_Hotel_Schema.xlsx</a></p></div>
+<div class="card" data-tags="pipeline data"><h4><span class="dot dot-green"></span>Clay CA Luxury 20 Targets <span class="tag new-tag">NEW</span></h4><p>California luxury hotel outbound target list</p><p><a href="../../Strategy AGI/clay_ca_luxury_20_targets.xlsx">clay_ca_luxury_20_targets.xlsx</a> · <a href="../../Strategy AGI/CLAY_OUTBOUND_SYSTEM.md">CLAY_OUTBOUND_SYSTEM.md</a></p></div>
+<div class="card" data-tags="pipeline data"><h4><span class="dot dot-green"></span>Clay Hotel Seed List</h4><p>Starting seed data for Clay</p><p><a href="../../Marketing Agent/Clay_Hotel_Seed_List.csv">Clay_Hotel_Seed_List.csv</a></p></div>
+<div class="card" data-tags="pipeline email"><h4><span class="dot dot-green"></span>Instantly — Hotels CSV</h4><p>Cold email list: Hotels</p><p><a href="../../Marketing Agent/instantly_HOTELS.csv">instantly_HOTELS.csv</a></p></div>
+<div class="card" data-tags="pipeline email"><h4><span class="dot dot-green"></span>Instantly — Kids CSV</h4><p>Cold email list: Kids/Schools</p><p><a href="../../Marketing Agent/instantly_KIDS.csv">instantly_KIDS.csv</a></p></div>
+<div class="card" data-tags="pipeline email"><h4><span class="dot dot-green"></span>Instantly — General CSV</h4><p>Cold email list: General leads</p><p><a href="../../Marketing Agent/instantly_GENERAL.csv">instantly_GENERAL.csv</a></p></div>
+<div class="card" data-tags="pipeline email"><h4><span class="dot dot-green"></span>Instantly — ALL Leads CSV</h4><p>Combined lead export</p><p><a href="../../Marketing Agent/instantly_ALL_LEADS.csv">instantly_ALL_LEADS.csv</a></p></div>
+<div class="card" data-tags="pipeline data"><h4><span class="dot dot-green"></span>Reoon Email Verification</h4><p>Verified emails &amp; batch processing</p><p><a href="../../Strategy AGI/reoon_verified_emails.csv">reoon_verified_emails.csv</a> · <a href="email-verification/">email-verification/</a></p></div>
+<div class="card" data-tags="pipeline"><h4><span class="dot dot-green"></span>Outreach Drafts (Daily Automated)</h4><p>AI-generated outreach — latest: 4/16 + 4/21 log <span class="tag new-tag">UPDATED</span></p><p><a href="../../Strategy AGI/outreach_drafts_2026-04-16.json">outreach_drafts_2026-04-16.json</a></p></div>
+<div class="card" data-tags="pipeline"><h4><span class="dot dot-green"></span>Deep Research Pipeline</h4><p>Multi-source research automation</p><p><a href="../../Strategy AGI/pipelines/deep_research_pipeline.py">pipelines/deep_research_pipeline.py</a></p></div>
+<div class="card" data-tags="pipeline"><h4><span class="dot dot-purple"></span>Auto-Research: Cold Email &amp; Opportunity Scoring</h4><p>Auto cold-email drafting + lead scoring</p><p><a href="../../Strategy AGI/auto-research">auto-research/</a></p></div>
+</div>
+</section>
+
+<!-- WEBSITES -->
+<section data-category="website">
+<h2>Websites &amp; Mockups (14 mockup pages + 2 repos)</h2>
+<div class="grid">
+<div class="card" data-tags="website"><h4><span class="dot dot-green"></span>myn.com-main (Next.js)</h4><p>Primary commercial website repo</p><p><a href="../../myn.com-main">myn.com-main/</a></p></div>
+<div class="card" data-tags="website"><h4><span class="dot dot-green"></span>myn.org-main (Next.js)</h4><p>Non-profit / community site repo</p><p><a href="../../myn.org-main">myn.org-main/</a></p></div>
+<div class="card" data-tags="website mockup"><h4><span class="dot dot-purple"></span>Homepage Mockup</h4><p><a href="../../Strategy AGI/website-mockups/homepage.html">homepage.html</a></p></div>
+<div class="card" data-tags="website mockup"><h4><span class="dot dot-purple"></span>About Page</h4><p><a href="../../Strategy AGI/website-mockups/about.html">about.html</a></p></div>
+<div class="card" data-tags="website mockup"><h4><span class="dot dot-purple"></span>Hotels &amp; Resorts</h4><p><a href="../../Strategy AGI/website-mockups/hotels-and-resorts.html">hotels-and-resorts.html</a></p></div>
+<div class="card" data-tags="website mockup"><h4><span class="dot dot-purple"></span>Hotels Listing</h4><p><a href="../../Strategy AGI/website-mockups/hotels-listing.html">hotels-listing.html</a></p></div>
+<div class="card" data-tags="website mockup"><h4><span class="dot dot-purple"></span>Corporate Wellness</h4><p><a href="../../Strategy AGI/website-mockups/corporate-wellness.html">corporate-wellness.html</a></p></div>
+<div class="card" data-tags="website mockup"><h4><span class="dot dot-purple"></span>Healthcare Providers</h4><p><a href="../../Strategy AGI/website-mockups/healthcare-providers.html">healthcare-providers.html</a></p></div>
+<div class="card" data-tags="website mockup"><h4><span class="dot dot-purple"></span>After-School Programs</h4><p><a href="../../Strategy AGI/website-mockups/after-school.html">after-school.html</a></p></div>
+<div class="card" data-tags="website mockup"><h4><span class="dot dot-purple"></span>Find Instructor</h4><p><a href="../../Strategy AGI/website-mockups/find-instructor.html">find-instructor.html</a></p></div>
+<div class="card" data-tags="website mockup"><h4><span class="dot dot-purple"></span>Join as Instructor</h4><p><a href="../../Strategy AGI/website-mockups/join-as-instructor.html">join-as-instructor.html</a></p></div>
+<div class="card" data-tags="website mockup"><h4><span class="dot dot-purple"></span>Platform</h4><p><a href="../../Strategy AGI/website-mockups/platform.html">platform.html</a></p></div>
+<div class="card" data-tags="website mockup"><h4><span class="dot dot-purple"></span>Blog</h4><p><a href="../../Strategy AGI/website-mockups/blog.html">blog.html</a></p></div>
+<div class="card" data-tags="website mockup"><h4><span class="dot dot-purple"></span>Contact / FAQs / Privacy</h4><p><a href="../../Strategy AGI/website-mockups/contact.html">contact</a> · <a href="../../Strategy AGI/website-mockups/faqs.html">faqs</a> · <a href="../../Strategy AGI/website-mockups/privacy-policy.html">privacy</a></p></div>
+</div>
+</section>
+
+<!-- APIs & INTEGRATIONS -->
+<section data-category="api">
+<h2>APIs, MCPs &amp; Integrations (19)</h2>
+<div class="grid">
+<div class="card" data-tags="api mcp"><h4><span class="dot dot-green"></span>GoHighLevel MCP Server</h4><p>CRM automation &amp; lead management</p><p><a href="../../GoHighLevel-MCP">GoHighLevel-MCP/</a></p></div>
+<div class="card" data-tags="api mcp"><h4><span class="dot dot-green"></span>GHL MCP Server (alt)</h4><p>Alternate GHL MCP build</p><p><a href="../../ghl-mcp-server">ghl-mcp-server/</a></p></div>
+<div class="card" data-tags="api mcp"><h4><span class="dot dot-yellow"></span>GA + GSC MCP Server <span class="tag new-tag">NEW</span></h4><p>Google Analytics 4 + Search Console MCP (new build)</p><p><a href="../../Strategy AGI/mcp-ga-gsc">Strategy AGI/mcp-ga-gsc/</a></p></div>
+<div class="card" data-tags="api mcp"><h4><span class="dot dot-green"></span>WhatsApp MCP Bridge</h4><p>WhatsApp messaging integration</p><p><a href="../../Strategy AGI/whatsapp-mcp">whatsapp-mcp/</a></p></div>
+<div class="card" data-tags="api"><h4><span class="dot dot-purple"></span>Paperclip Agent Platform</h4><p>Multi-agent orchestration engine</p><p><a href="../../Strategy AGI/paperclip">paperclip/</a></p></div>
+<div class="card" data-tags="api"><h4><span class="dot dot-purple"></span>MetaClaw</h4><p>Multi-skill agent framework</p><p><a href="../../Strategy AGI/MetaClaw">MetaClaw/</a></p></div>
+<div class="card" data-tags="api"><h4><span class="dot dot-purple"></span>Hermes Gateway</h4><p>Agent orchestration &amp; routing layer</p><p><a href="../../Strategy AGI/hermes">hermes/</a></p></div>
+<div class="card" data-tags="api"><h4><span class="dot dot-green"></span>MYN RAG API</h4><p>Retrieval-augmented generation API</p><p><a href="../../myn-rag-api">myn-rag-api/</a></p></div>
+<div class="card" data-tags="api"><h4><span class="dot dot-green"></span>MYN Backend API (FastAPI)</h4><p>Core backend services</p><p><a href="../../mynapi">mynapi/</a></p></div>
+<div class="card" data-tags="api"><h4><span class="dot dot-purple"></span>mynapi-main <span class="tag new-tag">NEW</span></h4><p>Alternate FastAPI build cloned to Desktop</p><p><a href="../../mynapi-main">mynapi-main/</a></p></div>
+<div class="card" data-tags="api data"><h4><span class="dot dot-green"></span>Qdrant Vector Database</h4><p>Vector storage &amp; semantic search</p><p><a href="../../qdrant">qdrant/</a></p></div>
+<div class="card" data-tags="api data"><h4><span class="dot dot-green"></span>Supabase (Auth, DB, Storage)</h4><p>PostgreSQL backend + auth + RLS</p><p><a href="../../Strategy AGI/supabase">supabase/</a></p></div>
+<div class="card" data-tags="api video"><h4><span class="dot dot-yellow"></span>MYN Remotion (Video Pipeline)</h4><p>Programmatic video generation</p><p><a href="../../Strategy AGI/myn-remotion">myn-remotion/</a></p></div>
+<div class="card" data-tags="api"><h4><span class="dot dot-green"></span>Slack Integration</h4><p>Slack MCP + channel comms</p><p>Connected via Cowork Slack MCP</p></div>
+<div class="card" data-tags="api"><h4><span class="dot dot-green"></span>Notion Integration</h4><p>Notion workspace connected</p><p>Connected via Cowork Notion MCP</p></div>
+<div class="card" data-tags="api"><h4><span class="dot dot-green"></span>Apify (Web Scraping)</h4><p>RAG web browser &amp; scraping actors</p><p>Connected via Cowork Apify MCP</p></div>
+<div class="card" data-tags="api"><h4><span class="dot dot-green"></span>Supermetrics (Marketing Analytics)</h4><p>Google Ads, Meta Ads, GA data queries</p><p>Connected via Cowork Supermetrics MCP</p></div>
+<div class="card" data-tags="api"><h4><span class="dot dot-green"></span>Common Room</h4><p>Customer signal intelligence</p><p>Connected via Cowork Common Room MCP</p></div>
+<div class="card" data-tags="api"><h4><span class="dot dot-purple"></span>Social Outreach Tools (18 JSON workflows)</h4><p>Instagram, LinkedIn, TikTok, YouTube, Facebook automation</p><p><a href="../../social_outreach_tools">social_outreach_tools/</a></p></div>
+</div>
+</section>
+
+<!-- DATA & ANALYTICS -->
+<section data-category="data">
+<h2>Data, Analytics &amp; Research</h2>
+<div class="grid">
+<div class="card" data-tags="data analytics"><h4><span class="dot dot-green"></span>GA4 Analytics Scripts</h4><p>ga4_full_analysis.py, ga4_paid_query.py, myn-analytics-dashboard.jsx</p><p><a href="../../Strategy AGI/ga4_full_analysis.py">ga4_full_analysis.py</a></p></div>
+<div class="card" data-tags="data"><h4><span class="dot dot-green"></span>Notion Inventory</h4><p>Full workspace inventory JSON</p><p><a href="../../Strategy AGI/notion_inventory.json">notion_inventory.json</a></p></div>
+<div class="card" data-tags="data pipeline"><h4><span class="dot dot-green"></span>Pipeline Reports</h4><p>Boulder, Denver, Aspen, Vail, Colorado Springs + Boulder 4/16 HTML <span class="tag new-tag">UPDATED</span></p><p><a href="../../Strategy AGI/pipeline_reports">pipeline_reports/</a> · <a href="../../Strategy AGI/pipeline-boulder-2026-04-16.html">Boulder 4/16 HTML</a></p></div>
+<div class="card" data-tags="data"><h4><span class="dot dot-green"></span>Reoon Verified Emails</h4><p>Email verification results &amp; tiered lists</p><p><a href="email-verification/">email-verification/</a></p></div>
+<div class="card" data-tags="data"><h4><span class="dot dot-green"></span>GHL Leads &amp; Opportunities</h4><p>CRM export data</p><p><a href="../../Strategy AGI/ghl_leads_raw.json">ghl_leads_raw.json</a> · <a href="../../Strategy AGI/ghl_opportunities.json">ghl_opportunities.json</a></p></div>
+<div class="card" data-tags="data"><h4><span class="dot dot-green"></span>Pipeline Snapshots</h4><p>Weekly pipeline snapshots + Daily pipeline report <span class="tag new-tag">UPDATED 4/20</span></p><p><a href="MYN-Pipeline-Daily.md">MYN-Pipeline-Daily.md</a></p></div>
+<div class="card" data-tags="data research"><h4><span class="dot dot-purple"></span>Research: Clay &amp; Govt</h4><p>Clay enrichment research + government contracting</p><p><a href="../../Strategy AGI/research">research/</a></p></div>
+<div class="card" data-tags="data"><h4><span class="dot dot-green"></span>Niche Segmentation Summary</h4><p>Market segment analysis JSON</p><p><a href="../../Strategy AGI/niche_segmentation_summary.json">niche_segmentation_summary.json</a></p></div>
+<div class="card" data-tags="data"><h4><span class="dot dot-green"></span>Fullscript Patient Reports</h4><p>Patient supplement tracking</p><p><a href="../../WombhealthFM/Fullscript_Patient_Report_Apr14.xlsx">Fullscript_Patient_Report_Apr14.xlsx</a></p></div>
+<div class="card" data-tags="data whfm"><h4><span class="dot dot-green"></span>Client IG DM Tracker <span class="tag new-tag">NEW</span></h4><p>Instagram DM outreach tracker</p><p><a href="../../WombhealthFM/Client_IG_DM_Tracker.xlsx">Client_IG_DM_Tracker.xlsx</a></p></div>
+<div class="card" data-tags="data whfm"><h4><span class="dot dot-green"></span>PracticeBetter Clients <span class="tag new-tag">NEW</span></h4><p>PracticeBetter client roster export</p><p><a href="../../WombhealthFM/PracticeBetter_Clients.xlsx">PracticeBetter_Clients.xlsx</a></p></div>
+</div>
+</section>
+
+<!-- STRATEGY & DOCS -->
+<section data-category="doc">
+<h2>Strategy &amp; Blueprint Docs</h2>
+<div class="grid">
+<div class="card" data-tags="doc strategy"><h4><span class="dot dot-green"></span>CLAUDE.md (Strategy AGI)</h4><p>Master agent instructions</p><p><a href="../../Strategy AGI/CLAUDE.md">CLAUDE.md</a></p></div>
+<div class="card" data-tags="doc strategy"><h4><span class="dot dot-green"></span>Operations Manual</h4><p>Full operating procedures</p><p><a href="../../Strategy AGI/OPERATIONS_MANUAL.md">OPERATIONS_MANUAL.md</a></p></div>
+<div class="card" data-tags="doc strategy"><h4><span class="dot dot-green"></span>Compressed Operating Architecture <span class="tag new-tag">NEW</span></h4><p>Condensed operating doc (desktop root, 4/17)</p><p><a href="../../MYN_Compressed_Operating_Architecture.docx">MYN_Compressed_Operating_Architecture.docx</a></p></div>
+<div class="card" data-tags="doc strategy"><h4><span class="dot dot-green"></span>Quick Reference Card</h4><p>Command &amp; system quick ref</p><p><a href="../../Strategy AGI/QUICK_REFERENCE_CARD.md">QUICK_REFERENCE_CARD.md</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-green"></span>Hotel Targeting Playbook</h4><p>Hotel sales strategy &amp; targeting</p><p><a href="../../Strategy AGI/HOTEL_TARGETING_PLAYBOOK.md">HOTEL_TARGETING_PLAYBOOK.md</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-green"></span>Clay Outbound System <span class="tag new-tag">NEW</span></h4><p>Clay-driven outbound methodology + CA luxury target list</p><p><a href="../../Strategy AGI/CLAY_OUTBOUND_SYSTEM.md">CLAY_OUTBOUND_SYSTEM.md</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-green"></span>Gates 2 &amp; 3 Checklist <span class="tag new-tag">NEW</span></h4><p>Roadmap gate progression checklist</p><p><a href="../../Strategy AGI/07_roadmaps/GATES_2_AND_3_CHECKLIST.md">07_roadmaps/GATES_2_AND_3_CHECKLIST.md</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-green"></span>Git Push Guide <span class="tag new-tag">NEW</span></h4><p>Deploy workflow docs</p><p><a href="../../Strategy AGI/03_repo_management/GIT_PUSH_GUIDE.md">03_repo_management/GIT_PUSH_GUIDE.md</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-purple"></span>MYN Agentic OS Blueprint</h4><p>System architecture document</p><p><a href="../../Marketing Agent/MYN_Agentic_OS_Blueprint.docx">MYN_Agentic_OS_Blueprint.docx</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-purple"></span>GHL AI Employee Blueprint</h4><p>GoHighLevel automation playbook</p><p><a href="../../Marketing Agent/GHL_AI_Employee_Blueprint.docx">GHL_AI_Employee_Blueprint.docx</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-green"></span>Content Calendar</h4><p>Marketing content schedule</p><p><a href="../../Marketing Agent/CONTENT_CALENDAR.md">CONTENT_CALENDAR.md</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-green"></span>SEO Playbook</h4><p>Search optimization strategy</p><p><a href="../../Marketing Agent/SEO_PLAYBOOK.md">SEO_PLAYBOOK.md</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-green"></span>Email Sequences</h4><p>All automated email flows</p><p><a href="../../Marketing Agent/EMAIL_SEQUENCES.md">EMAIL_SEQUENCES.md</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-purple"></span>Contracts Library</h4><p>Hotel contracts, service agreements, govt contracting guides</p><p><a href="../../Strategy AGI/contracts">contracts/ (20+ files)</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-green"></span>NJ RFP Documents</h4><p>Government contracting RFP package</p><p><a href="../../NJ RFP">NJ RFP/</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-purple"></span>Riipen Cohort Handoff</h4><p>Student team handoff documentation</p><p><a href="../../Marketing Agent/team/RIIPEN_COHORT_HANDOFF_2026-04-07.md">RIIPEN_COHORT_HANDOFF_2026-04-07.md</a></p></div>
+</div>
+</section>
+
+<!-- VIDEO & CONTENT -->
+<section data-category="video">
+<h2>AI Video &amp; Content Generation</h2>
+<div class="grid">
+<div class="card" data-tags="video"><h4><span class="dot dot-yellow"></span>Brand Anthem Results</h4><p>AI-generated brand anthem</p><p><a href="../../AI video gen/brand-anthem-results.html">brand-anthem-results.html</a></p></div>
+<div class="card" data-tags="video"><h4><span class="dot dot-yellow"></span>Brand Anthem Project</h4><p>Full anthem creation workspace</p><p><a href="../../AI video gen/brand_anthem_project.html">brand_anthem_project.html</a></p></div>
+<div class="card" data-tags="video"><h4><span class="dot dot-yellow"></span>Dance API Build Spec</h4><p>Dance video API specification</p><p><a href="../../AI video gen/DANCE_API_BUILD_SPEC.docx">DANCE_API_BUILD_SPEC.docx</a></p></div>
+<div class="card" data-tags="video"><h4><span class="dot dot-purple"></span>MYN Remotion Video Pipeline</h4><p>Conception video, stitch pipeline</p><p><a href="../../Strategy AGI/myn-remotion">myn-remotion/</a></p></div>
+<div class="card" data-tags="video"><h4><span class="dot dot-yellow"></span>Conception Video (JSX/TSX)</h4><p>Remotion-based conception animation</p><p><a href="../../Strategy AGI/ConceptionVideo.tsx">ConceptionVideo.tsx</a></p></div>
+<div class="card" data-tags="video"><h4><span class="dot dot-purple"></span>N8N Image Generator</h4><p>AI image generation practice</p><p><a href="../../N8N practice">N8N practice/</a></p></div>
+</div>
+</section>
+
+<!-- WOMBHEALTH FM -->
+<section>
+<h2>WombHealth FM</h2>
+<div class="grid">
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>WHFM Company Dashboard <span class="tag new-tag">NEW</span></h4><p>Top-level company ops dashboard</p><p><a href="../../WombhealthFM/WHFM_Company_Dashboard.html">WHFM_Company_Dashboard.html</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>Appointment Setter Live Sim <span class="tag new-tag">NEW</span></h4><p>Live conversational flow simulation for appointment setter</p><p><a href="../../WombhealthFM/APPOINTMENT_SETTER_LIVE_SIM.html">APPOINTMENT_SETTER_LIVE_SIM.html</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>After-Call Sequences <span class="tag new-tag">NEW</span></h4><p>Post-call nurture messaging sequences</p><p><a href="../../WombhealthFM/AFTER_CALL_SEQUENCES.md">AFTER_CALL_SEQUENCES.md</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>Amatma Mentor Calls <span class="tag new-tag">NEW</span></h4><p>April 2 + April 16 summaries &amp; protocols</p><p><a href="../../WombhealthFM/Amatma Mentor Calls">Amatma Mentor Calls/</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>Brand Memory <span class="tag new-tag">NEW</span></h4><p>8 memory files: brand-kit, guardrails, voice, owner, platforms, pdf-pipeline, working-preferences</p><p><a href="../../WombhealthFM/.memory">.memory/</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>Raw Food / Juice Reset Protocol <span class="tag new-tag">NEW</span></h4><p>Raw reset + raw-phase recipes PDFs</p><p><a href="../../WombhealthFM/WHFM_Raw_Food_Juice_Reset.pdf">Raw Food Juice Reset</a> · <a href="../../WombhealthFM/WHFM_Raw_Phase_Recipes.pdf">Raw Phase Recipes</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>FEM Live Session Notes <span class="tag new-tag">NEW</span></h4><p>Live session notes Apr 2</p><p><a href="../../WombhealthFM/FEM_Live_Session_Notes_2026-04-02.md">FEM_Live_Session_Notes_2026-04-02.md</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>30-Post Social Campaign</h4><p>6-week fertility content campaign — Week 2 ongoing <span class="tag">ACTIVE</span></p><p><a href="../../WombhealthFM/30-Post Campaign">30-Post Campaign/</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>New Tip Graphics <span class="tag new-tag">NEW</span></h4><p>tip_12_thyroid, tip_27_detox, tip_35_stress</p><p><a href="../../WombhealthFM">WombhealthFM/ root</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>45 Fertility Tips (Scripts &amp; Captions)</h4><p>Video scripts, captions, case studies</p><p><a href="../../WombhealthFM/WHFM_45_Tips_Voice_Scripts_Captions.xlsx">WHFM_45_Tips_Voice_Scripts_Captions.xlsx</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>Course Content</h4><p>Unexplained Infertility course + Amatma extraction</p><p><a href="../../WombhealthFM/Course">Course/</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>Client Roster Report</h4><p>Current client tracking</p><p><a href="../../WombhealthFM/WHFM_Client_Roster_Report.docx">WHFM_Client_Roster_Report.docx</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>GHL Client Roster</h4><p>GoHighLevel CRM client data</p><p><a href="../../WombhealthFM/GHL_Current_Client_Roster.md">GHL_Current_Client_Roster.md</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>Brand Voice &amp; Design Guides</h4><p>Visual identity &amp; messaging framework</p><p><a href="../../WombhealthFM/_design">_design/</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>Training Corpus (10 categories)</h4><p>Sales emails, transcripts, testimonials, objections, brand messaging, ads, course ref, workshops</p><p><a href="../../WombhealthFM/_training-corpus">_training-corpus/</a></p></div>
+<div class="card" data-tags="doc whfm"><h4><span class="dot dot-green"></span>Transcriptions (40+ calls)</h4><p>Client consultation recordings</p><p><a href="../../WombhealthFM/Transcriptions -sales + neha">Transcriptions/</a></p></div>
+<div class="card" data-tags="data whfm"><h4><span class="dot dot-green"></span>Fullscript Patient Report (Apr 14)</h4><p>Latest patient supplement orders</p><p><a href="../../WombhealthFM/Fullscript_Patient_Report_Apr14.xlsx">Fullscript_Patient_Report_Apr14.xlsx</a></p></div>
+</div>
+</section>
+
+<!-- SCOTT -->
+<section>
+<h2>Scott — Social &amp; Revenue Gen</h2>
+<div class="grid">
+<div class="card" data-tags="doc"><h4><span class="dot dot-purple"></span>Scott Hoffman Knowledge Base</h4><p>Full consulting analysis &amp; knowledge base</p><p><a href="../../Scott - social and rev gen/Scott-Hoffman-Knowledge-Base.html">Scott-Hoffman-Knowledge-Base.html</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-purple"></span>Business Consult Analysis</h4><p>12/22/18 consultation deep-dive</p><p><a href="../../Scott - social and rev gen/Scott-Hoffman-Business-Consult-12-22-18-Analysis.md">Analysis.md</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-purple"></span>MYN Strategy Dashboard (Scott)</h4><p>Scott-specific strategy view</p><p><a href="../../Scott - social and rev gen/MYN_Strategy_Dashboard.html">MYN_Strategy_Dashboard.html</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-purple"></span>Knowledge Base PDF</h4><p>Exported knowledge base</p><p><a href="../../Scott - social and rev gen/Scott_Hoffman_MYN_Knowledge_Base.pdf">Scott_Hoffman_MYN_Knowledge_Base.pdf</a></p></div>
+</div>
+</section>
+
+<!-- OTHER -->
+<section>
+<h2>Other Projects</h2>
+<div class="grid">
+<div class="card" data-tags="doc"><h4><span class="dot dot-yellow"></span>LBSOY Backup &amp; Rebuild</h4><p>WordPress backup, extraction, GHL handoff — active conversion to wellness SEO engine</p><p><a href="../../LBSOY_Backup">LBSOY_Backup/</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-yellow"></span>Wearables Project</h4><p>Wearables initiative (early stage)</p><p><a href="../../wearables project">wearables project/</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-purple"></span>Local AI (Docker)</h4><p>Local AI &amp; Docker setup docs</p><p><a href="../../Local AI">Local AI/</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-purple"></span>Browser Control</h4><p>Bookmarks &amp; browser automation</p><p><a href="../../Browser control">Browser control/</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-purple"></span>Razi (Folder)</h4><p>Empty — placeholder</p></div>
+<div class="card" data-tags="pipeline"><h4><span class="dot dot-green"></span>Social Outreach Tools (18 workflows)</h4><p>4K Video Creator, AI Ad Content Creator, AI Marketing Team, Carousel Auto-Poster, Custom Style Image Generator, Facebook Ad Spy, Instagram Idea Scraper, Instagram Viral Searcher, LinkedIn Brand Engine, LinkedIn Cold Email Machine, LinkedIn DM Automation, LinkedIn Performance Analyzer, Multi-Platform Publisher, Newsletter Automation Engine, Personalized Email Machine, Seedance AI Video Generator, TikTok Viral Searcher, YouTube Viral Searcher</p><p><a href="../../social_outreach_tools">social_outreach_tools/</a></p></div>
+</div>
+</section>
+
+<!-- CONTENT WEEKLY -->
+<section>
+<h2>Weekly Content Engine</h2>
+<div class="grid">
+<div class="card" data-tags="doc"><h4><span class="dot dot-green"></span>Wearable-Validated Wellness Blog <span class="tag new-tag">NEW</span></h4><p>Corporate yoga + wearables thought leadership (4/20)</p><p><a href="../../Marketing Agent/blog-2026-04-20-wearable-validated-wellness-corporate-yoga.md">blog-2026-04-20...md</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-green"></span>Week of 4/13 Content Batch</h4><p>2 blog posts, newsletter draft, social posts</p><p><a href="../../Strategy AGI/content-weekly/2026-04-13">content-weekly/2026-04-13/</a></p></div>
+<div class="card" data-tags="doc"><h4><span class="dot dot-green"></span>Week of 3/30 Content Batch</h4><p>HRV blog, yoga therapy blog, newsletter, social</p><p><a href="../../Strategy AGI/content-weekly">content-weekly/</a></p></div>
+</div>
+</section>
+
+<!-- CHANGES DETAIL -->
+<section>
+<h2>Detailed Changes Since Last Audit (April 15)</h2>
+<div class="possibilities">
+<ul style="list-style:none;padding:0">
+<li style="padding:6px 0"><span class="tag new-tag">NEW DIRS</span> <strong>Strategy AGI/03_repo_management/</strong>, <strong>07_roadmaps/</strong>, <strong>agents/</strong>, <strong>content_drafts/</strong>, <strong>execution_logs/</strong>, <strong>mcp-ga-gsc/</strong>, <strong>pipeline-daily/</strong>, <strong>pipeline-runs/</strong></li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>WHFM_Company_Dashboard.html</strong> (4/16) — new top-level company dashboard</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>APPOINTMENT_SETTER_LIVE_SIM.html</strong> (4/16) — live simulation of appointment setter flow</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>Strategy AGI/mcp-ga-gsc/</strong> — new MCP server build for Google Analytics 4 + Search Console</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>Strategy AGI/agents/PM_WEBDEV_AGENT.md</strong> + EXECUTION_MAP.md — project manager + web-dev agent specs</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>03_repo_management/GIT_PUSH_GUIDE.md</strong> — deploy workflow docs; paired with backend deployment docs</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>07_roadmaps/GATES_2_AND_3_CHECKLIST.md</strong> — gate progression checklist</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>CLAY_OUTBOUND_SYSTEM.md</strong> + <strong>clay_ca_luxury_20_targets.xlsx</strong> — CA luxury 20 Clay outbound target list and methodology</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>pipeline-daily/2026-04-17/</strong> — new structured pipeline output (lead_queue.json, REPORT.md, slack_summary.txt)</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>pipeline-runs/lead_queue_2026-04-21_aspen.json</strong> — today's Aspen lead queue</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>outreach_drafts_2026-04-15.json</strong> &amp; <strong>2026-04-16.json</strong> — outreach draft batches</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>execution_logs/2026-04-21_daily-outreach-drafts.md</strong> — today's outreach run log</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>MYN_Compressed_Operating_Architecture.docx</strong> — compressed operating architecture doc (Desktop root, 4/17)</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>mynapi-main/</strong> — alternate backend API build cloned to Desktop (4/20)</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>WombhealthFM/.memory/</strong> — 8 brand memory files (brand-kit, guardrails, MEMORY, owner, pdf-pipeline, platforms, voice, working-preferences)</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>WombhealthFM/Amatma Mentor Calls/</strong> — April 2 + April 16 summaries &amp; protocols + raw transcript</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>WombhealthFM/AFTER_CALL_SEQUENCES.md</strong> — after-call messaging sequences</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>Client_IG_DM_Tracker.xlsx</strong> + <strong>PracticeBetter_Clients.xlsx</strong> — new client trackers</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>WHFM_Raw_Food_Juice_Reset.pdf</strong> + <strong>WHFM_Raw_Phase_Recipes.pdf</strong> — raw reset protocol</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>tip_12_thyroid.png, tip_27_detox.png, tip_35_stress.png</strong> — new campaign tip graphics</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>Marketing Agent/blog-2026-04-20-wearable-validated-wellness-corporate-yoga.md</strong> — new wearables + corporate yoga thought piece</li>
+<li style="padding:6px 0"><span class="tag new-tag">NEW</span> <strong>approvals/MYN-Approval-Digest-2026-04-17.md</strong> + <strong>MYN-Pipeline-Daily.md</strong> (updated 4/20)</li>
+<li style="padding:6px 0"><strong>Cowork sessions:</strong> 340 → <strong>388</strong> (+48). 2 currently running: "Myn market research", "Myn weekly monday audit"</li>
+<li style="padding:6px 0"><strong>No folders removed.</strong> No major architectural regressions detected.</li>
+</ul>
+</div>
+</section>
+
+<!-- POSSIBILITIES -->
+<section>
+<h2>Possibilities &amp; Next Moves</h2>
+<div class="possibilities">
+<ul style="list-style:none;padding:0">
+<li style="padding:8px 0">📊 <strong>Wire up the new GA + GSC MCP:</strong> The <code>mcp-ga-gsc/</code> server is built but unsurfaced in dashboards — connect it to <code>analytics-dashboard.html</code> and the weekly audit so GA4 + Search Console pull live.</li>
+<li style="padding:8px 0">🎯 <strong>Clay CA Luxury 20 → Instantly Loop:</strong> The new <code>clay_ca_luxury_20_targets.xlsx</code> + <code>CLAY_OUTBOUND_SYSTEM.md</code> should flow into <code>instantly_HOTELS.csv</code> — automate the handoff so the target list becomes live campaign fuel.</li>
+<li style="padding:8px 0">📅 <strong>Adopt the new pipeline-daily/ format:</strong> The 4/17 output (lead_queue + REPORT.md + slack_summary) is cleaner than the old loose JSONs. Point the daily-pipeline scheduled task at this format and retire <code>pipeline_output_2026-*.json</code>.</li>
+<li style="padding:8px 0">🏨 <strong>PM / WebDev Agent activation:</strong> The new <code>PM_WEBDEV_AGENT.md</code> + EXECUTION_MAP gives Strategy AGI a project-manager layer — wire it into the executive router and give it scheduled oversight of the Gates 2 &amp; 3 checklist.</li>
+<li style="padding:8px 0">🌿 <strong>WHFM Brand Memory → Agents:</strong> The new <code>.memory/</code> files (voice, guardrails, brand-kit) should be loaded into the 8 WHFM agents for consistent output. Big leverage, small cost.</li>
+<li style="padding:8px 0">📱 <strong>Appointment Setter Live Sim → Real GHL flow:</strong> Convert the live sim into an actual GHL workflow using the AI Employee Blueprint.</li>
+<li style="padding:8px 0">📄 <strong>Amatma call → Training corpus:</strong> Ingest the 4/2 + 4/16 Amatma summaries into <code>_training-corpus/</code> and Qdrant so the nurture-email + sales-psychology agents learn from them.</li>
+<li style="padding:8px 0">🧊 <strong>Raw Reset Protocol → Lead magnet:</strong> The new Raw Food Juice Reset PDFs are great lead-magnet material — pair with an Instantly drip sequence targeting fertility/postpartum clients.</li>
+<li style="padding:8px 0">🧬 <strong>Wearables blog → Wearables project:</strong> The 4/20 wearables blog post previews a major initiative. Escalate <code>wearables project/</code> from early-stage to an actively tracked division with its own dashboard.</li>
+<li style="padding:8px 0">🧹 <strong>Deduplicate API repos:</strong> <code>mynapi/</code> vs. <code>mynapi-main/</code> + <code>GoHighLevel-MCP/</code> vs. <code>ghl-mcp-server/</code> — pick canonical versions and archive the rest before drift compounds.</li>
+</ul>
+</div>
+</section>
+
+<!-- RECENT SESSIONS -->
+<section>
+<h2>Recent Cowork Sessions (Last 30 of 388)</h2>
+<div class="sessions-list">
+<div class="session-item"><span class="s-name">Myn market research</span><br><span class="s-status">🟢 Running</span></div>
+<div class="session-item"><span class="s-name">Myn weekly monday audit</span><br><span class="s-status">🟢 Running</span></div>
+<div class="session-item"><span class="s-name">Check Google Drive and Gmail access</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Plan email sequence for fertility labs</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Weekly pipeline review</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Reoon email verification</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Weekly content engine</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Daily outreach drafts</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Ask claude poll</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Daily hotel lead pipeline</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Myn daily pipeline</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Daily agent budget report</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Morning approval digest</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Recreate detox guide with brand assets</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Build MCP server for GA4 and Search Console</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Check for project manager in folder</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Convert lbsoy to wellness SEO engine</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Write personalized client follow-up emails</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Build Clay outbound system for yoga network</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Weekly pipeline snapshot</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Weekly command center QA</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Morning approval digest (prev)</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Daily agent budget report (prev)</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Myn weekly digest</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Myn daily pipeline (prev)</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Myn weekly content</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Review Google Analytics for myn.com</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Create new folder</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Myn full system audit (prev)</span><br><span class="s-status">Idle</span></div>
+<div class="session-item"><span class="s-name">Daily hotel lead pipeline (older)</span><br><span class="s-status">Idle</span></div>
+</div>
+</section>
+
+<footer>
+<p>MYN Full System Audit · Generated automatically by Cowork · April 21, 2026</p>
+<p>Previous audits: <a href="4-15-26-full-audit.html">4/15</a> · <a href="4-12-26-full-audit.html">4/12</a> · <a href="4-09-26-full-audit.html">4/9</a> · <a href="4-06-26-full-audit.html">4/6</a> · <a href="4-03-26-full-audit.html">4/3</a> · <a href="3-30-26-full-audit.html">3/30</a> · <a href="3-29-26-full-audit.html">3/29</a></p>
+</footer>
+</div>
+
+<script>
+let activeFilter='all';
+function setFilter(cat, btn){
+  activeFilter=cat;
+  document.querySelectorAll('.filter-tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filterItems();
+}
+function filterItems(){
+  const q=(document.getElementById('searchInput').value||'').toLowerCase();
+  document.querySelectorAll('section').forEach(sec=>{
+    const cat=sec.getAttribute('data-category');
+    let anyVisible=false;
+    sec.querySelectorAll('.card').forEach(card=>{
+      const tags=(card.getAttribute('data-tags')||'').toLowerCase();
+      const text=card.textContent.toLowerCase();
+      const matchesFilter=activeFilter==='all'|| (cat===activeFilter) || tags.split(/\s+/).includes(activeFilter);
+      const matchesSearch=!q || text.includes(q) || tags.includes(q);
+      const show=matchesFilter && matchesSearch;
+      card.style.display=show?'':'none';
+      if(show) anyVisible=true;
+    });
+    if(cat){
+      sec.style.display=(activeFilter==='all'||cat===activeFilter||anyVisible)?'':'none';
+    }
+  });
+}
+</script>
+</body>
+</html>

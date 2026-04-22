@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MYN Master Directory — Complete System Map</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #0f1f35 100%);
+            color: #e8e8e8;
+            min-height: 100vh;
+        }
+        .container { display: flex; height: 100vh; }
+        .sidebar {
+            width: 280px; background: rgba(10, 22, 40, 0.95);
+            border-right: 1px solid rgba(0, 212, 170, 0.2);
+            overflow-y: auto; padding: 20px; position: fixed;
+            height: 100vh; left: 0; top: 0; z-index: 100;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.3);
+        }
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.3); border-radius: 3px; }
+        .sidebar-header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid rgba(0,212,170,0.3); }
+        .logo { font-size: 20px; font-weight: 900; color: #00d4aa; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+        .logo-sub { font-size: 10px; color: #7a9ba8; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-section { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #5a7a8a; margin: 18px 0 8px 14px; font-weight: 700; }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+            border-radius: 8px; cursor: pointer; font-size: 13px; color: #b0c4ce;
+            transition: all 0.2s; margin-bottom: 2px;
+        }
+        .nav-item:hover { background: rgba(0,212,170,0.08); color: #fff; }
+        .nav-item.active { background: rgba(0,212,170,0.15); color: #00d4aa; font-weight: 600; border-left: 3px solid #00d4aa; }
+        .nav-item .icon { font-size: 16px; width: 22px; text-align: center; }
+        .nav-item .count { margin-left: auto; font-size: 11px; background: rgba(0,212,170,0.12); color: #00d4aa; padding: 2px 8px; border-radius: 10px; }
+        .nav-divider { height: 1px; background: rgba(0,212,170,0.1); margin: 12px 0; }
+
+        .main { margin-left: 280px; padding: 30px; width: calc(100% - 280px); overflow-y: auto; height: 100vh; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .section-header { margin-bottom: 28px; }
+        .section-header h1 { font-size: 26px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+        .section-header p { font-size: 14px; color: #7a9ba8; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+        .badge-teal { background: rgba(0,212,170,0.15); color: #00d4aa; }
+        .badge-amber { background: rgba(255,183,77,0.15); color: #ffb74d; }
+        .badge-blue { background: rgba(66,165,245,0.15); color: #42a5f5; }
+        .badge-green { background: rgba(102,187,106,0.15); color: #66bb6a; }
+        .badge-red { background: rgba(239,83,80,0.15); color: #ef5350; }
+        .badge-purple { background: rgba(171,71,188,0.15); color: #ab47bc; }
+
+        .stat-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; margin-bottom: 28px; }
+        .stat-box { background: rgba(15,31,53,0.6); border: 1px solid rgba(0,212,170,0.08); border-radius: 10px; padding: 16px; text-align: center; }
+        .stat-box .number { font-size: 28px; font-weight: 800; color: #00d4aa; }
+        .stat-box .number.amber { color: #ffb74d; }
+        .stat-box .number.blue { color: #42a5f5; }
+        .stat-box .number.purple { color: #ab47bc; }
+        .stat-box .label { font-size: 10px; color: #7a9ba8; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .card { background: rgba(15, 31, 53, 0.8); border: 1px solid rgba(0,212,170,0.12); border-radius: 12px; padding: 20px; transition: all 0.2s; }
+        .card:hover { border-color: rgba(0,212,170,0.3); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .card h3 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .card p { font-size: 12px; color: #9ab0bc; line-height: 1.6; }
+        .card .meta { font-size: 11px; color: #5a7a8a; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+        h2.sub { font-size: 17px; font-weight: 700; color: #e0e0e0; margin: 24px 0 14px; padding-bottom: 8px; border-bottom: 1px solid rgba(0,212,170,0.1); }
+        h2.sub span { color: #00d4aa; }
+
+        /* FILE TREE */
+        .tree { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; line-height: 1.8; color: #9ab0bc; }
+        .tree .dir { color: #42a5f5; font-weight: 600; }
+        .tree .file { color: #b0c4ce; }
+        .tree .count { color: #5a7a8a; font-style: italic; }
+        .tree .highlight { color: #00d4aa; font-weight: 600; }
+        .tree .data { color: #ffb74d; }
+        .tree .code { color: #ab47bc; }
+        .tree .doc { color: #66bb6a; }
+        .tree .asset { color: #ef5350; }
+        .tree-indent { padding-left: 24px; }
+        .tree-indent-2 { padding-left: 48px; }
+        .tree-indent-3 { padding-left: 72px; }
+
+        /* TABLE */
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .data-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #5a7a8a; padding: 10px 14px; border-bottom: 1px solid rgba(0,212,170,0.15); }
+        .data-table td { padding: 10px 14px; font-size: 12px; color: #b0c4ce; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .data-table tr:hover td { background: rgba(0,212,170,0.03); }
+
+        .search-box { width: 100%; padding: 10px 16px; background: rgba(15,31,53,0.6); border: 1px solid rgba(0,212,170,0.15); border-radius: 8px; color: #e8e8e8; font-size: 13px; margin-bottom: 16px; outline: none; }
+        .search-box:focus { border-color: rgba(0,212,170,0.4); }
+        .search-box::placeholder { color: #5a7a8a; }
+
+        @media (max-width: 900px) { .sidebar { display: none; } .main { margin-left: 0; width: 100%; } .card-grid { grid-template-columns: 1fr; } .stat-row { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+</head>
+<body>
+<!-- BEGIN MYN-NAV (auto-injected 2026-04-21) -->
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; -webkit-font-smoothing: antialiased; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__inner::-webkit-scrollbar { height: 4px; } .myn-nav__inner::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.25); border-radius: 2px; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-variant-numeric: tabular-nums; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Center</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="master-directory.html" data-page="master-directory">Directory</a>
+  <a href="analytics-dashboard.html" data-page="analytics-dashboard">Analytics</a>
+  <a href="lead-gen-dashboard.html" data-page="lead-gen-dashboard">Leads</a>
+  <a href="hotel-activities-dashboard.html" data-page="hotel-activities-dashboard">Hotels</a>
+  <a href="business-economics-dashboard.html" data-page="business-economics-dashboard">Economics</a>
+  <a href="team-handoff-dashboard.html" data-page="team-handoff-dashboard">Team</a>
+  <a href="architecture-dashboard.html" data-page="architecture-dashboard">Architecture</a>
+  <a href="agent-control-plane.html" data-page="agent-control-plane">Agents</a>
+  <a href="supabase-dashboard.html" data-page="supabase-dashboard">Supabase</a>
+  <a href="paperclip-dashboard.html" data-page="paperclip-dashboard">Paperclip</a>
+  <a href="review-queue.html" data-page="review-queue">Review</a>
+  <a href="4-21-26-full-audit.html" data-page="4-21-26-full-audit">Audit</a>
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date" id="myn-nav-date"></span>
+</div>
+</nav>
+<script>
+(function(){
+  var path = (location.pathname.split('/').pop() || 'index.html').replace('.html','');
+  var links = document.querySelectorAll('.myn-nav a[data-page]');
+  for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('data-page') === path) links[i].classList.add('is-active'); }
+  var d = new Date(); var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var el = document.getElementById('myn-nav-date'); if (el) el.textContent = m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+})();
+</script>
+<!-- END MYN-NAV -->
+
+<div class="container">
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">MYN</div>
+            <div class="logo-sub">Master System Directory</div>
+        </div>
+        <div class="nav-section">Overview</div>
+        <div class="nav-item active" onclick="switchTab('overview')"><span class="icon">🗺️</span> System Map <span class="count">8 systems</span></div>
+
+        <div class="nav-section">Systems</div>
+        <div class="nav-item" onclick="switchTab('strategy')"><span class="icon">🧠</span> Strategy AGI <span class="count">408</span></div>
+        <div class="nav-item" onclick="switchTab('marketing')"><span class="icon">📣</span> Marketing Agent <span class="count">858</span></div>
+        <div class="nav-item" onclick="switchTab('command')"><span class="icon">🎛️</span> Command Center <span class="count">34</span></div>
+        <div class="nav-item" onclick="switchTab('myn-com')"><span class="icon">🌐</span> myn.com <span class="count">739</span></div>
+        <div class="nav-item" onclick="switchTab('myn-org')"><span class="icon">⚙️</span> myn.org <span class="count">4,587</span></div>
+        <div class="nav-item" onclick="switchTab('video')"><span class="icon">🎬</span> AI Video Gen <span class="count">47</span></div>
+
+        <div class="nav-section">Data & Assets</div>
+        <div class="nav-item" onclick="switchTab('knowledge')"><span class="icon">📚</span> Knowledge Base <span class="count">783</span></div>
+        <div class="nav-item" onclick="switchTab('crm')"><span class="icon">📋</span> CRM & Leads <span class="count">2,318</span></div>
+        <div class="nav-item" onclick="switchTab('contracts')"><span class="icon">📝</span> Contracts <span class="count">27</span></div>
+        <div class="nav-item" onclick="switchTab('deliverables')"><span class="icon">📦</span> Deliverables <span class="count">20+</span></div>
+        <div class="nav-item" onclick="switchTab('dashboards')"><span class="icon">📊</span> Dashboards <span class="count">18+</span></div>
+
+        <div class="nav-section">People</div>
+        <div class="nav-item" onclick="switchTab('students')"><span class="icon">🎓</span> Students & Interns <span class="count">12</span></div>
+        <div class="nav-item" onclick="switchTab('initiatives')"><span class="icon">🎯</span> Initiatives <span class="count">24</span></div>
+
+        <div class="nav-divider"></div>
+        <div class="nav-section-title">Navigation</div>
+        <div class="nav-item" onclick="window.open('file:///C:/Users/ram/Desktop/Strategy%20AGI/agentfield/myn-agent-os/index.html')"><span class="icon">🤖</span> Agent OS</div>
+        <div class="nav-item" onclick="window.open('file:///C:/Users/ram/Desktop/Command%20Center/myn-command-center/agentfield-dashboard.html')"><span class="icon">⚙️</span> AgentField Dashboard</div>
+    </nav>
+
+    <div class="main">
+        <!-- ==================== OVERVIEW ==================== -->
+        <div id="overview" class="content-section active">
+            <div class="section-header">
+                <h1>Master System Directory <span class="badge badge-teal">6,694 FILES</span></h1>
+                <p>Complete map of every file, asset, data source, and opportunity across the MYN system &bull; Mar 25, 2026</p>
+            </div>
+
+            <div class="stat-row">
+                <div class="stat-box"><div class="number">8</div><div class="label">Systems</div></div>
+                <div class="stat-box"><div class="number">6,694</div><div class="label">Total Files</div></div>
+                <div class="stat-box"><div class="number blue">783</div><div class="label">Knowledge Base</div></div>
+                <div class="stat-box"><div class="number amber">2,318</div><div class="label">Lead Records</div></div>
+                <div class="stat-box"><div class="number purple">27</div><div class="label">Contracts</div></div>
+                <div class="stat-box"><div class="number">18+</div><div class="label">Dashboards</div></div>
+                <div class="stat-box"><div class="number">24</div><div class="label">Initiatives</div></div>
+                <div class="stat-box"><div class="number">12</div><div class="label">Team Members</div></div>
+            </div>
+
+            <h2 class="sub"><span>System Architecture</span></h2>
+            <div class="tree">
+<pre style="color: inherit; background: transparent; font-size: 12px; line-height: 1.9;">
+<span class="dir">MYN SYSTEM ROOT</span>
+│
+├── <span class="dir">📁 Strategy AGI/</span> <span class="count">(408 files)</span> — Backend intelligence, agents, workflows, research
+│   ├── <span class="dir">01_operating_system/</span> — Company identity, team map, skills inventory, soul
+│   ├── <span class="dir">02_architecture/</span> — Stack map, data flow, Supabase schema, dashboards (12 HTML)
+│   ├── <span class="dir">03_repo_management/</span> — Deployment, env setup, git push guides
+│   ├── <span class="dir">04_prompts/</span> — Agent system prompts (hotels, B2B intel, product owner)
+│   ├── <span class="dir">05_workflows/</span> — n8n workflow analysis + reference
+│   ├── <span class="dir">06_research/</span> — Investor docs, pitch decks, marketing skills (31KB playbook)
+│   ├── <span class="dir">07_roadmaps/</span> — 30-day roadmap, OpenAI upgrade bundle (15 files)
+│   ├── <span class="dir">08_archive/</span> — Migrated AI Stack artifacts, session logs, generator scripts
+│   ├── <span class="dir">agents/</span> — PM_WEBDEV_AGENT.md (unified operating instructions)
+│   ├── <span class="dir">backend/</span> — Next.js API + FastAPI routes (agents.ts, supabase.ts, hotel_context.py)
+│   ├── <span class="dir">contracts/</span> — <span class="data">27 contract files</span> (hotel + govt contracting guides)
+│   ├── <span class="dir">pipelines/</span> — Python: Apify scraper, BigQuery, Claude, deep research, style pipeline
+│   ├── <span class="dir">research/</span> — NotebookLM outputs, Clay enrichment, govt contracting research (22 files)
+│   ├── <span class="dir">scripts/</span> — LinkedIn/Instagram scrapers, business cards, intelligence server
+│   └── <span class="dir">supabase/</span> — SQL migrations (hotel context, enrichment, classes)
+│
+├── <span class="dir">📣 Marketing Agent/</span> <span class="count">(858 files)</span> — Full-funnel marketing automation
+│   ├── <span class="highlight">CONTENT_CALENDAR.md</span> / <span class="highlight">EMAIL_SEQUENCES.md</span> / <span class="highlight">SEO_PLAYBOOK.md</span> / <span class="highlight">SOCIAL_ATOMIZER.md</span>
+│   ├── <span class="dir">knowledge-base/</span> — <span class="data">783 files</span> from Google TakeOuts
+│   │   ├── business/ <span class="count">(286)</span> — strategy, ads, analytics, SEO, intern deliverables
+│   │   ├── yoga/ <span class="count">(281)</span> — programs, clinical research, therapist content
+│   │   ├── hotels/ <span class="count">(42)</span> — databases, pitch notebooks, wellness research
+│   │   ├── prompts/ <span class="count">(44)</span> — reusable prompt templates
+│   │   ├── crm-data/ <span class="count">(35)</span> — <span class="data">contact lists, hotel leads, email lists</span>
+│   │   ├── founder-authority/ <span class="count">(17)</span> — Ram's bio, personal branding
+│   │   ├── kids/ <span class="count">(16)</span> — school program data, LBUSD
+│   │   ├── advertising/ <span class="count">(16)</span> — Facebook, Instagram, Google strategies
+│   │   ├── corporate-wellness/ <span class="count">(15)</span> — B2B corporate programs
+│   │   ├── notebooklm-research/ <span class="count">(17)</span> — AI-generated research summaries
+│   │   ├── cold-email/ <span class="count">(12)</span> — outreach guides, LinkedIn sequences
+│   │   ├── sales/ <span class="count">(8)</span> — pipeline KPIs, B2B funnel strategy
+│   │   ├── social/ <span class="count">(8)</span> — Facebook advertising guides
+│   │   ├── seo/ <span class="count">(6)</span> — Google Business Profile, local search
+│   │   └── healthcare/ <span class="count">(0)</span> — EMPTY — needs Priya's research
+│   ├── <span class="dir">initiatives/</span> — <span class="data">24 active initiatives</span> across 7 categories
+│   │   ├── hotels/ <span class="count">(6)</span> — partnerships, scoring, pilots, pitch, CRM
+│   │   ├── analytics/ <span class="count">(6)</span> — dashboards, tracking, GTM, social AI
+│   │   ├── enablement/ <span class="count">(4)</span> — procurement, stakeholders, referrals, execution
+│   │   ├── strategy/ <span class="count">(3)</span> — value prop, competitors, financial model
+│   │   ├── platform/ <span class="count">(2)</span> — marketplace, research pipeline
+│   │   ├── kids/ <span class="count">(2)</span> — LBUSD/ELOP rollout, school partnerships
+│   │   └── wearables/ <span class="count">(1)</span> — Yoga Bio Sync launch readiness
+│   ├── <span class="dir">students/</span> — 12 student workspace folders (Riipen + ASU)
+│   ├── <span class="data">instantly_ALL_LEADS.csv</span> <span class="count">(1,158 rows)</span>
+│   ├── <span class="data">instantly_HOTELS.csv</span> <span class="count">(1,045 rows)</span>
+│   ├── <span class="data">instantly_GENERAL.csv</span> <span class="count">(100 rows)</span>
+│   ├── <span class="data">instantly_KIDS.csv</span> <span class="count">(15 rows)</span>
+│   └── <span class="data">Clay_Pipeline_A_Hotel_Schema.xlsx</span> / <span class="data">Clay_Hotel_Seed_List.csv</span>
+│
+├── <span class="dir">🎛️ Command Center/</span> <span class="count">(34 files)</span> — Executive dashboards + Notion mirror
+│   ├── <span class="dir">myn-command-center/</span>
+│   │   ├── <span class="highlight">command-center.html</span> — Main executive command center
+│   │   ├── <span class="highlight">master-directory.html</span> — THIS FILE (system-wide directory)
+│   │   ├── <span class="highlight">business-economics-dashboard.html</span> — Live pipeline + unit economics
+│   │   ├── <span class="highlight">team-handoff-dashboard.html</span> — Neha, Naveen, Avi handoff tracker
+│   │   ├── <span class="highlight">dashboard-master.html</span> / <span class="highlight">supabase-dashboard.html</span> / <span class="highlight">index.html</span>
+│   │   └── AGENT_ARCHITECTURE.md / PM_AGENT_SUPPLEMENT.md / SYSTEM_STATUS.md / TEMPLATES.md
+│   └── <span class="dir">notion-mirror/</span> — Notion workspace filed as markdown
+│       ├── 00_org_overview/ — riipen_organization.md
+│       ├── 01_workstreams/ — automations, brand, conference, finance, procurement, wearables
+│       ├── 02_databases/ — B2B hotels, healthcare, procurement, SOPs
+│       ├── 03_initiatives/ — index, financial model, hotels research
+│       ├── 04_student_workspaces/ — hotels_naveen_neha, naveen, neha, procurement_not_hotels
+│       └── 05_reference/ — assets_housekeeping, notion_site_map
+│
+├── <span class="dir">🌐 myn.com-main/</span> <span class="count">(739 files)</span> — Public marketing website (Next.js 16 + TypeScript)
+│   └── <span class="dir">myn.com/</span>
+│       ├── <span class="dir">app/</span> — 17 routes (pages)
+│       │   ├── / (homepage) — /about-our-team-and-vision — /after-school-program
+│       │   ├── /api/class-registrations — /blogs — /contact-us
+│       │   ├── /corporate-wellness-programs — /faqs — /find-a-yoga-therapist-near-me
+│       │   ├── /hotel/[hotelId] — /hotels/[hotelId] — /join-as-yoga-instructor
+│       │   ├── /platform — /post/[slug] — /privacy-policy — /terms-of-service
+│       │   └── /yoga-for-healthcare-providers — /yoga-for-hotels-and-resorts
+│       ├── <span class="dir">components/</span> — Reusable React components
+│       ├── <span class="dir">styles/</span> — CSS + fonts
+│       ├── <span class="dir">public/</span> — Static assets (images, uploads)
+│       └── <span class="dir">util/</span> — Utility functions
+│
+├── <span class="dir">⚙️ myn.org-main/</span> <span class="count">(4,587 files)</span> — Admin dashboard (Next.js 15)
+│   └── <span class="dir">src/</span>
+│       ├── <span class="dir">app/</span> — 40+ routes (dashboard, classes, apps, auth, business-profile)
+│       │   ├── /dashboard/hotel/wria — /classes/list — /classes/edit — /classes/qr
+│       │   ├── /apps/linkedin-scrapper — /apps/instagram-scrapper — /apps/website-analyzer
+│       │   ├── /account/profile — /auth/login — /auth/signup
+│       │   └── /business-profile/edit
+│       ├── <span class="dir">components/</span> — Reusable React components
+│       ├── <span class="dir">context/</span> — AuthContext.js (auth + authedFetch)
+│       └── <span class="dir">Data/</span> — Static data files
+│
+├── <span class="dir">🎬 AI video gen/</span> <span class="count">(47 files)</span> — Video generation pipelines
+│   ├── <span class="dir">brand-anthem-generator/</span> — Node.js/TypeScript: website → brand video
+│   │   ├── src/ — index.ts, server.ts
+│   │   └── output/ — brand_profile.json, lyrics.txt, storyboard.json, results.html
+│   └── <span class="dir">dance_api_project/</span> — Python prototype
+│
+├── <span class="dir">📊 reports by vertical/</span> <span class="count">(13 files)</span> — Deliverables
+│   ├── <span class="doc">My_Yoga_Network_Presentation.pptx</span>
+│   ├── <span class="doc">My_Yoga_Network_Strategic_Healthcare_Platform_WhitePaper.docx</span>
+│   ├── <span class="doc">MYN_Healthcare_Agent.md</span> / <span class="doc">MYN_Project_State.md</span> / <span class="doc">MYN_Decision_Log.md</span>
+│   └── <span class="dir">bio medical/</span> — Proposal R4.pdf, implementing_yoga_in_healthcare.docx, interim_report.docx
+│
+└── <span class="dir">📱 social/</span> <span class="count">(8 files)</span> — Social media strategy + Facebook research
+    ├── <span class="highlight">SOCIAL_STRATEGY.md</span> / <span class="highlight">TOOLS_NEEDED.md</span>
+    ├── social-dashboard.html
+    └── 5× Facebook advertising research (HTML)
+</pre>
+            </div>
+        </div>
+
+        <!-- ==================== STRATEGY AGI ==================== -->
+        <div id="strategy" class="content-section">
+            <div class="section-header">
+                <h1>Strategy AGI <span class="badge badge-teal">408 FILES</span></h1>
+                <p>Backend intelligence layer — agents, workflows, research, architecture, contracts</p>
+            </div>
+            <div class="card-grid">
+                <div class="card"><h3>🧠 01_operating_system/ <span class="badge badge-blue">11 files</span></h3>
+                    <p>COMPANY.md, EXECUTIVE_SUMMARY.md, TEAM_MAP.md, MASTER_SKILLS_INVENTORY.md, CAPABILITY_INVENTORY.md, SKILLS_AUDIT.md, SKILLS_BY_DIVISION_QUICK_REF.md, RETREAT_EVENT_SYSTEM.md, soul.md</p></div>
+                <div class="card"><h3>🏗️ 02_architecture/ <span class="badge badge-blue">20+ files</span></h3>
+                    <p>STACK_MAP.md, DATA_FLOW.md, SUPABASE_SCHEMA.md, MODELS.md, QDRANT.md, WEBSITE_INTEGRATION_MAP.md, plus 12 interactive HTML dashboards</p></div>
+                <div class="card"><h3>🚀 03_repo_management/ <span class="badge badge-green">9 files</span></h3>
+                    <p>DEPLOYMENT_CHECKLIST.md, QUICK_START.md, GIT_PUSH_GUIDE.md, ENV_SETUP_GUIDE.md, BACKEND_DEPLOYMENT.md, SCRIPTS_ORGANIZATION.md</p></div>
+                <div class="card"><h3>💬 04_prompts/ <span class="badge badge-amber">4 files</span></h3>
+                    <p>AGENT_INSTRUCTION_PRODUCT_OWNER.txt, DASHBOARD_B2B_INTELLIGENCE_PROMPT.txt, HOTELS_AGENT_SYSTEM_PROMPT.txt, HOTELS_CAPABILITIES_PROMPT.txt</p></div>
+                <div class="card"><h3>📝 contracts/ <span class="badge badge-red">27 files</span></h3>
+                    <p><strong>Hotel contracts:</strong> Westin LB, Westin-Woodlands, Dagny, San Luis Resort, Henna, Jean MYN, 7× contract templates<br>
+                    <strong>Govt contracting:</strong> SAM.gov guides, GWAC, state contracting, funding checklists, FAQ</p></div>
+                <div class="card"><h3>🔬 research/ <span class="badge badge-purple">25+ files</span></h3>
+                    <p><strong>Clay enrichment:</strong> 4 guides (proprietary data, Google Maps, tutorials)<br>
+                    <strong>Govt contracting:</strong> 22 NotebookLM research files (ethics, IDIQ, proposals, NASA, state procurement)</p></div>
+                <div class="card"><h3>📦 06_research/deliverables/ <span class="badge badge-green">7 files</span></h3>
+                    <p>Executive_Summary.pdf, Investor_Architecture.pptx, MYN_AGI_Capability_Inventory.pdf, MYN_ORG_Architecture.docx, My_Yoga_Network_Architecture.pdf, Pitch_Deck.pptx, Strategic_Workflow.pptx, Technical_Architecture.pptx</p></div>
+                <div class="card"><h3>⚡ scripts/ <span class="badge badge-purple">10+ files</span></h3>
+                    <p>intelligence_server.py, dashboard_server.py, model_router.py, test_connections.py, plus scrapers: linkedin/, instagram/, website/, business-cards/, deep-research/</p></div>
+            </div>
+        </div>
+
+        <!-- ==================== MARKETING AGENT ==================== -->
+        <div id="marketing" class="content-section">
+            <div class="section-header">
+                <h1>Marketing Agent <span class="badge badge-teal">858 FILES</span></h1>
+                <p>Full-funnel marketing automation — knowledge base, initiatives, lead lists, content playbooks</p>
+            </div>
+            <h2 class="sub"><span>Core Playbooks</span></h2>
+            <div class="card-grid">
+                <div class="card"><h3>📅 CONTENT_CALENDAR.md</h3><p>Division-aware content calendar framework for all 9 divisions</p></div>
+                <div class="card"><h3>📧 EMAIL_SEQUENCES.md</h3><p>Cold email + nurture sequence templates (7-email multi-touch)</p></div>
+                <div class="card"><h3>🔍 SEO_PLAYBOOK.md</h3><p>Keyword targets, JSON-LD, meta tags, internal linking strategy</p></div>
+                <div class="card"><h3>📱 SOCIAL_ATOMIZER.md</h3><p>Content atomization: 1 piece → 15+ social posts</p></div>
+                <div class="card"><h3>🎯 DIVISION_MESSAGING.md</h3><p>Division-specific messaging, positioning, tone per vertical</p></div>
+                <div class="card"><h3>📋 30_DAY_PLAN.md</h3><p>First 30 days of Marketing Agent activation plan</p></div>
+            </div>
+
+            <h2 class="sub"><span>Lead Data</span> — 2,318 total records</h2>
+            <table class="data-table">
+                <thead><tr><th>File</th><th>Records</th><th>Segment</th></tr></thead>
+                <tbody>
+                    <tr><td>instantly_ALL_LEADS.csv</td><td><strong>1,158</strong></td><td>All segments combined</td></tr>
+                    <tr><td>instantly_HOTELS.csv</td><td><strong>1,045</strong></td><td>Hotel leads</td></tr>
+                    <tr><td>instantly_GENERAL.csv</td><td><strong>100</strong></td><td>General leads</td></tr>
+                    <tr><td>instantly_KIDS.csv</td><td><strong>15</strong></td><td>Kids/school program leads</td></tr>
+                    <tr><td>Clay_Hotel_Seed_List.csv</td><td>—</td><td>Clay enrichment seed list</td></tr>
+                    <tr><td>Clay_Pipeline_A_Hotel_Schema.xlsx</td><td>—</td><td>Clay pipeline schema</td></tr>
+                    <tr><td>Clay_Hotel_Pipeline_Template.csv</td><td>—</td><td>Clay pipeline template</td></tr>
+                </tbody>
+            </table>
+
+            <h2 class="sub"><span>Additional Reports</span></h2>
+            <div class="card-grid">
+                <div class="card"><h3>📊 Google_TakeOuts_Audit_Report.pdf</h3><p>Complete audit of all 783 files routed from Google TakeOuts</p></div>
+                <div class="card"><h3>🌐 MYN_Website_Redesign_v1.pdf</h3><p>Website redesign proposal</p></div>
+                <div class="card"><h3>🔐 SENSITIVE_FILES_AUDIT.md</h3><p>Audit of files containing sensitive data (API keys, credentials)</p></div>
+                <div class="card"><h3>📈 TakeOuts_New_Capabilities_Report.pdf</h3><p>New capabilities unlocked from Google TakeOuts data</p></div>
+            </div>
+        </div>
+
+        <!-- ==================== COMMAND CENTER ==================== -->
+        <div id="command" class="content-section">
+            <div class="section-header">
+                <h1>Command Center <span class="badge badge-teal">34 FILES</span></h1>
+                <p>Executive dashboards, team handoff tracking, Notion workspace mirror</p>
+            </div>
+            <h2 class="sub"><span>Dashboards</span></h2>
+            <div class="card-grid">
+                <div class="card"><h3>🎛️ command-center.html</h3><p>Main executive command center — system overview, health checks, quick actions</p></div>
+                <div class="card"><h3>🗺️ master-directory.html</h3><p>THIS FILE — complete system-wide directory of every file and data source</p></div>
+                <div class="card"><h3>💰 business-economics-dashboard.html</h3><p>Live pipeline (18 leads), unit economics, revenue model, ROI calculator</p></div>
+                <div class="card"><h3>👥 team-handoff-dashboard.html</h3><p>Neha, Naveen, Avi — work history, Notion pages, Fathom recordings, action items</p></div>
+                <div class="card"><h3>📊 dashboard-master.html</h3><p>Master dashboard overview</p></div>
+                <div class="card"><h3>🗄️ supabase-dashboard.html</h3><p>Supabase database status and schema viewer</p></div>
+            </div>
+
+            <h2 class="sub"><span>Notion Mirror</span> — Filed Notion workspace as markdown</h2>
+            <table class="data-table">
+                <thead><tr><th>Folder</th><th>Contents</th></tr></thead>
+                <tbody>
+                    <tr><td>00_org_overview/</td><td>riipen_organization.md — complete Riipen org structure</td></tr>
+                    <tr><td>01_workstreams/</td><td>automations, brand_content_comms_events, conference_pipeline, finance_accounting, procurement_kids, wearables_yoga_therapy</td></tr>
+                    <tr><td>02_databases/</td><td>b2b2c_healthcare_tracker, b2b_hotels_finance_tracker, hospitality_procurement_directory, procurement_hotel_portals, sops_database</td></tr>
+                    <tr><td>03_initiatives/</td><td>INDEX.md, financial_projection_model, hotels_research</td></tr>
+                    <tr><td>04_student_workspaces/</td><td>hotels_naveen_neha, naveen_procurement, neha_social_design, procurement_not_hotels</td></tr>
+                    <tr><td>05_reference/</td><td>assets_housekeeping, notion_site_map</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ==================== MYN.COM ==================== -->
+        <div id="myn-com" class="content-section">
+            <div class="section-header">
+                <h1>myn.com <span class="badge badge-green">PUBLIC WEBSITE</span></h1>
+                <p>Next.js 16 + TypeScript — public marketing website with 17 routes</p>
+            </div>
+            <h2 class="sub"><span>Routes</span> — by PMF Priority</h2>
+            <table class="data-table">
+                <thead><tr><th>Priority</th><th>Route</th><th>Division</th></tr></thead>
+                <tbody>
+                    <tr><td><span class="badge badge-red">HIGHEST</span></td><td>/yoga-for-hotels-and-resorts</td><td>B2B Hotels</td></tr>
+                    <tr><td><span class="badge badge-red">HIGHEST</span></td><td>/hotels + /hotel/[hotelId]</td><td>B2B Hotels</td></tr>
+                    <tr><td><span class="badge badge-red">HIGHEST</span></td><td>/yoga-for-healthcare-providers</td><td>B2B2C Healthcare</td></tr>
+                    <tr><td><span class="badge badge-red">HIGHEST</span></td><td>/corporate-wellness-programs</td><td>B2B Wellness</td></tr>
+                    <tr><td><span class="badge badge-amber">MEDIUM</span></td><td>/find-a-yoga-therapist-near-me</td><td>Marketplace</td></tr>
+                    <tr><td><span class="badge badge-amber">MEDIUM</span></td><td>/join-as-yoga-instructor</td><td>Marketplace</td></tr>
+                    <tr><td><span class="badge badge-blue">SUPPORT</span></td><td>/blogs + /post/[slug]</td><td>Trust + SEO</td></tr>
+                    <tr><td><span class="badge badge-blue">SUPPORT</span></td><td>/about-our-team-and-vision</td><td>Trust</td></tr>
+                    <tr><td><span class="badge badge-blue">SUPPORT</span></td><td>/platform</td><td>Product</td></tr>
+                    <tr><td><span class="badge badge-blue">SUPPORT</span></td><td>/after-school-program</td><td>Kids/Procurement</td></tr>
+                    <tr><td><span class="badge badge-teal">UTILITY</span></td><td>/faqs, /contact-us, /privacy-policy, /terms-of-service</td><td>Legal + Support</td></tr>
+                </tbody>
+            </table>
+            <div class="card"><h3>Tech Stack</h3><p>Next.js 16.1.6 | React 18 | TypeScript | Supabase Auth Helpers | Framer Motion | AOS | Swiper | Vercel</p></div>
+        </div>
+
+        <!-- ==================== MYN.ORG ==================== -->
+        <div id="myn-org" class="content-section">
+            <div class="section-header">
+                <h1>myn.org <span class="badge badge-purple">ADMIN DASHBOARD</span></h1>
+                <p>Next.js 15 — admin dashboard for managing yoga business operations (4,587 files)</p>
+            </div>
+            <h2 class="sub"><span>Key Routes</span></h2>
+            <div class="card-grid">
+                <div class="card"><h3>📊 /dashboard/hotel/wria</h3><p>Hotel analytics dashboard (WRIA metrics)</p></div>
+                <div class="card"><h3>📋 /classes/list + /edit + /qr</h3><p>Class management, editing, QR code generation</p></div>
+                <div class="card"><h3>🔗 /apps/*</h3><p>Scraper apps: LinkedIn, Instagram, Website Analyzer, Jobs</p></div>
+                <div class="card"><h3>👤 /account/profile + /business-profile</h3><p>User + business profile management</p></div>
+                <div class="card"><h3>🔐 /auth/*</h3><p>Login, signup, callback (Supabase auth)</p></div>
+            </div>
+            <div class="card"><h3>Tech Stack</h3><p>Next.js 15.5.9 | React 18.3.1 | Bootstrap 5.3.3 | Reactstrap | Supabase Auth | FastAPI backend (mynapi.onrender.com)</p></div>
+        </div>
+
+        <!-- ==================== AI VIDEO GEN ==================== -->
+        <div id="video" class="content-section">
+            <div class="section-header">
+                <h1>AI Video Gen <span class="badge badge-blue">47 FILES</span></h1>
+                <p>Video generation pipelines — brand anthems, outreach videos, editing</p>
+            </div>
+            <div class="card-grid">
+                <div class="card"><h3>🎵 Brand Anthem Generator</h3><p>Node.js/TypeScript pipeline: Firecrawl → GPT-4o → FAL.AI Sonauto → Hedra → ffmpeg<br>Output: brand_profile.json, lyrics.txt, storyboard.json, song.mp3, video.mp4</p></div>
+                <div class="card"><h3>💃 Dance API Project</h3><p>Python prototype: Firecrawl → OpenAI → FAL.AI → Hedra → ffmpeg</p></div>
+                <div class="card"><h3>🎬 GHL Video Outreach (Planned)</h3><p>n8n workflow: GHL webhook → script gen → audio → video → Slack approval → GHL delivery</p></div>
+            </div>
+        </div>
+
+        <!-- ==================== KNOWLEDGE BASE ==================== -->
+        <div id="knowledge" class="content-section">
+            <div class="section-header">
+                <h1>Knowledge Base <span class="badge badge-teal">783 FILES</span></h1>
+                <p>Primary knowledge layer — routed from Google TakeOuts (Mar 25, 2026) into Marketing Agent</p>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>Category</th><th>Files</th><th>Contents</th><th>Key For</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>business/</strong></td><td>286</td><td>Strategy, ads, analytics, SEO, growth plans, intern deliverables</td><td>All divisions</td></tr>
+                    <tr><td><strong>yoga/</strong></td><td>281</td><td>Programs, clinical research, therapist content, health studies</td><td>Healthcare, Marketplace</td></tr>
+                    <tr><td><strong>prompts/</strong></td><td>44</td><td>Reusable prompt templates (SEO, marketing, sales, AI)</td><td>All agents</td></tr>
+                    <tr><td><strong>hotels/</strong></td><td>42</td><td>Hotel databases, pitch notebooks, wellness strategy research</td><td>Hotels division</td></tr>
+                    <tr><td><strong>crm-data/</strong></td><td>35</td><td>Contact lists, hotel leads, email lists, school responses</td><td>Sales, CRM</td></tr>
+                    <tr><td><strong>founder-authority/</strong></td><td>17</td><td>Ram's bio, personal branding research</td><td>Marketing, PR</td></tr>
+                    <tr><td><strong>notebooklm-research/</strong></td><td>17</td><td>AI-generated research summaries from NotebookLM</td><td>Research</td></tr>
+                    <tr><td><strong>advertising/</strong></td><td>16</td><td>Facebook, Instagram, Google advertising strategies</td><td>Paid acquisition</td></tr>
+                    <tr><td><strong>kids/</strong></td><td>16</td><td>School program data, LBUSD context, kids yoga materials</td><td>Kids division</td></tr>
+                    <tr><td><strong>corporate-wellness/</strong></td><td>15</td><td>B2B corporate wellness program research</td><td>Corporate</td></tr>
+                    <tr><td><strong>cold-email/</strong></td><td>12</td><td>Cold email strategies, LinkedIn outreach guides</td><td>Sales outreach</td></tr>
+                    <tr><td><strong>sales/</strong></td><td>8</td><td>Pipeline KPIs, B2B funnel strategy, sales training</td><td>Sales</td></tr>
+                    <tr><td><strong>social/</strong></td><td>8</td><td>Facebook advertising guides</td><td>Social media</td></tr>
+                    <tr><td><strong>seo/</strong></td><td>6</td><td>Google Business Profile data, local search strategy</td><td>SEO</td></tr>
+                    <tr><td style="color: #ef5350;"><strong>healthcare/</strong></td><td style="color: #ef5350;">0</td><td style="color: #ef5350;">EMPTY — needs Priya's clinical research</td><td>Healthcare</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ==================== CRM & LEADS ==================== -->
+        <div id="crm" class="content-section">
+            <div class="section-header">
+                <h1>CRM & Lead Data <span class="badge badge-amber">2,318+ RECORDS</span></h1>
+                <p>Lead lists, CRM contacts, hotel databases across multiple sources</p>
+            </div>
+            <h2 class="sub"><span>Lead Sources</span></h2>
+            <div class="card-grid">
+                <div class="card"><h3>📧 Instantly Leads</h3>
+                    <p>1,158 All Leads + 1,045 Hotels + 100 General + 15 Kids<br>Location: <code>Marketing Agent/instantly_*.csv</code></p></div>
+                <div class="card"><h3>🏨 Clay Pipeline</h3>
+                    <p>Hotel enrichment pipeline with seed list and schema<br>Location: <code>Marketing Agent/Clay_*.csv/.xlsx</code></p></div>
+                <div class="card"><h3>📋 Notion CRM</h3>
+                    <p>18 active leads in "Contracts Sent + Appointments Made" database<br>2 Signed, 5 Viewed, 9 Sent, 2 Declined</p></div>
+                <div class="card"><h3>📂 CRM Data Files (35)</h3>
+                    <p>100-HotelM.xlsx, All Leads.xlsx, Boston Luxury Hotels.xlsx, CRM Contacts.csv, Hotel leads.xlsx, Hospitality Outreach Tracker, school responses, Bixby Elementary</p></div>
+            </div>
+            <h2 class="sub"><span>CRM Data Files</span> — in knowledge-base/crm-data/</h2>
+            <div class="card"><h3>📊 Key Files</h3>
+                <p style="line-height: 2;">
+                    100-HotelM.xlsx &bull; All Leads (Default View).xlsx &bull; Boston Luxury Hotels Full Descriptions.xlsx &bull;
+                    CRM Contacts with Separated Names.csv/.xlsx &bull; California Orange County-GoogleMaps.xlsx &bull;
+                    Cleaned Email List.csv/.xlsx &bull; Contacts (Default View).csv &bull; Hotel leads.xlsx &bull;
+                    MYN Hospitality Outreach Tracker.xlsx &bull; Bixby Elementary Responses.xlsx &bull;
+                    Longfellow Clubs Responses.xlsx &bull; Bulk Connect Sample.xlsx &bull;
+                    A Seeker's Guide Marketing Schedule.xlsx
+                </p></div>
+        </div>
+
+        <!-- ==================== CONTRACTS ==================== -->
+        <div id="contracts" class="content-section">
+            <div class="section-header">
+                <h1>Contracts <span class="badge badge-red">27 FILES</span></h1>
+                <p>All contract files — hotel agreements, templates, and government contracting research</p>
+            </div>
+            <h2 class="sub"><span>Active Hotel Contracts</span></h2>
+            <div class="card-grid">
+                <div class="card"><h3>📝 SERVICE CONTRACT Westin LB.pdf</h3><p>Active Westin Long Beach service contract</p></div>
+                <div class="card"><h3>📝 Hotel Yoga Contract - Dagny.pdf</h3><p>Dagny hotel contract</p></div>
+                <div class="card"><h3>📝 Hotel Yoga Contract - Westin-Woodlands.pdf</h3><p>Westin Woodlands contract</p></div>
+                <div class="card"><h3>📝 Contract San Luis Resort Galveston - unsigned.pdf</h3><p>San Luis Resort — unsigned</p></div>
+                <div class="card"><h3>📝 Henna contract.pdf</h3><p>Henna contract</p></div>
+                <div class="card"><h3>📝 Jean MYN Contract.pdf</h3><p>Jean MYN contract</p></div>
+            </div>
+            <h2 class="sub"><span>Contract Templates</span> (7 versions)</h2>
+            <p style="font-size: 13px; color: #9ab0bc; margin-bottom: 16px;">My Yoga Network Contract.pdf, Contract (2).pdf, Contract copy.pdf, Contract template.pdf, template (2).pdf, template (3).pdf, template 3.pdf</p>
+
+            <h2 class="sub"><span>Government Contracting Research</span></h2>
+            <div class="card-grid">
+                <div class="card"><h3>📖 Guides</h3><p>Become a federal contractor (SBA), Contracting guide (SBA), GWACs overview, How to Win Government Contracts (3 versions), Lean Marketing for Contractors</p></div>
+                <div class="card"><h3>📋 Templates</h3><p>FAQ - Intro to Govt Contracting.pdf, Funding Checklist.pdf, Website Reference List.pdf, Connecticut State Contracting Standards</p></div>
+            </div>
+        </div>
+
+        <!-- ==================== DELIVERABLES ==================== -->
+        <div id="deliverables" class="content-section">
+            <div class="section-header">
+                <h1>Deliverables <span class="badge badge-green">PRODUCED ASSETS</span></h1>
+                <p>All produced documents, presentations, and reports across the system</p>
+            </div>
+            <h2 class="sub"><span>Strategy AGI Deliverables</span> (06_research/deliverables/)</h2>
+            <div class="card-grid">
+                <div class="card"><h3>📊 Executive_Summary_My_Yoga_Network.pdf</h3><p>Executive summary PDF</p></div>
+                <div class="card"><h3>📊 Investor_Architecture_Diagram.pptx</h3><p>Investor architecture presentation</p></div>
+                <div class="card"><h3>📊 MYN_AGI_System_Capability_Inventory.pdf</h3><p>Complete AGI capability inventory (Mar 23, 2026)</p></div>
+                <div class="card"><h3>📊 MYN_ORG_Architecture_Plan.docx</h3><p>myn.org architecture plan</p></div>
+                <div class="card"><h3>📊 My_Yoga_Network_Architecture.pdf</h3><p>Full architecture documentation</p></div>
+                <div class="card"><h3>📊 My_Yoga_Network_Pitch_Deck.pptx</h3><p>Investor pitch deck</p></div>
+                <div class="card"><h3>📊 Strategic_Workflow_Diagram.pptx</h3><p>Workflow visualization</p></div>
+                <div class="card"><h3>📊 Technical_Architecture_Diagram.pptx</h3><p>Technical architecture</p></div>
+            </div>
+            <h2 class="sub"><span>Reports by Vertical</span></h2>
+            <div class="card-grid">
+                <div class="card"><h3>📊 My_Yoga_Network_Presentation.pptx</h3><p>Main company presentation</p></div>
+                <div class="card"><h3>📄 Strategic Healthcare Platform WhitePaper.docx/.html</h3><p>Healthcare white paper (DOCX + 2 HTML versions)</p></div>
+                <div class="card"><h3>🏥 Bio Medical Reports</h3><p>Proposal R4.pdf, implementing_yoga_in_healthcare (Reeya + Priya).docx, interim_report (Priya).docx</p></div>
+                <div class="card"><h3>📋 Project Management</h3><p>MYN_Project_State.md, MYN_Decision_Log.md, MYN_Next_Actions.md, MYN_Healthcare_Agent.md, MYN_Project_Management_Outline.md</p></div>
+            </div>
+        </div>
+
+        <!-- ==================== DASHBOARDS ==================== -->
+        <div id="dashboards" class="content-section">
+            <div class="section-header">
+                <h1>All Dashboards <span class="badge badge-blue">18+ HTML</span></h1>
+                <p>Every interactive HTML dashboard across the system</p>
+            </div>
+            <h2 class="sub"><span>Command Center</span></h2>
+            <table class="data-table">
+                <thead><tr><th>Dashboard</th><th>Purpose</th></tr></thead>
+                <tbody>
+                    <tr><td>command-center.html</td><td>Main executive command center</td></tr>
+                    <tr><td>master-directory.html</td><td>This file — complete system directory</td></tr>
+                    <tr><td>business-economics-dashboard.html</td><td>Live pipeline, unit economics, ROI calculator</td></tr>
+                    <tr><td>team-handoff-dashboard.html</td><td>Neha, Naveen, Avi work tracker</td></tr>
+                    <tr><td>dashboard-master.html</td><td>Master dashboard overview</td></tr>
+                    <tr><td>supabase-dashboard.html</td><td>Database status viewer</td></tr>
+                </tbody>
+            </table>
+            <h2 class="sub"><span>Strategy AGI</span> — 02_architecture/dashboards/</h2>
+            <table class="data-table">
+                <thead><tr><th>Dashboard</th><th>Purpose</th></tr></thead>
+                <tbody>
+                    <tr><td>myn_master_dashboard.html</td><td>Master overview dashboard</td></tr>
+                    <tr><td>myn_intelligence_console.html</td><td>Intelligence server console</td></tr>
+                    <tr><td>myn_capabilities.html</td><td>Capabilities inventory viewer</td></tr>
+                    <tr><td>myn_workflows.html</td><td>Workflow visualization</td></tr>
+                    <tr><td>myn_search_history.html</td><td>Search history dashboard</td></tr>
+                    <tr><td>investor_architecture_interactive.html</td><td>Interactive investor architecture</td></tr>
+                    <tr><td>consulting_diagram_premium.html</td><td>Premium consulting diagram</td></tr>
+                    <tr><td>consulting_architecture_diagram.html</td><td>Architecture consulting view</td></tr>
+                    <tr><td>company_operating_manual.html</td><td>Company operating manual</td></tr>
+                    <tr><td>intern_mind_map.html</td><td>Intern mind map</td></tr>
+                    <tr><td>api_dashboard.html</td><td>API status dashboard</td></tr>
+                    <tr><td>MYN_ORG_Architecture.html</td><td>myn.org architecture</td></tr>
+                </tbody>
+            </table>
+            <h2 class="sub"><span>Other Dashboards</span></h2>
+            <table class="data-table">
+                <tbody>
+                    <tr><td>social/social-dashboard.html</td><td>Social media strategy dashboard</td></tr>
+                    <tr><td>AI video gen/brand-anthem-results.html</td><td>Brand anthem generation results</td></tr>
+                    <tr><td>AI video gen/brand_anthem_project.html</td><td>Brand anthem project overview</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ==================== STUDENTS ==================== -->
+        <div id="students" class="content-section">
+            <div class="section-header">
+                <h1>Students & Team <span class="badge badge-purple">16 CONTRIBUTORS</span></h1>
+                <p>Riipen interns (10) + ASU Capstone (5) + Founder</p>
+            </div>
+            <h2 class="sub"><span>Riipen Interns</span> — Workspace folders in Marketing Agent/students/</h2>
+            <table class="data-table">
+                <thead><tr><th>Person</th><th>Focus</th><th>Division</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Grace</strong></td><td>Hotel graphics, messaging, CX + brand + client finance</td><td>Hotels</td></tr>
+                    <tr><td><strong>Sunmeet</strong></td><td>Retreat marketing assets, brand story, pitch rewrite</td><td>Hotels</td></tr>
+                    <tr><td><strong>Vaishali</strong></td><td>Growth analytics, ROI model, Looker dashboards, finance ops</td><td>Hotels/Finance</td></tr>
+                    <tr><td><strong>Priya</strong></td><td>Market research, biomedical research, competitor analysis</td><td>Healthcare</td></tr>
+                    <tr><td><strong>Reeya</strong></td><td>Healthcare economic model, cost avoidance</td><td>Healthcare</td></tr>
+                    <tr><td><strong>Chioma</strong></td><td>Customer experience mapping, stakeholder CX table</td><td>Healthcare/CX</td></tr>
+                    <tr><td><strong>Shivangi</strong></td><td>Healthcare initiatives</td><td>Healthcare</td></tr>
+                    <tr><td><strong>Charisma</strong></td><td>Kids/Mommy and Me marketing, events strategy</td><td>Kids</td></tr>
+                    <tr><td><strong>Binderiya</strong></td><td>Kids strategy, local research, vendor partnerships</td><td>Kids</td></tr>
+                    <tr><td><strong>Diksha</strong></td><td>Org chart, data strategy, hotel scoring framework</td><td>Infrastructure</td></tr>
+                </tbody>
+            </table>
+            <h2 class="sub"><span>ASU Capstone</span> — Wearables + EHR (Yoga Bio Sync™)</h2>
+            <table class="data-table">
+                <thead><tr><th>Student</th><th>Focus</th></tr></thead>
+                <tbody>
+                    <tr><td>Anay Pradhan</td><td>Project Lead / OAuth — wearable provider abstraction (Oura first)</td></tr>
+                    <tr><td>David Brown</td><td>Infrastructure / Security — DigitalOcean, Auth0, token vault</td></tr>
+                    <tr><td>Benjamin Herman</td><td>EHR / FHIR — OpenEMR integration, HIPAA compliance</td></tr>
+                    <tr><td>Roen Wainscoat</td><td>Data Pipelines — ingest, daily metrics, cohort analytics</td></tr>
+                    <tr><td>Wyatt Belscher</td><td>UI/UX — pre-session snapshot card, Figma designs</td></tr>
+                </tbody>
+            </table>
+            <h2 class="sub"><span>Previous Cohort Members</span> (Tracked in Team Handoff Dashboard)</h2>
+            <div class="card-grid">
+                <div class="card"><h3>🎨 Neha (Design + Social)</h3><p>17 Notion pages filed. Hotel graphics, SEO visuals, brand identity, social strategy.</p></div>
+                <div class="card"><h3>💰 Naveen (Procurement)</h3><p>Hotel procurement, conference research, LinkedIn contacts, vendor management.</p></div>
+                <div class="card"><h3>📋 Avi (Strategy/BD)</h3><p>25+ Fathom recordings, PMF narrative, sales pipeline, product strategy.</p></div>
+            </div>
+        </div>
+
+        <!-- ==================== INITIATIVES ==================== -->
+        <div id="initiatives" class="content-section">
+            <div class="section-header">
+                <h1>Initiatives <span class="badge badge-teal">24 ACTIVE</span></h1>
+                <p>All active initiatives from Notion, filed in Marketing Agent/initiatives/</p>
+            </div>
+            <table class="data-table">
+                <thead><tr><th>Category</th><th>#</th><th>Initiatives</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>Hotels</strong></td><td>6</td><td>01-wellness-partnerships, 02-scoring-framework, 03-activation-pilot, 04-pitch-assets, 05-ghl-crm-structure, 06-crm-automation</td></tr>
+                    <tr><td><strong>Analytics</strong></td><td>6</td><td>01-dashboards, 02-tracking-instrumentation, 03-dashboard-questions, 04-healthcare-gtm, 05-local-intelligence, 06-social-media-ai</td></tr>
+                    <tr><td><strong>Enablement</strong></td><td>4</td><td>01-procurement-playbook, 02-stakeholder-mapping, 03-local-referrals, 04-execution-alignment</td></tr>
+                    <tr><td><strong>Strategy</strong></td><td>3</td><td>01-value-proposition, 02-competitor-landscape, 03-financial-model</td></tr>
+                    <tr><td><strong>Platform</strong></td><td>2</td><td>01-marketplace-platform, 02-research-pipeline</td></tr>
+                    <tr><td><strong>Kids</strong></td><td>2</td><td>01-package-rollout, 02-school-partnerships</td></tr>
+                    <tr><td><strong>Wearables</strong></td><td>1</td><td>01-launch-readiness (Yoga Bio Sync™)</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function switchTab(tabId) {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+</script>
+<!-- FLOATING QUICK-ACCESS PANEL -->
+<style>
+    .quick-access-fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #00d4aa, #00a885);
+        border: none;
+        border-radius: 50%;
+        color: #0a1628;
+        font-size: 24px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(0, 212, 170, 0.4);
+        z-index: 9999;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .quick-access-fab:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 30px rgba(0, 212, 170, 0.6);
+    }
+    .quick-access-panel {
+        position: fixed;
+        bottom: 92px;
+        right: 24px;
+        width: 320px;
+        max-height: 0;
+        overflow: hidden;
+        background: rgba(10, 22, 40, 0.98);
+        border: 1px solid rgba(0, 212, 170, 0.25);
+        border-radius: 16px;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+        transition: max-height 0.35s ease, padding 0.35s ease, opacity 0.35s ease;
+        opacity: 0;
+        padding: 0 20px;
+    }
+    .quick-access-panel.open {
+        max-height: 520px;
+        opacity: 1;
+        padding: 20px;
+    }
+    .qa-header {
+        font-size: 13px;
+        font-weight: 700;
+        color: #00d4aa;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(0, 212, 170, 0.15);
+    }
+    .qa-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #c0d0dd;
+        font-size: 13px;
+        transition: all 0.15s;
+    }
+    .qa-link:hover {
+        background: rgba(0, 212, 170, 0.1);
+        color: #fff;
+    }
+    .qa-link .qa-icon { font-size: 16px; width: 22px; text-align: center; }
+    .qa-link .qa-badge {
+        margin-left: auto;
+        background: rgba(255, 107, 53, 0.2);
+        color: #ff6b35;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 8px;
+    }
+    .qa-section-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #5a7a8a;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 12px 0 4px 12px;
+    }
+</style>
+
+<button class="quick-access-fab" onclick="document.getElementById('quick-access-panel').classList.toggle('open')" title="Quick Access — All Dashboards">⚡</button>
+
+<div class="quick-access-panel" id="quick-access-panel">
+    <div class="qa-header">Quick Access — All Boards</div>
+    <a href="unified-command-center.html" class="qa-link" style="background:rgba(0,212,170,0.08);margin-bottom:4px;">
+        <span class="qa-icon">🎯</span> <strong>Unified Command Center</strong>
+    </a>
+    <div class="qa-section-label">Operational</div>
+    <a href="agentic-os-dashboard.html" class="qa-link"><span class="qa-icon">🤖</span> Agentic OS Dashboard</a>
+    <a href="agentfield-dashboard.html" class="qa-link"><span class="qa-icon">⚙️</span> AgentField Control Plane</a>
+    <a href="review-queue.html" class="qa-link"><span class="qa-icon">📋</span> Review Queue <span class="qa-badge">2</span></a>
+    <div class="qa-section-label">Strategy & Business</div>
+    <a href="business-economics-dashboard.html" class="qa-link"><span class="qa-icon">💰</span> Business Economics</a>
+    <a href="dashboard-master.html" class="qa-link"><span class="qa-icon">📊</span> Master Dashboard</a>
+    <div class="qa-section-label">Reference</div>
+    <a href="index.html" class="qa-link"><span class="qa-icon">🏠</span> Marketing Index</a>
+    <a href="architecture-dashboard.html" class="qa-link"><span class="qa-icon">🏗️</span> Architecture & Skills</a>
+    <a href="supabase-dashboard.html" class="qa-link"><span class="qa-icon">🗄️</span> Supabase Dashboard</a>
+    <a href="team-handoff-dashboard.html" class="qa-link"><span class="qa-icon">👥</span> Team Handoff</a>
+    <a href="master-directory.html" class="qa-link"><span class="qa-icon">📁</span> Master Directory</a>
+</div>
+<!-- END QUICK-ACCESS PANEL -->
+
+</body>
+</html>

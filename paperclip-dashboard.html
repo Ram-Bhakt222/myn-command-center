@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paperclip Dashboard — MYN Command Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0a1628 0%, #0f1f35 100%);
+            color: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 48px;
+            background: rgba(10, 22, 40, 0.98);
+            border-bottom: 1px solid rgba(0, 212, 170, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 16px;
+            z-index: 1000;
+            overflow-x: auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        nav a {
+            color: #5a9aaa;
+            text-decoration: none;
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        nav a:hover {
+            background: rgba(0, 212, 170, 0.1);
+            color: #00d4aa;
+        }
+
+        nav a.active {
+            color: #00d4aa;
+            background: rgba(0, 212, 170, 0.1);
+        }
+
+        /* Main Layout */
+        .main-container {
+            margin-top: 60px;
+            padding: 24px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            color: #00d4aa;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        /* Tab Navigation */
+        .tabs-nav {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid rgba(0, 212, 170, 0.15);
+            overflow-x: auto;
+            padding-bottom: 12px;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: #5a9aaa;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: #00d4aa;
+        }
+
+        .tab-btn.active {
+            color: #00d4aa;
+            border-bottom-color: #00d4aa;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(10, 22, 40, 0.95);
+            border: 1px solid rgba(0, 212, 170, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 212, 170, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 212, 170, 0.1);
+        }
+
+        .card h3 {
+            color: #00d4aa;
+            font-size: 15px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .card p {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section h2 {
+            font-size: 18px;
+            color: #00d4aa;
+            margin-bottom: 16px;
+            border-left: 3px solid #00d4aa;
+            padding-left: 12px;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 212, 170, 0.15);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            color: #00d4aa;
+            line-height: 1.5;
+        }
+
+        /* Org Chart */
+        .org-chart {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+        }
+
+        .org-level {
+            margin: 12px 0;
+            font-size: 13px;
+        }
+
+        .org-box {
+            display: inline-block;
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: 0 4px;
+            color: #00d4aa;
+            font-weight: 500;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 13px;
+        }
+
+        th {
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.15);
+            padding: 10px;
+            text-align: left;
+            color: #00d4aa;
+            font-weight: 600;
+        }
+
+        td {
+            border: 1px solid rgba(0, 212, 170, 0.15);
+            padding: 10px;
+            color: #ccc;
+        }
+
+        tr:hover {
+            background: rgba(0, 212, 170, 0.05);
+        }
+
+        /* Stat Box */
+        .stat-box {
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            color: #00d4aa;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        /* Department Card */
+        .dept-card {
+            background: rgba(10, 22, 40, 0.95);
+            border: 1px solid rgba(0, 212, 170, 0.15);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .dept-card h4 {
+            color: #00d4aa;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .dept-detail {
+            font-size: 12px;
+            color: #aaa;
+            margin: 4px 0;
+        }
+
+        /* Heartbeat Timeline */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .timeline-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 13px;
+            top: 40px;
+            width: 2px;
+            height: 40px;
+            background: rgba(0, 212, 170, 0.2);
+        }
+
+        .timeline-icon {
+            width: 28px;
+            height: 28px;
+            background: rgba(0, 212, 170, 0.1);
+            border: 2px solid rgba(0, 212, 170, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            z-index: 1;
+        }
+
+        .timeline-content h4 {
+            color: #00d4aa;
+            font-size: 13px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .timeline-content p {
+            font-size: 12px;
+            color: #aaa;
+            line-height: 1.5;
+        }
+
+        /* Flow Diagram */
+        .flow-diagram {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 16px 0;
+            text-align: center;
+            border: 1px solid rgba(0, 212, 170, 0.15);
+        }
+
+        .flow-step {
+            display: inline-block;
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: 0 8px;
+            color: #00d4aa;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .flow-arrow {
+            display: inline-block;
+            color: #5a9aaa;
+            margin: 0 4px;
+            font-weight: bold;
+        }
+
+        /* Check/X Lists */
+        .check-list {
+            list-style: none;
+            margin: 12px 0;
+        }
+
+        .check-list li {
+            font-size: 13px;
+            margin: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: #ccc;
+        }
+
+        .check-list li.check::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #00d4aa;
+            font-weight: bold;
+        }
+
+        .check-list li.x::before {
+            content: '✕';
+            position: absolute;
+            left: 0;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        /* Identity Card */
+        .identity-card {
+            background: rgba(0, 212, 170, 0.05);
+            border: 2px solid rgba(0, 212, 170, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .identity-card h3 {
+            color: #00d4aa;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .identity-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+        }
+
+        .identity-detail:last-child {
+            border-bottom: none;
+        }
+
+        .identity-label {
+            color: #5a9aaa;
+            font-weight: 500;
+        }
+
+        .identity-value {
+            color: #00d4aa;
+            font-weight: 600;
+        }
+
+        /* Budget Bar */
+        .budget-bar {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            height: 24px;
+            margin: 12px 0;
+            overflow: hidden;
+            border: 1px solid rgba(0, 212, 170, 0.15);
+            position: relative;
+        }
+
+        .budget-used {
+            background: linear-gradient(90deg, #00d4aa, #5a9aaa);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0a1628;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Approval Gate */
+        .approval-section {
+            background: rgba(0, 212, 170, 0.05);
+            border-left: 3px solid rgba(0, 212, 170, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
+        }
+
+        .approval-section strong {
+            color: #00d4aa;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+
+        .approval-section p {
+            font-size: 12px;
+            color: #ccc;
+            margin: 4px 0;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid rgba(0, 212, 170, 0.1);
+            margin-top: 40px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            nav {
+                font-size: 11px;
+            }
+
+            nav a {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- BEGIN MYN-NAV (auto-injected 2026-04-21) -->
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; -webkit-font-smoothing: antialiased; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__inner::-webkit-scrollbar { height: 4px; } .myn-nav__inner::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.25); border-radius: 2px; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-variant-numeric: tabular-nums; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Center</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="master-directory.html" data-page="master-directory">Directory</a>
+  <a href="analytics-dashboard.html" data-page="analytics-dashboard">Analytics</a>
+  <a href="lead-gen-dashboard.html" data-page="lead-gen-dashboard">Leads</a>
+  <a href="hotel-activities-dashboard.html" data-page="hotel-activities-dashboard">Hotels</a>
+  <a href="business-economics-dashboard.html" data-page="business-economics-dashboard">Economics</a>
+  <a href="team-handoff-dashboard.html" data-page="team-handoff-dashboard">Team</a>
+  <a href="architecture-dashboard.html" data-page="architecture-dashboard">Architecture</a>
+  <a href="agent-control-plane.html" data-page="agent-control-plane">Agents</a>
+  <a href="supabase-dashboard.html" data-page="supabase-dashboard">Supabase</a>
+  <a href="paperclip-dashboard.html" data-page="paperclip-dashboard">Paperclip</a>
+  <a href="review-queue.html" data-page="review-queue">Review</a>
+  <a href="4-21-26-full-audit.html" data-page="4-21-26-full-audit">Audit</a>
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date" id="myn-nav-date"></span>
+</div>
+</nav>
+<script>
+(function(){
+  var path = (location.pathname.split('/').pop() || 'index.html').replace('.html','');
+  var links = document.querySelectorAll('.myn-nav a[data-page]');
+  for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('data-page') === path) links[i].classList.add('is-active'); }
+  var d = new Date(); var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var el = document.getElementById('myn-nav-date'); if (el) el.textContent = m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+})();
+</script>
+<!-- END MYN-NAV -->
+
+<!-- Navigation -->
+    <nav>
+        <a href="unified-command-center.html">🏠 Hub</a>
+        <a href="index.html">📊 Marketing</a>
+        <a href="agent-os-dashboard.html">🤖 Agent OS</a>
+        <a href="paperclip-dashboard.html" class="active">📎 Paperclip</a>
+        <a href="agentfield-dashboard.html">⚙️ AgentField</a>
+        <a href="agentic-os-dashboard.html">🧠 Agentic OS</a>
+        <a href="architecture-dashboard.html">🏗️ Architecture</a>
+        <a href="business-economics-dashboard.html">💰 Economics</a>
+        <a href="dashboard-master.html">📈 Master</a>
+        <a href="supabase-dashboard.html">🗄️ Supabase</a>
+        <a href="team-handoff-dashboard.html">👥 Team</a>
+        <a href="review-queue.html">📋 Review</a>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📎 Paperclip — AI Company Orchestration</h1>
+            <p>Run MYN's 14 AI agents as a virtual company with org charts, budgets, heartbeats, and governance</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tabs-nav">
+            <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+            <button class="tab-btn" onclick="switchTab('setup')">Setup Guide</button>
+            <button class="tab-btn" onclick="switchTab('config')">Company Config</button>
+            <button class="tab-btn" onclick="switchTab('ceo')">CEO Agent</button>
+            <button class="tab-btn" onclick="switchTab('heartbeat')">Heartbeat & Taste</button>
+            <button class="tab-btn" onclick="switchTab('review')">Review Loops</button>
+            <button class="tab-btn" onclick="switchTab('files')">Config Files</button>
+        </div>
+
+        <!-- TAB 1: OVERVIEW -->
+        <div id="overview" class="tab-content active">
+            <div class="section">
+                <h2>What is Paperclip?</h2>
+                <p style="margin-bottom: 20px; font-size: 14px; color: #ccc;">
+                    Paperclip is an open-source AI company orchestration platform. It treats your AI agents as a virtual company with departments, budgets, role assignments, governance, and approval gates. MYN uses Paperclip as the control plane for its 14-agent workforce.
+                </p>
+            </div>
+
+            <div class="section">
+                <h2>Core Concepts</h2>
+                <div class="grid">
+                    <div class="card">
+                        <h3>💼 Company as Code</h3>
+                        <p>Define your entire AI company in a single JSON config — departments, roles, budgets, goals, reporting lines, and approval policies. Version control your org structure.</p>
+                    </div>
+                    <div class="card">
+                        <h3>📸 Memento Man Pattern</h3>
+                        <p>Agents wake with zero memory. The heartbeat checklist is their Polaroid. The taste guide is their tattoo. Every agent resets between tasks — total autonomy, zero drift.</p>
+                    </div>
+                    <div class="card">
+                        <h3>🔍 Inspector Pattern</h3>
+                        <p>QA agents review every critical output. Adversarial by design. Catch errors before they reach customers. 96.4% error catch rate across MYN's production pipeline.</p>
+                    </div>
+                    <div class="card">
+                        <h3>💰 BAMAS Principle</h3>
+                        <p>Budget-Aware Multi-Agent topology. Match model tier to task complexity. Use Haiku for research, Sonnet for synthesis, Opus for decisions. 86% cost reduction vs. Opus-everywhere.</p>
+                    </div>
+                    <div class="card">
+                        <h3>🔒 Atomic Checkout</h3>
+                        <p>Tasks locked to one agent at a time. No duplication. Clear ownership. The "checkout" pattern ensures every task has exactly one owner and one outcome.</p>
+                    </div>
+                    <div class="card">
+                        <h3>✅ Approval Gates</h3>
+                        <p>Human-in-the-loop for all external sends, budget changes, and architecture modifications. Governance rules prevent agents from breaking guardrails.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>System Architecture</h2>
+                <div class="flow-diagram">
+                    <div style="margin-bottom: 16px; font-size: 12px; color: #aaa;">MYN's AI Company Stack</div>
+                    <div class="flow-step">Paperclip<br/>(Control Plane)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">AgentField<br/>(Execution Engine)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Supabase +<br/>Qdrant (Data)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">myn.org +<br/>myn.com (UI)</div>
+                </div>
+                <p style="font-size: 13px; color: #aaa; text-align: center; margin-top: 12px;">
+                    Paperclip defines what work agents should do. AgentField executes it. Supabase/Qdrant persist memory and context. myn.org/myn.com display results to humans.
+                </p>
+            </div>
+
+            <div class="section">
+                <h2>Quick Stats</h2>
+                <div class="grid-2">
+                    <div class="stat-box">
+                        <div class="stat-number">14</div>
+                        <div class="stat-label">AI Agents</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">$722/mo</div>
+                        <div class="stat-label">Total Monthly Budget</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">4</div>
+                        <div class="stat-label">Departments</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number">96.4%</div>
+                        <div class="stat-label">Error Catch Rate (QA)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SETUP GUIDE -->
+        <div id="setup" class="tab-content">
+            <div class="section">
+                <h2>Prerequisites</h2>
+                <ul class="check-list">
+                    <li class="check">Node.js 18 or higher</li>
+                    <li class="check">pnpm (package manager)</li>
+                    <li class="check">Git</li>
+                    <li class="check">Terminal access</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Step 1: Clone & Install</h2>
+                <div class="code-block">cd ~/Projects
+git clone https://github.com/paperclipai/paperclip.git
+cd paperclip
+pnpm install</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 2: Start Dev Server</h2>
+                <div class="code-block">pnpm dev</div>
+                <p style="font-size: 13px; color: #aaa; margin-top: 12px;">
+                    <strong style="color: #00d4aa;">Note:</strong> Uses PGlite (embedded Postgres) in dev mode. No database setup needed.
+                </p>
+                <p style="font-size: 13px; color: #aaa; margin-top: 8px;">
+                    API + UI available at: <span style="color: #00d4aa;">http://localhost:3100</span>
+                </p>
+            </div>
+
+            <div class="section">
+                <h2>Step 3: Verify Health</h2>
+                <div class="code-block">curl http://localhost:3100/api/health
+curl http://localhost:3100/api/companies</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 4: Create MYN Company</h2>
+                <p style="font-size: 13px; color: #aaa; margin-bottom: 12px;">Via API:</p>
+                <div class="code-block">curl -X POST http://localhost:3100/api/companies \
+  -H "Content-Type: application/json" \
+  -d '{"name": "My Yoga Network", "description": "Connect people with real health conditions to clinically trained yoga therapists."}'</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 5: Create Departments</h2>
+                <div class="code-block">COMPANY_ID="&lt;your-company-id&gt;"
+for dept in "Intelligence" "Sales & Outreach" "Marketing & Content" "Operations"; do
+  curl -X POST "http://localhost:3100/api/companies/$COMPANY_ID/teams" \
+    -H "Content-Type: application/json" \
+    -d "{\"name\": \"$dept\"}"
+done</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 6: Register Agents</h2>
+                <p style="font-size: 13px; color: #aaa; margin-bottom: 12px;">Example: CEO Agent</p>
+                <div class="code-block">curl -X POST "http://localhost:3100/api/companies/$COMPANY_ID/agents" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "CEO",
+    "role": "Chief Executive Officer",
+    "model": "claude-opus-4-1",
+    "heartbeat_interval_minutes": 60,
+    "monthly_budget_cents": 6000,
+    "team_id": "&lt;intelligence-team-id&gt;"
+  }'</div>
+            </div>
+
+            <div class="section">
+                <h2>Step 7: Connect to AgentField</h2>
+                <p style="font-size: 13px; color: #aaa; margin-bottom: 12px;">Python heartbeat integration:</p>
+                <div class="code-block">import requests
+
+PAPERCLIP_URL = "http://localhost:3100/api"
+
+def heartbeat(agent_id, company_id):
+    # 1. Load agent config
+    config = requests.get(
+        f"{PAPERCLIP_URL}/companies/{company_id}/agents/{agent_id}"
+    ).json()
+    
+    # 2. Fetch open tasks (sorted by priority)
+    tasks = requests.get(
+        f"{PAPERCLIP_URL}/companies/{company_id}/issues",
+        params={"assignee": agent_id, "status": "open"}
+    ).json()
+    
+    task = sorted(tasks, key=lambda t: t["priority"])[0]
+    
+    # 3. Atomic checkout (lock task to this agent)
+    requests.post(
+        f"{PAPERCLIP_URL}/companies/{company_id}/issues/{task['id']}/checkout",
+        json={"agent_id": agent_id}
+    )
+    
+    # 4. Execute work
+    result = do_agent_work(task)
+    
+    # 5. Update task status
+    requests.patch(
+        f"{PAPERCLIP_URL}/companies/{company_id}/issues/{task['id']}",
+        json={"status": "done", "result": result}
+    )</div>
+            </div>
+
+            <div class="section">
+                <h2>Reset / Clean State</h2>
+                <div class="code-block">rm -rf data/pglite && pnpm dev</div>
+                <p style="font-size: 13px; color: #aaa; margin-top: 12px;">
+                    This removes the embedded database and restarts with a fresh Paperclip instance.
+                </p>
+            </div>
+        </div>
+
+        <!-- TAB 3: COMPANY CONFIG -->
+        <div id="config" class="tab-content">
+            <div class="section">
+                <h2>Company Identity</h2>
+                <div class="identity-card">
+                    <h3>My Yoga Network</h3>
+                    <div class="identity-detail">
+                        <span class="identity-label">Mission</span>
+                        <span class="identity-value">Connect people with real health conditions to clinically trained yoga therapists — safely, personally, and with medical credibility.</span>
+                    </div>
+                    <div class="identity-detail">
+                        <span class="identity-label">PMF Anchor</span>
+                        <span class="identity-value">Hotels & Luxury Residential</span>
+                    </div>
+                    <div class="identity-detail">
+                        <span class="identity-label">Total Monthly Budget</span>
+                        <span class="identity-value">$722/month</span>
+                    </div>
+                    <div class="identity-detail">
+                        <span class="identity-label">Agent Count</span>
+                        <span class="identity-value">14</span>
+                    </div>
+                    <div class="identity-detail">
+                        <span class="identity-label">Board</span>
+                        <span class="identity-value">Ram Bhakt (Founder)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Organizational Structure</h2>
+                <div class="org-chart">
+                    <div class="org-level">
+                        <div class="org-box" style="background: rgba(0, 212, 170, 0.15); border-color: rgba(0, 212, 170, 0.4);">Ram (Board)</div>
+                    </div>
+                    <div class="org-level" style="margin: 16px 0; color: #5a9aaa;">↓</div>
+                    <div class="org-level">
+                        <div class="org-box" style="background: rgba(0, 212, 170, 0.15); border-color: rgba(0, 212, 170, 0.4);">CEO Agent<br/>(Opus, 60min heartbeat)</div>
+                    </div>
+                    <div class="org-level" style="margin: 16px 0; color: #5a9aaa;">↓</div>
+                    <div class="org-level">
+                        <div class="org-box">Intelligence<br/>$172/mo</div>
+                        <div class="org-box">Sales & Outreach<br/>$312/mo</div>
+                        <div class="org-box">Marketing & Content<br/>$178/mo</div>
+                        <div class="org-box">Operations<br/>$60/mo</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Departments</h2>
+                
+                <div class="dept-card">
+                    <h4>🧠 Intelligence Department</h4>
+                    <div class="dept-detail">Budget: $172/month | Agents: 4 | Model Tier: Sonnet</div>
+                    <div class="dept-detail" style="margin-top: 8px;"><strong style="color: #00d4aa;">Agents:</strong> Intent Router, Lead Discovery, Lead Researcher, Website Intelligence</div>
+                    <div class="dept-detail"><strong style="color: #00d4aa;">Heartbeat:</strong> Every 30 minutes</div>
+                </div>
+
+                <div class="dept-card">
+                    <h4>📞 Sales & Outreach Department</h4>
+                    <div class="dept-detail">Budget: $312/month | Agents: 4 | Model Tier: Opus + Sonnet</div>
+                    <div class="dept-detail" style="margin-top: 8px;"><strong style="color: #00d4aa;">Agents:</strong> Executive Research, Opportunity Scoring, Cold Email Writer, Outreach Generator</div>
+                    <div class="dept-detail"><strong style="color: #00d4aa;">Heartbeat:</strong> Every 45 minutes</div>
+                </div>
+
+                <div class="dept-card">
+                    <h4>📝 Marketing & Content Department</h4>
+                    <div class="dept-detail">Budget: $178/month | Agents: 3 | Model Tier: Opus</div>
+                    <div class="dept-detail" style="margin-top: 8px;"><strong style="color: #00d4aa;">Agents:</strong> Style Cloner, Wellness Recommender, Marketing Agent</div>
+                    <div class="dept-detail"><strong style="color: #00d4aa;">Heartbeat:</strong> Every 60 minutes</div>
+                </div>
+
+                <div class="dept-card">
+                    <h4>⚙️ Operations Department</h4>
+                    <div class="dept-detail">Budget: $60/month | Agents: 3 | Model Tier: Haiku + Sonnet</div>
+                    <div class="dept-detail" style="margin-top: 8px;"><strong style="color: #00d4aa;">Agents:</strong> Memory Store, Video Producer, Summarizers</div>
+                    <div class="dept-detail"><strong style="color: #00d4aa;">Heartbeat:</strong> Every 30 minutes (async)</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Approval Gates</h2>
+                
+                <div class="approval-section">
+                    <strong>Requires Human Approval:</strong>
+                    <p>✓ Send outreach emails (cold, follow-up, or promotional)</p>
+                    <p>✓ Publish content to blogs, social media, or public channels</p>
+                    <p>✓ Spend over $50 in a single transaction</p>
+                    <p>✓ Modify Supabase schema or create/delete agents</p>
+                    <p>✓ Execute financial transactions or billing operations</p>
+                </div>
+
+                <div class="approval-section">
+                    <strong>Auto-Approved (No Human Review):</strong>
+                    <p>✓ Lead research and data enrichment</p>
+                    <p>✓ Draft generation and editing</p>
+                    <p>✓ Internal summarization and analysis</p>
+                    <p>✓ Memory persistence and log updates</p>
+                    <p>✓ Routine data fetches and synchronization</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Cost Controls</h2>
+                <div class="card">
+                    <h3>Budget Overview</h3>
+                    <div style="margin-top: 16px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                            <span>Total Budget</span>
+                            <span style="color: #00d4aa; font-weight: 600;">$722/month</span>
+                        </div>
+                        <div class="budget-bar">
+                            <div class="budget-used" style="width: 62%;">62% Used YTD</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <div style="font-size: 13px; color: #5a9aaa; margin-bottom: 8px;"><strong>Thresholds</strong></div>
+                        <div style="font-size: 12px; color: #ccc; margin: 6px 0;">Alert Threshold: 75% of monthly budget</div>
+                        <div style="font-size: 12px; color: #ccc; margin: 6px 0;">Auto-Pause Threshold: 90% of monthly budget</div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <div style="font-size: 13px; color: #5a9aaa; margin-bottom: 8px;"><strong>Model Pricing (Approx)</strong></div>
+                        <table>
+                            <tr>
+                                <th>Model</th>
+                                <th>Input (per MTok)</th>
+                                <th>Output (per MTok)</th>
+                                <th>Recommended For</th>
+                            </tr>
+                            <tr>
+                                <td>Claude Opus</td>
+                                <td>$15</td>
+                                <td>$45</td>
+                                <td>Complex decisions, executive review</td>
+                            </tr>
+                            <tr>
+                                <td>Claude Sonnet</td>
+                                <td>$3</td>
+                                <td>$15</td>
+                                <td>Balanced analysis, synthesis, content</td>
+                            </tr>
+                            <tr>
+                                <td>Claude Haiku</td>
+                                <td>$0.80</td>
+                                <td>$4</td>
+                                <td>Research, data extraction, routing</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: CEO AGENT -->
+        <div id="ceo" class="tab-content">
+            <div class="section">
+                <h2>CEO Agent Profile</h2>
+                <div class="identity-card">
+                    <h3>Chief Executive Officer</h3>
+                    <div class="identity-detail">
+                        <span class="identity-label">Name</span>
+                        <span class="identity-value">CEO Agent</span>
+                    </div>
+                    <div class="identity-detail">
+                        <span class="identity-label">Role</span>
+                        <span class="identity-value">Chief Executive Officer</span>
+                    </div>
+                    <div class="identity-detail">
+                        <span class="identity-label">Model</span>
+                        <span class="identity-value">Claude Opus 4.1</span>
+                    </div>
+                    <div class="identity-detail">
+                        <span class="identity-label">Heartbeat Interval</span>
+                        <span class="identity-value">60 minutes</span>
+                    </div>
+                    <div class="identity-detail">
+                        <span class="identity-label">Monthly Budget</span>
+                        <span class="identity-value">$600</span>
+                    </div>
+                    <div class="identity-detail">
+                        <span class="identity-label">Department</span>
+                        <span class="identity-value">Executive (Direct Reports: 4 Dept Heads)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Five Pillars of Identity</h2>
+                
+                <div class="card">
+                    <h3>1. Identity</h3>
+                    <p>CEO of a 14-agent workforce operating My Yoga Network. Coordinates all agents toward the PMF anchor: Hotels & Luxury Residential. Translates Ram's strategic intent into executable department OKRs. Holds final decision authority on brand, budget allocation, and cross-departmental conflicts.</p>
+                </div>
+
+                <div class="card">
+                    <h3>2. Communication</h3>
+                    <p>Executive-grade, concise, data-backed. Never verbose. Every communication includes: 1) situation, 2) data or evidence, 3) recommendation, 4) next action. Ends every message with "Next Action: [specific task]". Speaks with authority but remains open to Ram's feedback.</p>
+                </div>
+
+                <div class="card">
+                    <h3>3. Domain Expertise</h3>
+                    <p>Deep PMF economics: hotels pay $4k-$10k/month, schools are slow cash drains, corporate wellness is variable. Understands competitive frame (IAYT, PT networks, integrative medicine, future insurers). Knows MYN wins on coordination, not content volume. Prioritizes repeatable delivery over creative novelty.</p>
+                </div>
+
+                <div class="card">
+                    <h3>4. Decision Framework</h3>
+                    <p>Decisions use priority matrix: (Impact × Confidence). Brand check: Does this align with "clinically trained, medical credibility"? Budget check: Does this fit remaining monthly allocation? Cross-system check: Does this affect myn.org, myn.com, or Supabase? Logs all decisions in audit trail.</p>
+                </div>
+
+                <div class="card">
+                    <h3>5. Boundaries</h3>
+                    <p>NEVER approve outreach without brand alignment review. NEVER exceed $100/day spending without Ram's override. ALWAYS log approvals and rejections with reasoning. ALWAYS escalate to Ram if: budget crisis, brand violation detected, or strategic pivot requested. Acts autonomously within guardrails; pauses at edges.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Heartbeat Protocol (9 Steps)</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon">🪪</div>
+                        <div class="timeline-content">
+                            <h4>IDENTITY CHECK</h4>
+                            <p>Load agent SOUL.md. Verify role, model, guardrails, approval gates, budget limits. Sync with Paperclip to check for config changes.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">🎨</div>
+                        <div class="timeline-content">
+                            <h4>TASTE CHECK</h4>
+                            <p>Load taste guide and brand spine. Verify tone, vocabulary rules, competitive frame. Activate rejection filters for spiritual language, generic wellness, emojis in business context.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">✅</div>
+                        <div class="timeline-content">
+                            <h4>APPROVAL FOLLOW-UP</h4>
+                            <p>Check Paperclip inbox for pending approvals from previous agents. Review requests with Ram's criteria. Approve/reject + log reason.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">📥</div>
+                        <div class="timeline-content">
+                            <h4>INBOX FETCH</h4>
+                            <p>Pull all open issues (tasks) assigned to CEO or escalated from department heads. Fetch context from Supabase (recent logs, budget status, team performance).</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">🎯</div>
+                        <div class="timeline-content">
+                            <h4>PICK WORK</h4>
+                            <p>Sort by priority matrix (Impact × Confidence × PMF alignment). Select highest-value task. Verify task doesn't exceed budget + approvals.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">🔒</div>
+                        <div class="timeline-content">
+                            <h4>ATOMIC CHECKOUT</h4>
+                            <p>Lock task to CEO agent in Paperclip. No other agent can pick it up. Prevent duplication. Set timeout to 5 min (if CEO doesn't finish, task resets).</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">📚</div>
+                        <div class="timeline-content">
+                            <h4>CONTEXT LOAD</h4>
+                            <p>Load agent SOULs for all department heads. Load recent meeting notes + strategy docs. Load competitive intelligence. Load Supabase data on hotels, schools, corporate verticals.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">⚡</div>
+                        <div class="timeline-content">
+                            <h4>DO WORK</h4>
+                            <p>Execute task (approve, allocate budget, resolve conflict, write strategy memo, etc.). Verify output against taste guide. If fails, loop back to step 8. If passes, move to step 9.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">📤</div>
+                        <div class="timeline-content">
+                            <h4>UPDATE + DELEGATE</h4>
+                            <p>Update task status in Paperclip. Log decision to audit trail. Delegate follow-up tasks to appropriate departments. Release atomic lock. Close task. Emit heartbeat summary.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Weekly Cadence</h2>
+                <table>
+                    <tr>
+                        <th>Day</th>
+                        <th>Focus</th>
+                        <th>Key Actions</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Monday</strong></td>
+                        <td>Pipeline & Priorities</td>
+                        <td>Review pipeline metrics, set weekly OKRs, confirm department priorities, audit budget</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tue–Thu</strong></td>
+                        <td>Approvals & Unblocking</td>
+                        <td>Process approval queue, review agent outputs, resolve conflicts, unblock bottlenecks</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Friday</strong></td>
+                        <td>Retrospective</td>
+                        <td>Weekly costs, wins, blockers → generate executive summary for Ram</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 5: HEARTBEAT & TASTE -->
+        <div id="heartbeat" class="tab-content">
+            <div class="section">
+                <h2>The 9-Step Heartbeat</h2>
+                <p style="margin-bottom: 20px; font-size: 13px; color: #aaa;">
+                    Every agent, every 30–60 minutes, runs through this protocol. Total time: 2–5 minutes. This is the Memento Man pattern: agents reset between tasks, carrying only a checklist and a taste guide.
+                </p>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon">🪪</div>
+                        <div class="timeline-content">
+                            <h4>IDENTITY CHECK</h4>
+                            <p>Who am I? What's my role, model tier, budget limit? Load SOUL.md. Verify with Paperclip. Sync any config changes.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">🎨</div>
+                        <div class="timeline-content">
+                            <h4>TASTE CHECK</h4>
+                            <p>What's my brand voice? Load DO/DON'T lists, tone guide, competitive frame. Activate filters. This is my tattoo — never changes.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">✅</div>
+                        <div class="timeline-content">
+                            <h4>APPROVAL FOLLOW-UP</h4>
+                            <p>Any pending approvals from my last action? Check Paperclip inbox. Respond if yes.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">📥</div>
+                        <div class="timeline-content">
+                            <h4>INBOX FETCH</h4>
+                            <p>What's waiting for me? Fetch open tasks assigned to me. Rank by priority. Load context from Supabase.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">🎯</div>
+                        <div class="timeline-content">
+                            <h4>PICK WORK</h4>
+                            <p>Which task is highest-value right now? Apply priority matrix. Check budget. Pick top task.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">🔒</div>
+                        <div class="timeline-content">
+                            <h4>ATOMIC CHECKOUT</h4>
+                            <p>Lock this task to me in Paperclip. No duplication. Clear ownership. 5-minute timeout.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">📚</div>
+                        <div class="timeline-content">
+                            <h4>CONTEXT LOAD</h4>
+                            <p>What do I need to know? Load task context, relevant SOULs, strategy docs, data from Supabase + Qdrant.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">⚡</div>
+                        <div class="timeline-content">
+                            <h4>DO WORK</h4>
+                            <p>Execute the task. Verify output against taste guide. If fail, fix and loop. If pass, move on.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">📤</div>
+                        <div class="timeline-content">
+                            <h4>UPDATE + DELEGATE</h4>
+                            <p>Mark task done in Paperclip. Log decision. Delegate follow-up if needed. Release lock. Emit summary.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Taste Guide (Brand Spine)</h2>
+                <p style="margin-bottom: 20px; font-size: 13px; color: #aaa;">
+                    <strong style="color: #00d4aa;">Brand Spine:</strong> "My Yoga Network connects people with real health conditions to clinically trained yoga therapists — safely, personally, and with medical credibility."
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="approval-section">
+                        <strong style="color: #00d4aa;">✓ DO This</strong>
+                        <ul class="check-list">
+                            <li class="check">Lead with medical credibility</li>
+                            <li class="check">Cite clinical evidence (ACP, Australian insurance, HRV studies)</li>
+                            <li class="check">Professional, warm tone</li>
+                            <li class="check">Data-first visuals and claims</li>
+                            <li class="check">Clear separation: yoga therapy ≠ yoga classes</li>
+                            <li class="check">Patient stories as adjunct care, not miracles</li>
+                            <li class="check">Executive-grade summaries for decision makers</li>
+                            <li class="check">Focus on hotels/healthcare/corporate (institutional buyers)</li>
+                        </ul>
+                    </div>
+
+                    <div class="approval-section">
+                        <strong style="color: #ff6b6b;">✕ DON'T Do This</strong>
+                        <ul class="check-list">
+                            <li class="x">Spiritual language or yoga culture vocab</li>
+                            <li class="x">Promise health outcomes or miraculous cures</li>
+                            <li class="x">Generic wellness tone</li>
+                            <li class="x">Emojis in business context</li>
+                            <li class="x">Yoga-culture jargon (chakra, prana, namaste in marketing)</li>
+                            <li class="x">Comparison to yoga studios or fitness apps</li>
+                            <li class="x">Overstating therapist credentials</li>
+                            <li class="x">Lead with end-user demand; lead with institutional demand</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Competitive Frame</h2>
+                <div class="card">
+                    <h3>Who Are We Really Competing Against?</h3>
+                    <p style="margin-bottom: 12px;">NOT: Yoga studios, wellness apps, meditation platforms</p>
+                    <p style="margin-bottom: 16px;">REAL competitors:</p>
+                    <ul style="list-style-position: inside; color: #ccc; font-size: 13px;">
+                        <li>International Association of Yoga Therapists (IAYT) — authority but clunky, nonprofit, no growth engine</li>
+                        <li>Physical therapy networks — clinical, reimbursable, but limited scope</li>
+                        <li>Integrative medicine clinics — multi-modality, local presence, high cost</li>
+                        <li>Forward-facing insurers — using yoga therapy to reduce claims (emerging category)</li>
+                    </ul>
+                    <p style="margin-top: 16px; font-size: 13px; color: #00d4aa;"><strong>MYN's advantage:</strong> Coordination at scale. Licensed therapists on demand. Infrastructure for hotels and healthcare systems. Economics that make sense to institutional buyers.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: REVIEW LOOPS -->
+        <div id="review" class="tab-content">
+            <div class="section">
+                <h2>Inspector Pattern (QA Loops)</h2>
+                <p style="margin-bottom: 20px; font-size: 13px; color: #aaa;">
+                    Four critical review loops. Adversarial QA. 96.4% error catch rate.
+                </p>
+            </div>
+
+            <div class="section">
+                <h2>1. Outreach QA</h2>
+                <div class="flow-diagram">
+                    <div class="flow-step">Cold Email Writer<br/>(Generates)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Inspector: CEO<br/>(Reviews)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">PASS / FAIL</div>
+                </div>
+                <div class="card" style="margin-top: 16px;">
+                    <h3>Approval Criteria</h3>
+                    <ul class="check-list">
+                        <li class="check">Brand spine alignment (medical credibility first)</li>
+                        <li class="check">Personalization depth (not generic template)</li>
+                        <li class="check">No false claims or unsupported benefits</li>
+                        <li class="check">Clear CTA (specific next step)</li>
+                        <li class="check">Correct recipient (verified contact)</li>
+                        <li class="check">No spelling/grammar errors</li>
+                    </ul>
+                    <p style="font-size: 12px; color: #aaa; margin-top: 16px;"><strong>On FAIL:</strong> Return to Cold Email Writer with specific feedback. Loop until PASS.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>2. Research QA</h2>
+                <div class="flow-diagram">
+                    <div class="flow-step">Lead Researcher<br/>(Gathers Data)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Inspector: Opportunity<br/>Scoring (Validates)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">PASS / FAIL</div>
+                </div>
+                <div class="card" style="margin-top: 16px;">
+                    <h3>Approval Criteria</h3>
+                    <ul class="check-list">
+                        <li class="check">Data completeness (name, role, company, email, phone)</li>
+                        <li class="check">Source verification (LinkedIn, website, public records)</li>
+                        <li class="check">No hallucinated contacts or fabricated titles</li>
+                        <li class="check">Contact relevance to target segment (hotel owner, HR director, etc.)</li>
+                        <li class="check">Budget fit (hotel >$4k/mo potential, not solo teacher)</li>
+                    </ul>
+                    <p style="font-size: 12px; color: #aaa; margin-top: 16px;"><strong>On FAIL:</strong> Flag data quality issue. Researcher re-validates or removes contact.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>3. Content QA</h2>
+                <div class="flow-diagram">
+                    <div class="flow-step">Marketing Agent<br/>(Creates Content)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Inspector: CEO<br/>(Brand Review)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">PASS / FAIL</div>
+                </div>
+                <div class="card" style="margin-top: 16px;">
+                    <h3>Approval Criteria</h3>
+                    <ul class="check-list">
+                        <li class="check">Brand spine alignment (clinical, not spiritual)</li>
+                        <li class="check">Medical credibility (cites evidence, not opinions)</li>
+                        <li class="check">No yoga-culture language (chakra, prana, etc.)</li>
+                        <li class="check">SEO keywords present (hotel yoga, healthcare, etc.)</li>
+                        <li class="check">CTAs clear (hotel inquiry, provider signup, etc.)</li>
+                        <li class="check">Target audience correct (institutional, not consumer-only)</li>
+                    </ul>
+                    <p style="font-size: 12px; color: #aaa; margin-top: 16px;"><strong>On FAIL:</strong> Return with specific brand violations. Rewrite required.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>4. Video QA</h2>
+                <div class="flow-diagram">
+                    <div class="flow-step">Video Producer<br/>(Generates)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">Inspector: Marketing<br/>Agent (Reviews)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">PASS / FAIL</div>
+                </div>
+                <div class="card" style="margin-top: 16px;">
+                    <h3>Approval Criteria</h3>
+                    <ul class="check-list">
+                        <li class="check">Brand consistency (logo, colors, tone)</li>
+                        <li class="check">Audio quality (clear, no background noise)</li>
+                        <li class="check">Message clarity (key points visible, no jargon)</li>
+                        <li class="check">Lip-sync accuracy (Hedra output)</li>
+                        <li class="check">Length appropriate for platform</li>
+                        <li class="check">CTA clear and clickable</li>
+                    </ul>
+                    <p style="font-size: 12px; color: #aaa; margin-top: 16px;"><strong>On FAIL:</strong> Return with edit spec. Regenerate or re-edit.</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Key Metric</h2>
+                <div class="stat-box">
+                    <div class="stat-number">96.4%</div>
+                    <div class="stat-label">Error Catch Rate (Adversarial QA)</div>
+                </div>
+                <p style="font-size: 12px; color: #aaa; margin-top: 16px;">
+                    This means 96.4% of errors are caught by inspectors before reaching customers. The remaining 3.6% are either: (1) subtle brand violations that humans also miss, or (2) novel scenarios not yet in the QA rubric.
+                </p>
+            </div>
+        </div>
+
+        <!-- TAB 7: CONFIG FILES -->
+        <div id="files" class="tab-content">
+            <div class="section">
+                <h2>Paperclip Configuration Files</h2>
+                <p style="margin-bottom: 20px; font-size: 13px; color: #aaa;">
+                    Files that define MYN's AI company structure, agent identities, brand rules, and setup instructions.
+                </p>
+
+                <div class="card">
+                    <h3>paperclip-config/MYN_COMPANY.json</h3>
+                    <p>Complete company definition in JSON. Includes company name, mission, budget, departments, approval gates, cost controls, and agent registry. Version controlled.</p>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0, 212, 170, 0.1); font-size: 12px; color: #5a9aaa;">
+                        📂 Path: <span style="color: #00d4aa;">paperclip-config/MYN_COMPANY.json</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>paperclip-config/CEO_AGENT.md</h3>
+                    <p>Full CEO Agent SOUL.md. Identity, communication style, domain expertise, decision framework, boundaries. The heartbeat protocol lives here.</p>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0, 212, 170, 0.1); font-size: 12px; color: #5a9aaa;">
+                        📂 Path: <span style="color: #00d4aa;">paperclip-config/CEO_AGENT.md</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>paperclip-config/MASTER_PROMPT.md</h3>
+                    <p>System prompt that all agents receive at startup. Defines universal rules: atomic checkout, approval gates, audit logging, error handling, escalation paths.</p>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0, 212, 170, 0.1); font-size: 12px; color: #5a9aaa;">
+                        📂 Path: <span style="color: #00d4aa;">paperclip-config/MASTER_PROMPT.md</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>paperclip-config/SETUP_GUIDE.md</h3>
+                    <p>Text version of the setup guide. Step-by-step instructions for cloning, installing, starting the dev server, registering agents, and connecting to AgentField.</p>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0, 212, 170, 0.1); font-size: 12px; color: #5a9aaa;">
+                        📂 Path: <span style="color: #00d4aa;">paperclip-config/SETUP_GUIDE.md</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Strategy AGI Reference Files</h2>
+                <p style="margin-bottom: 20px; font-size: 13px; color: #aaa;">
+                    These files live in the Strategy AGI repo and define MYN's agent org structure, individual agent SOULs, and routine specifications.
+                </p>
+
+                <div class="card">
+                    <h3>org/MYN_AGENT_ORG_DESIGN.md</h3>
+                    <p>Complete organizational chart for all 14 agents. Departments, reporting lines, heartbeat intervals, model tiers, and budget allocation. Cross-referenced with Paperclip.</p>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0, 212, 170, 0.1); font-size: 12px; color: #5a9aaa;">
+                        📂 Path: <span style="color: #00d4aa;">../Strategy AGI/org/MYN_AGENT_ORG_DESIGN.md</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>org/souls/MYN_AGENT_SOULS.md</h3>
+                    <p>All 14 agent SOUL.md files combined. Identity, communication style, domain expertise, decision framework, and boundaries for each agent. Living document.</p>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0, 212, 170, 0.1); font-size: 12px; color: #5a9aaa;">
+                        📂 Path: <span style="color: #00d4aa;">../Strategy AGI/org/souls/MYN_AGENT_SOULS.md</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>routines/ROUTINE_SPECIFICATIONS.md</h3>
+                    <p>Specification for 6 core agent routines: Daily Pipeline, Weekly Retrospective, Approval Workflow, QA Loop, Budget Alert, and Escalation Procedure. Machines readable and human auditable.</p>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0, 212, 170, 0.1); font-size: 12px; color: #5a9aaa;">
+                        📂 Path: <span style="color: #00d4aa;">../Strategy AGI/routines/ROUTINE_SPECIFICATIONS.md</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>GitHub Repository</h2>
+                <div class="card">
+                    <h3>Paperclip Official Repo</h3>
+                    <p><strong style="color: #00d4aa;">https://github.com/paperclipai/paperclip</strong></p>
+                    <p style="margin-top: 12px;">Open-source AI company orchestration platform. Used for MYN's control plane. Includes:</p>
+                    <ul style="margin-top: 8px; list-style-position: inside; color: #ccc; font-size: 13px;">
+                        <li>REST API for company, team, agent, and task management</li>
+                        <li>Web UI for dashboard and configuration</li>
+                        <li>PGlite (embedded Postgres) for dev mode</li>
+                        <li>Complete documentation and examples</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Paperclip Dashboard — MYN Command Center | Last Updated: 2026-03-27</p>
+            <p style="margin-top: 8px;">For updates to this dashboard, modify the HTML source. For Paperclip updates, check the official GitHub repository.</p>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Remove active from all buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+
+            // Add active to clicked button
+            event.target.classList.add('active');
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>

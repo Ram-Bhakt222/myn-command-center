@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MYN Skills Architecture — Full Stack Audit</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0b0b10;color:#d8d8e8;min-height:100vh}
+header{background:linear-gradient(135deg,#0f0f1a,#161630,#1a1045);padding:32px 40px;border-bottom:1px solid rgba(255,255,255,.06)}
+h1{font-size:24px;font-weight:700;color:#fff}
+.sub{color:#666680;font-size:13px;margin-top:4px}
+.stats{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap}
+.stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:10px 18px;text-align:center;min-width:90px}
+.stat b{display:block;font-size:20px;color:#a78bfa}
+.stat small{font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.5px}
+.stat.green b{color:#4ade80}
+.stat.amber b{color:#facc15}
+.stat.red b{color:#f87171}
+.stat.blue b{color:#60a5fa}
+.stat.pink b{color:#f472b6}
+main{padding:28px 40px 60px}
+.section{margin-bottom:36px}
+.sh{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.dot{width:8px;height:8px;border-radius:50%}
+.st{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:#555}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:#13131c;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;border-top:3px solid var(--c,#7c3aed);transition:all .15s}
+.card:hover{border-color:rgba(255,255,255,.12);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.card h3{font-size:13px;font-weight:600;color:#fff;margin-bottom:4px}
+.card p{font-size:11px;color:#666;line-height:1.4}
+.tag{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;background:rgba(255,255,255,.05);color:#777;margin:6px 4px 0 0;border:1px solid rgba(255,255,255,.06)}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;margin-top:6px}
+.b-exec{background:rgba(124,58,237,.15);color:#a78bfa;border:1px solid rgba(124,58,237,.3)}
+.b-ops{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
+.b-design{background:rgba(236,72,153,.12);color:#f472b6;border:1px solid rgba(236,72,153,.2)}
+.b-archived{background:rgba(107,114,128,.12);color:#9ca3af;border:1px solid rgba(107,114,128,.2)}
+.b-new{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+.b-system{background:rgba(234,179,8,.12);color:#facc15;border:1px solid rgba(234,179,8,.2)}
+.flow{background:#13131c;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:24px;margin-bottom:24px;font-family:'Cascadia Code','Fira Code',monospace;font-size:12px;line-height:1.8;color:#888;white-space:pre;overflow-x:auto}
+.flow .l1{color:#a78bfa;font-weight:700}
+.flow .l2{color:#60a5fa}
+.flow .l3{color:#818cf8}
+.flow .l4{color:#555}
+.flow .arrow{color:#444}
+.memory{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:768px){.memory{grid-template-columns:1fr}}
+.mem-card{background:#13131c;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:16px;border-left:3px solid var(--c)}
+.mem-card h4{font-size:12px;color:#fff;margin-bottom:6px}
+.mem-card p{font-size:11px;color:#666;line-height:1.4}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.proj-card{background:#13131c;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:20px;border-left:4px solid var(--c,#7c3aed);transition:all .15s}
+.proj-card:hover{border-color:rgba(255,255,255,.12);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.proj-card h3{font-size:14px;font-weight:600;color:#fff;margin-bottom:2px}
+.proj-card .proj-tech{font-size:11px;color:#555;margin-bottom:10px}
+.proj-card .proj-stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.proj-card .ps{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:4px 10px;text-align:center}
+.proj-card .ps b{display:block;font-size:14px;color:var(--c)}
+.proj-card .ps small{font-size:9px;color:#555;text-transform:uppercase;letter-spacing:.4px}
+.proj-card .proj-contents{font-size:11px;color:#666;line-height:1.5}
+.proj-card .proj-contents b{color:#999;font-weight:500}
+.folder-tree{background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.04);border-radius:8px;padding:12px;margin-top:10px;font-family:'Cascadia Code','Fira Code',monospace;font-size:11px;line-height:1.6;color:#666;white-space:pre;overflow-x:auto}
+.folder-tree .hi{color:#a78bfa}
+.folder-tree .md{color:#60a5fa}
+.folder-tree .lo{color:#555}
+.nav-float{position:fixed;bottom:20px;right:20px;z-index:100;display:flex;flex-direction:column;gap:6px}
+.nav-float a{display:block;padding:8px 14px;background:#1a1a2e;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#888;font-size:11px;text-decoration:none;transition:all .15s;white-space:nowrap}
+.nav-float a:hover{background:#252540;color:#fff;border-color:rgba(255,255,255,.15)}
+</style>
+</head>
+<body>
+<!-- BEGIN MYN-NAV (auto-injected 2026-04-21) -->
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; -webkit-font-smoothing: antialiased; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__inner::-webkit-scrollbar { height: 4px; } .myn-nav__inner::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.25); border-radius: 2px; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-variant-numeric: tabular-nums; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Center</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="master-directory.html" data-page="master-directory">Directory</a>
+  <a href="analytics-dashboard.html" data-page="analytics-dashboard">Analytics</a>
+  <a href="lead-gen-dashboard.html" data-page="lead-gen-dashboard">Leads</a>
+  <a href="hotel-activities-dashboard.html" data-page="hotel-activities-dashboard">Hotels</a>
+  <a href="business-economics-dashboard.html" data-page="business-economics-dashboard">Economics</a>
+  <a href="team-handoff-dashboard.html" data-page="team-handoff-dashboard">Team</a>
+  <a href="architecture-dashboard.html" data-page="architecture-dashboard">Architecture</a>
+  <a href="agent-control-plane.html" data-page="agent-control-plane">Agents</a>
+  <a href="supabase-dashboard.html" data-page="supabase-dashboard">Supabase</a>
+  <a href="paperclip-dashboard.html" data-page="paperclip-dashboard">Paperclip</a>
+  <a href="review-queue.html" data-page="review-queue">Review</a>
+  <a href="4-21-26-full-audit.html" data-page="4-21-26-full-audit">Audit</a>
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date" id="myn-nav-date"></span>
+</div>
+</nav>
+<script>
+(function(){
+  var path = (location.pathname.split('/').pop() || 'index.html').replace('.html','');
+  var links = document.querySelectorAll('.myn-nav a[data-page]');
+  for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('data-page') === path) links[i].classList.add('is-active'); }
+  var d = new Date(); var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var el = document.getElementById('myn-nav-date'); if (el) el.textContent = m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+})();
+</script>
+<!-- END MYN-NAV -->
+
+<header>
+<h1>MYN Skills Architecture — Full Stack Audit</h1>
+<div class="sub">Live inventory of all 8 project folders on disk — Audited 2026-03-26</div>
+<div class="stats">
+<div class="stat green"><b>10</b><small>Executive Skills</small></div>
+<div class="stat"><b>25</b><small>Operational Skills</small></div>
+<div class="stat pink"><b>5</b><small>Design Skills</small></div>
+<div class="stat amber"><b>10</b><small>Archived</small></div>
+<div class="stat blue"><b>14</b><small>Agents</small></div>
+<div class="stat blue"><b>4</b><small>Workflows</small></div>
+<div class="stat green"><b>8</b><small>Project Folders</small></div>
+</div>
+</header>
+
+<main>
+
+<!-- EXECUTION HIERARCHY -->
+<div class="section">
+<div class="sh"><div class="dot" style="background:#a78bfa"></div><span class="st">Execution Hierarchy</span></div>
+<div class="flow"><span class="l1">LAYER 1 — EXECUTIVE (skills/)</span>
+<span class="arrow">  │</span>
+<span class="arrow">  ├── </span><span class="l1">myn-executive-router</span> <span class="l4">→ decides WHICH skills/agents to invoke</span>
+<span class="arrow">  ├── </span><span class="l1">myn-product-owner</span> <span class="l4">→ decides WHAT to build next</span>
+<span class="arrow">  └── </span><span class="l1">myn-founder-voice</span> <span class="l4">→ enforces HOW things sound</span>
+
+<span class="l2">LAYER 2 — DOMAIN (skills/)</span>
+<span class="arrow">  │</span>
+<span class="arrow">  ├── </span><span class="l2">myn-hotel-sales-brain</span> <span class="l4">→ hotel partnership intelligence</span>
+<span class="arrow">  ├── </span><span class="l2">myn-proposal-engine</span> <span class="l4">→ proposals, decks, ROI cases</span>
+<span class="arrow">  ├── </span><span class="l2">myn-warm-lead-conversion</span> <span class="l4">→ warm signal → follow-up → booked call</span>
+<span class="arrow">  ├── </span><span class="l2">myn-content-miner</span> <span class="l4">→ 783-file knowledge extraction</span>
+<span class="arrow">  ├── </span><span class="l2">myn-frontend-reviewer</span> <span class="l4">→ code review (myn.org + myn.com)</span>
+<span class="arrow">  ├── </span><span class="l2">myn-api-integration-architect</span> <span class="l4">→ system connection design</span>
+<span class="arrow">  └── </span><span class="l2">myn-automation-operator</span> <span class="l4">→ workflow automation design</span>
+
+<span class="l3">LAYER 3 — OPERATIONAL (.claude/skills/) — 25 skills</span>
+<span class="arrow">  │</span>
+<span class="arrow">  ├── </span><span class="l3">deep-research, classify-leads, prospect-enrich, gmaps-leads, scrape-leads</span>
+<span class="arrow">  ├── </span><span class="l3">company-snapshot, lead-research, style-pipeline, qdrant-search</span>
+<span class="arrow">  ├── </span><span class="l3">gmail-inbox, instantly-campaigns, instantly-autoreply</span>
+<span class="arrow">  ├── </span><span class="l3">video-edit, pan-3d-transition, skool-rag, skool-monitor</span>
+<span class="arrow">  └── </span><span class="l3">welcome-email, onboarding-kickoff, create-proposal, division-router...</span>
+
+<span style="color:#f472b6">LAYER 4 — DESIGN (imported-skills/) — 5 skills</span>
+<span class="arrow">  │</span>
+<span class="arrow">  └── </span><span style="color:#f472b6">taste-skill, soft-skill, minimalist-skill, output-skill, redesign-skill</span></div>
+</div>
+
+<!-- EXECUTIVE SKILLS -->
+<div class="section">
+<div class="sh"><div class="dot" style="background:#a78bfa"></div><span class="st">Layer 1+2 — Executive + Domain Skills (skills/)</span></div>
+<div class="grid">
+<div class="card" style="--c:#a78bfa">
+<h3>myn-executive-router</h3>
+<p>Routes incoming requests to the correct agents, skills, divisions, or humans</p>
+<span class="tag">All Divisions</span><span class="badge b-exec">EXECUTIVE</span>
+</div>
+<div class="card" style="--c:#a78bfa">
+<h3>myn-product-owner</h3>
+<p>PM/PO for 3 systems (Strategy AGI, myn.org, myn.com). 5 operating modes.</p>
+<span class="tag">All Systems</span><span class="badge b-exec">EXECUTIVE</span>
+</div>
+<div class="card" style="--c:#a78bfa">
+<h3>myn-founder-voice</h3>
+<p>Ram's direct, clinical-credibility voice. No fluff, no yoga-speak.</p>
+<span class="tag">All External</span><span class="badge b-exec">EXECUTIVE</span>
+</div>
+<div class="card" style="--c:#7c3aed">
+<h3>myn-hotel-sales-brain</h3>
+<p>Full hotel sales pipeline: discovery → research → scoring → outreach → proposal</p>
+<span class="tag">Hotels</span><span class="tag">Hospitality</span><span class="tag">Convention</span><span class="badge b-exec">DOMAIN</span>
+</div>
+<div class="card" style="--c:#7c3aed">
+<h3>myn-proposal-engine</h3>
+<p>Generate ready-to-send proposals, pitch decks, ROI case studies</p>
+<span class="tag">All B2B</span><span class="badge b-exec">DOMAIN</span>
+</div>
+<div class="card" style="--c:#7c3aed">
+<h3>myn-warm-lead-conversion</h3>
+<p>Detect warm signals → trigger follow-up → book calls</p>
+<span class="tag">All Divisions</span><span class="badge b-exec">DOMAIN</span>
+</div>
+<div class="card" style="--c:#7c3aed">
+<h3>myn-content-miner</h3>
+<p>Extract and repurpose from 783-file knowledge base</p>
+<span class="tag">Marketing</span><span class="tag">Healthcare</span><span class="badge b-exec">DOMAIN</span>
+</div>
+<div class="card" style="--c:#7c3aed">
+<h3>myn-frontend-reviewer</h3>
+<p>Code review for myn.org (Next.js 15) and myn.com (Next.js 16+TS)</p>
+<span class="tag">Engineering</span><span class="badge b-exec">DOMAIN</span>
+</div>
+<div class="card" style="--c:#7c3aed">
+<h3>myn-api-integration-architect</h3>
+<p>Design API integrations, webhooks, auth, error recovery across 310+ tools</p>
+<span class="tag">Infrastructure</span><span class="badge b-exec">DOMAIN</span>
+</div>
+<div class="card" style="--c:#7c3aed">
+<h3>myn-automation-operator</h3>
+<p>Design trigger→condition→action workflows in AgentField</p>
+<span class="tag">All Divisions</span><span class="badge b-exec">DOMAIN</span>
+</div>
+</div>
+</div>
+
+<!-- ============================================ -->
+<!-- FULL PROJECT FOLDER AUDIT                    -->
+<!-- ============================================ -->
+<div class="section">
+<div class="sh"><div class="dot" style="background:#4ade80"></div><span class="st">Full Project Folder Audit — All 8 Systems on Disk</span></div>
+<div class="proj-grid">
+
+<!-- Strategy AGI -->
+<div class="proj-card" style="--c:#a78bfa">
+<h3>Strategy AGI</h3>
+<div class="proj-tech">Backend Intelligence — Agents, Workflows, Data | Python + Go + Node.js</div>
+<div class="proj-stats">
+<div class="ps"><b style="color:#a78bfa">14</b><small>Agents</small></div>
+<div class="ps"><b style="color:#a78bfa">4</b><small>Workflows</small></div>
+<div class="ps"><b style="color:#a78bfa">40+</b><small>Skills</small></div>
+<div class="ps"><b style="color:#a78bfa">137</b><small>.py Files</small></div>
+<div class="ps"><b style="color:#a78bfa">80</b><small>.html Files</small></div>
+</div>
+<div class="proj-contents">
+<b>agentfield/</b> — AgentField control plane (14 agents, 4 workflows, REST API, Pydantic schemas)
+<b>agentfield/myn-agent-os/</b> — Standalone Agent OS dashboard (index.html, 10-screen SPA)
+<b>agentfield/myn_agent_os_v1/</b> — v1 spec (16 agent prompts, 14 schemas, routing, handoffs)
+<b>backend/</b> — FastAPI backend (mynapi.onrender.com)
+<b>skills/</b> — 12 custom executive+domain skills (SKILL.md manifests + references/)
+<b>.claude/skills/</b> — 26 operational Claude skills
+<b>imported-skills/</b> — 5 design skills (taste, soft, minimalist, output, redesign)
+<b>agents/</b> — README.md, PM_WEBDEV_AGENT.md, EXECUTION_MAP.md
+<b>memory/</b> — Qdrant collections + Supabase memory schemas
+<b>02_architecture/</b> — 35 files: STACK_MAP, DATA_FLOW, 13 HTML dashboards
+<b>contracts/</b> — 27 hotel/government/vendor contracts (PDF)
+<b>scripts/</b> — 16 files: intelligence server, scrapers (LinkedIn, Instagram, website)
+<b>infrastructure/</b> — 24 files: Qdrant setup, ingestion pipeline, document embedder
+<b>pipelines/</b> — 11 data pipelines (Apify, Supabase, deep research)
+<b>01_operating_system/</b> — 13 files: team map, capability inventory, doctrine
+<b>06_research/</b> — 10 files: investor architecture, vibe-marketing-skills.md, deliverables (PDF/PPTX)
+<b>07_roadmaps/</b> — 19 files: 30-day roadmap + 15-file OpenAI upgrade bundle
+<b>08_archive_from_ai_stack/</b> — 117 files: deprecated skills, legacy v1, session artifacts
+</div>
+<div class="folder-tree"><span class="hi">Strategy AGI/</span>
+├── <span class="hi">agentfield/</span>        main.py, 14 agents, 4 workflows, Agent OS
+├── <span class="hi">backend/</span>           FastAPI (mynapi.onrender.com)
+├── <span class="hi">skills/</span>            12 custom skills + SKILLS_ARCHITECTURE.md
+├── <span class="hi">.claude/skills/</span>    26 operational skill dirs
+├── <span class="md">agents/</span>            README + PM_WEBDEV_AGENT + EXECUTION_MAP
+├── <span class="md">memory/</span>            Qdrant + Supabase memory design
+├── <span class="md">02_architecture/</span>   STACK_MAP, DATA_FLOW, 13 dashboards
+├── <span class="md">contracts/</span>         27 legal PDFs
+├── <span class="md">scripts/</span>           intelligence_server.py + scrapers
+├── <span class="md">infrastructure/</span>    Qdrant, ingestion, embedder
+├── <span class="lo">01_operating_system/</span>  team map, doctrine
+├── <span class="lo">06_research/</span>       investor docs, deliverables
+├── <span class="lo">07_roadmaps/</span>       30-day + OpenAI upgrade
+└── <span class="lo">08_archive/</span>        deprecated skills, legacy v1</div>
+</div>
+
+<!-- myn.com -->
+<div class="proj-card" style="--c:#4ade80">
+<h3>myn.com-main</h3>
+<div class="proj-tech">Public Marketing Website | Next.js 16.1.6 + React 18 + TypeScript + Supabase</div>
+<div class="proj-stats">
+<div class="ps"><b style="color:#4ade80">18</b><small>Pages</small></div>
+<div class="ps"><b style="color:#4ade80">4</b><small>Component Dirs</small></div>
+<div class="ps"><b style="color:#4ade80">TS</b><small>TypeScript</small></div>
+</div>
+<div class="proj-contents">
+<b>app/</b> — 18 Next.js App Router pages (TypeScript)
+<b>components/</b> — blog/, elements/, layout/, sections/
+<b>styles/</b> — CSS + fonts
+<b>public/</b> — Static assets (images, uploads)
+<b>util/</b> — Utility functions
+<b>Root config:</b> next.config.mjs, tsconfig.json, package.json
+<b>Docs:</b> CLAUDE.md, QUICK_START.md, LOGIN_ISSUES.md, SETUP guides
+<b>Architecture:</b> MYN_COM_Architecture_Plan.docx + .html
+</div>
+<div class="folder-tree"><span class="hi">myn.com-main/</span>
+├── <span class="hi">myn.com/app/</span>       18 page routes (hotels, blogs, healthcare, etc.)
+├── <span class="hi">myn.com/components/</span> blog/ elements/ layout/ sections/
+├── <span class="md">myn.com/styles/</span>    CSS + fonts
+├── <span class="md">myn.com/public/</span>    Static assets
+├── <span class="lo">next.config.mjs</span>    Supabase image domains + URL redirects
+└── <span class="lo">CLAUDE.md</span>          Project operating manual</div>
+</div>
+
+<!-- myn.org -->
+<div class="proj-card" style="--c:#60a5fa">
+<h3>myn.org-main</h3>
+<div class="proj-tech">Admin Dashboard | Next.js 15.5.9 + React 18.3.1 + Bootstrap 5.3.3 + Supabase</div>
+<div class="proj-stats">
+<div class="ps"><b style="color:#60a5fa">22</b><small>Page Dirs</small></div>
+<div class="ps"><b style="color:#60a5fa">140+</b><small>Components</small></div>
+<div class="ps"><b style="color:#60a5fa">JS</b><small>JavaScript</small></div>
+</div>
+<div class="proj-contents">
+<b>src/app/</b> — 22 page directories (dashboard, classes, profile, auth, settings, etc.)
+<b>src/components/</b> — Reusable React components
+<b>src/context/</b> — AuthContext.js + authedFetch wrapper
+<b>src/scss/</b> — Styles (Bootstrap-based)
+<b>src/middleware.js</b> — Route protection
+<b>Root:</b> .env, next.config.mjs (API proxy to FastAPI)
+<b>Docs:</b> CLAUDE.md, CODE_OVERVIEW.md, DASHBOARD_REVIEW.md, SITEMAP.md
+<b>Architecture:</b> MYN_ORG_Architecture_Plan (DOCX, PDF, HTML)
+</div>
+<div class="folder-tree"><span class="hi">myn.org-main/</span>
+├── <span class="hi">src/app/</span>           22 page dirs (dashboard, classes, auth, etc.)
+├── <span class="hi">src/components/</span>    140+ React components
+├── <span class="md">src/context/</span>       AuthContext.js
+├── <span class="md">src/scss/</span>          Bootstrap styles
+├── <span class="md">src/middleware.js</span>   Route protection
+├── <span class="lo">next.config.mjs</span>    FastAPI proxy config
+└── <span class="lo">CLAUDE.md</span>          Project operating manual</div>
+</div>
+
+<!-- Marketing Agent -->
+<div class="proj-card" style="--c:#f472b6">
+<h3>Marketing Agent</h3>
+<div class="proj-tech">Full-Funnel Marketing Automation | Content + Email + SEO + Social + Video</div>
+<div class="proj-stats">
+<div class="ps"><b style="color:#f472b6">783</b><small>KB Files</small></div>
+<div class="ps"><b style="color:#f472b6">24</b><small>Initiatives</small></div>
+<div class="ps"><b style="color:#f472b6">18</b><small>Team Folders</small></div>
+<div class="ps"><b style="color:#f472b6">16</b><small>KB Categories</small></div>
+</div>
+<div class="proj-contents">
+<b>knowledge-base/</b> — 783 files across 16 categories:
+  business (286), yoga (281), hotels (42), prompts (44), crm-data (35),
+  founder-authority (17), kids (16), advertising (16), corporate-wellness (15),
+  cold-email (12), notebooklm-research (17), sales (8), seo (6), social (8)
+<b>initiatives/</b> — 24 initiatives in 7 categories:
+  hotels (7), analytics (6), enablement (5), strategy (4), platform (3), kids (3), wearables (2)
+<b>team/</b> — 18 folders: 3 core + 10 Riipen interns + ASU capstone + alumni
+<b>Root docs:</b> CLAUDE.md (32KB), AGENT.md, 30_DAY_PLAN.md
+<b>Playbooks:</b> CONTENT_CALENDAR, EMAIL_SEQUENCES, SEO_PLAYBOOK, SOCIAL_ATOMIZER, DIVISION_MESSAGING
+<b>Data:</b> Clay exports (XLSX/CSV/JS), Instantly lists, GHL blueprint, security audits
+</div>
+<div class="folder-tree"><span class="hi">Marketing Agent/</span>
+├── <span class="hi">knowledge-base/</span>    783 files in 16 categories
+│   ├── business/          286 files (strategy, ads, analytics, SEO)
+│   ├── yoga/              281 files (programs, clinical, therapist)
+│   ├── hotels/            42 files (databases, pitch, wellness)
+│   └── ...14 more dirs
+├── <span class="hi">initiatives/</span>       24 initiatives in 7 categories
+├── <span class="hi">team/</span>              18 member folders + TEAM_INDEX.md
+├── <span class="md">CONTENT_CALENDAR.md</span>
+├── <span class="md">EMAIL_SEQUENCES.md</span>
+├── <span class="md">SEO_PLAYBOOK.md</span>
+├── <span class="md">SOCIAL_ATOMIZER.md</span>
+└── <span class="lo">CLAUDE.md</span>          32KB operating manual</div>
+</div>
+
+<!-- Command Center -->
+<div class="proj-card" style="--c:#facc15">
+<h3>Command Center</h3>
+<div class="proj-tech">Executive Dashboards + Notion Mirroring + Central Operations Hub</div>
+<div class="proj-stats">
+<div class="ps"><b style="color:#facc15">8</b><small>Dashboards</small></div>
+<div class="ps"><b style="color:#facc15">143KB</b><small>Index.html</small></div>
+</div>
+<div class="proj-contents">
+<b>index.html</b> (143KB) — Main entry point with cross-links to all systems
+<b>command-center.html</b> (103KB) — Master control panel
+<b>dashboard-master.html</b> (71KB) — Dashboard aggregator
+<b>agentfield-dashboard.html</b> (100KB) — Agent orchestration status (9 tabs)
+<b>business-economics-dashboard.html</b> (67KB) — Financial analytics
+<b>supabase-dashboard.html</b> (95KB) — Database operations
+<b>team-handoff-dashboard.html</b> (78KB) — Team coordination
+<b>master-directory.html</b> (53KB) — File/folder directory
+<b>myn-command-center/</b> — Git repo + Notion mirror layer
+<b>notion-mirror/</b> — Additional Notion sync
+<b>Docs:</b> CLAUDE.md (32KB), PM_WEBDEV_AGENT.md, AGENT.md, SYSTEM_STATUS.md
+</div>
+<div class="folder-tree"><span class="hi">Command Center/</span>
+├── <span class="hi">index.html</span>                     143KB main entry
+├── <span class="hi">command-center.html</span>             103KB master control
+├── <span class="hi">agentfield-dashboard.html</span>       100KB agent ops
+├── <span class="hi">supabase-dashboard.html</span>         95KB database
+├── <span class="md">dashboard-master.html</span>           71KB aggregator
+├── <span class="md">team-handoff-dashboard.html</span>     78KB team
+├── <span class="md">business-economics-dashboard.html</span> 67KB finance
+├── <span class="md">master-directory.html</span>           53KB directory
+├── <span class="lo">myn-command-center/</span>             git repo + Notion mirror
+└── <span class="lo">CLAUDE.md</span>                       32KB operating manual</div>
+</div>
+
+<!-- AI video gen -->
+<div class="proj-card" style="--c:#f87171">
+<h3>AI video gen</h3>
+<div class="proj-tech">Video Generation Pipelines | Node.js/TypeScript + Python + ffmpeg</div>
+<div class="proj-stats">
+<div class="ps"><b style="color:#f87171">3</b><small>Pipelines</small></div>
+<div class="ps"><b style="color:#f87171">5</b><small>APIs</small></div>
+</div>
+<div class="proj-contents">
+<b>brand-anthem-generator/</b> — Primary pipeline (TypeScript):
+  Firecrawl → GPT-4o → FAL.AI Sonauto → Hedra → ffmpeg
+  src/pipelines/ (generateBrandAnthem, generateTherapistIntro)
+  src/scripts/ (batchHotels, atomize)
+  src/routes/ghlWebhook.ts (GHL integration)
+  configs/hotel_anthems.json
+<b>dance_api_project/</b> — Python prototype (Firecrawl → OpenAI → FAL.AI → Hedra)
+<b>APIs:</b> Apify, OpenAI, FAL.AI, Hedra, Firecrawl
+<b>Docs:</b> CLAUDE.md, brand-anthem-results.html, brand_anthem_project.html
+</div>
+<div class="folder-tree"><span class="hi">AI video gen/</span>
+├── <span class="hi">brand-anthem-generator/</span>
+│   ├── src/pipelines/     generateBrandAnthem.ts, therapistIntro.ts
+│   ├── src/scripts/       batchHotels.ts, atomize.ts
+│   ├── src/routes/        ghlWebhook.ts
+│   ├── configs/           hotel_anthems.json
+│   └── output/            generated videos
+├── <span class="md">dance_api_project/</span>    Python prototype
+├── <span class="lo">brand-anthem-results.html</span>
+└── <span class="lo">CLAUDE.md</span>             8KB operating manual</div>
+</div>
+
+<!-- social -->
+<div class="proj-card" style="--c:#38bdf8">
+<h3>social</h3>
+<div class="proj-tech">Social Media Strategy + Tools + Advertising Resources</div>
+<div class="proj-stats">
+<div class="ps"><b style="color:#38bdf8">8</b><small>Files</small></div>
+</div>
+<div class="proj-contents">
+<b>SOCIAL_STRATEGY.md</b> (22KB) — Division-specific social strategy for all 9 divisions
+<b>TOOLS_NEEDED.md</b> (33KB) — Complete social media tool stack requirements
+<b>social-dashboard.html</b> (60KB) — Interactive social analytics dashboard
+<b>5 Facebook Ad guides</b> — Saved HTML reference docs for Facebook advertising
+</div>
+<div class="folder-tree"><span class="hi">social/</span>
+├── <span class="hi">SOCIAL_STRATEGY.md</span>        22KB division strategy
+├── <span class="hi">TOOLS_NEEDED.md</span>           33KB tool requirements
+├── <span class="md">social-dashboard.html</span>     60KB analytics viewer
+└── <span class="lo">PDFs - Facebook *.html</span>    5 advertising guides</div>
+</div>
+
+<!-- reports by vertical -->
+<div class="proj-card" style="--c:#a3e635">
+<h3>reports by vertical</h3>
+<div class="proj-tech">Strategic Business Documentation + White Papers + Decision Logs</div>
+<div class="proj-stats">
+<div class="ps"><b style="color:#a3e635">10</b><small>Files</small></div>
+<div class="ps"><b style="color:#a3e635">1</b><small>Subdir</small></div>
+</div>
+<div class="proj-contents">
+<b>MYN_Project_Management_Outline.md</b> (24KB) — Full PM structure
+<b>MYN_Project_State.md</b> (8KB) — Current project status snapshot
+<b>MYN_Healthcare_Agent.md</b> (6KB) — Healthcare division agent spec
+<b>MYN_Next_Actions.md</b> (6KB) — Priority action items
+<b>MYN_Decision_Log.md</b> (5KB) — Tracked decisions with rationale
+<b>My_Yoga_Network_Presentation.pptx</b> (190KB) — Investor pitch deck
+<b>White papers:</b> Strategic Healthcare Platform (DOCX + styled HTML)
+<b>bio medical/</b> — Biomedical research materials subdirectory
+</div>
+<div class="folder-tree"><span class="hi">reports by vertical/</span>
+├── <span class="hi">MYN_Project_Management_Outline.md</span>  24KB PM
+├── <span class="md">MYN_Project_State.md</span>               8KB status
+├── <span class="md">MYN_Healthcare_Agent.md</span>            6KB agent
+├── <span class="md">MYN_Next_Actions.md</span>                6KB priorities
+├── <span class="md">MYN_Decision_Log.md</span>                5KB decisions
+├── <span class="md">My_Yoga_Network_Presentation.pptx</span>  investor deck
+├── <span class="lo">*WhitePaper.docx / .html</span>           healthcare positioning
+└── <span class="lo">bio medical/</span>                       research materials</div>
+</div>
+
+</div>
+</div>
+
+<!-- NEW ARCHITECTURAL LAYERS -->
+<div class="section">
+<div class="sh"><div class="dot" style="background:#4ade80"></div><span class="st">Architectural Layers</span></div>
+<div class="memory">
+<div class="mem-card" style="--c:#4ade80">
+<h4>memory/</h4>
+<p>How agents remember. Qdrant (semantic), Supabase (structured), execution_logs (operational). 3 files documenting schemas, query patterns, and data flow.</p>
+</div>
+<div class="mem-card" style="--c:#60a5fa">
+<h4>agents/EXECUTION_MAP.md</h4>
+<p>Which agent calls which, in what order, with what data. 5 production chains mapped. REST endpoints documented. Error propagation rules defined.</p>
+</div>
+<div class="mem-card" style="--c:#a78bfa">
+<h4>skills/SKILLS_ARCHITECTURE.md</h4>
+<p>Single source of truth. 60 skills across 4 layers. Overlap analysis complete. 7 merges, 10 archives, 6 structural fixes executed.</p>
+</div>
+</div>
+</div>
+
+<!-- REMAINING OPERATIONAL SKILLS -->
+<div class="section">
+<div class="sh"><div class="dot" style="background:#3b82f6"></div><span class="st">Layer 3 — Operational Skills (.claude/skills/) — 25 Remaining</span></div>
+<div class="grid">
+<div class="card" style="--c:#3b82f6"><h3>deep-research</h3><p>Core research pipeline. Used by multiple executive skills.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>classify-leads</h3><p>LLM lead classification. Used by hotel-sales-brain.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>prospect-enrich</h3><p>Clay/Unify CRM enrichment.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>gmaps-leads</h3><p>Google Maps lead generation.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>scrape-leads</h3><p>Lead scraping and verification.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>company-snapshot</h3><p>Unified company data aggregation.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>qdrant-search</h3><p>Vector semantic search. Critical infrastructure.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>style-pipeline</h3><p>Writing style extraction and matching.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>gmail-inbox</h3><p>Email access and search.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>video-edit</h3><p>Video production pipeline.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>pan-3d-transition</h3><p>3D video transitions.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>skool-rag</h3><p>Community content RAG pipeline.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>skool-monitor</h3><p>Community monitoring.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>welcome-email</h3><p>Client onboarding email.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>onboarding-kickoff</h3><p>Post-sale engagement workflow.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>create-proposal</h3><p>Base proposal generation. Orchestrated by myn-proposal-engine.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>division-router</h3><p>Legacy router. Superseded by myn-executive-router (kept as fallback).</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>lead-research</h3><p>Lead enrichment pipeline.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>literature-research</h3><p>Academic/clinical research.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>instantly-campaigns</h3><p>Instantly.ai email campaign management.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>instantly-autoreply</h3><p>Instantly.ai auto-reply logic.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>cross-niche-outliers</h3><p>Cross-industry content discovery.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>generate-report</h3><p>Custom reporting generator.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>myn-stack-advisor</h3><p>Tech stack recommendations.</p><span class="badge b-ops">OPERATIONAL</span></div>
+<div class="card" style="--c:#3b82f6"><h3>project-dev-orchestrator</h3><p>Project development management.</p><span class="badge b-ops">OPERATIONAL</span></div>
+</div>
+</div>
+
+<!-- DESIGN SKILLS -->
+<div class="section">
+<div class="sh"><div class="dot" style="background:#ec4899"></div><span class="st">Layer 4 — Design Skills (imported-skills/)</span></div>
+<div class="grid">
+<div class="card" style="--c:#ec4899"><h3>taste-skill</h3><p>Attractive, polished frontend design</p><span class="badge b-design">DESIGN</span></div>
+<div class="card" style="--c:#ec4899"><h3>soft-skill</h3><p>Luxury, premium aesthetic</p><span class="badge b-design">DESIGN</span></div>
+<div class="card" style="--c:#ec4899"><h3>minimalist-skill</h3><p>Clean, minimal design</p><span class="badge b-design">DESIGN</span></div>
+<div class="card" style="--c:#ec4899"><h3>output-skill</h3><p>Complete, production-ready implementation</p><span class="badge b-design">DESIGN</span></div>
+<div class="card" style="--c:#ec4899"><h3>redesign-skill</h3><p>Improve existing designs</p><span class="badge b-design">DESIGN</span></div>
+</div>
+</div>
+
+<!-- ARCHIVED -->
+<div class="section">
+<div class="sh"><div class="dot" style="background:#6b7280"></div><span class="st">Archived (08_archive/) — Do Not Use</span></div>
+<div class="grid">
+<div class="card" style="--c:#4b5563"><h3>n8n-workflow-builder</h3><p>n8n deprecated 2026-03-25. Replaced by myn-automation-operator.</p><span class="badge b-archived">ARCHIVED</span></div>
+<div class="card" style="--c:#4b5563"><h3>local-server</h3><p>Infrastructure utility. Not a business skill.</p><span class="badge b-archived">ARCHIVED</span></div>
+<div class="card" style="--c:#4b5563"><h3>modal-deploy</h3><p>Deployment utility. Not a business skill.</p><span class="badge b-archived">ARCHIVED</span></div>
+<div class="card" style="--c:#4b5563"><h3>add-webhook</h3><p>Absorbed into myn-api-integration-architect.</p><span class="badge b-archived">ARCHIVED</span></div>
+<div class="card" style="--c:#4b5563"><h3>upwork-apply</h3><p>Not relevant to MYN operations.</p><span class="badge b-archived">ARCHIVED</span></div>
+<div class="card" style="--c:#4b5563"><h3>youtube-outliers</h3><p>Niche content tool. Not core.</p><span class="badge b-archived">ARCHIVED</span></div>
+<div class="card" style="--c:#4b5563"><h3>recreate-thumbnails</h3><p>YouTube utility. Not core.</p><span class="badge b-archived">ARCHIVED</span></div>
+<div class="card" style="--c:#4b5563"><h3>title-variants</h3><p>Absorbed into myn-content-miner.</p><span class="badge b-archived">ARCHIVED</span></div>
+<div class="card" style="--c:#4b5563"><h3>casualize-names</h3><p>Absorbed into myn-founder-voice.</p><span class="badge b-archived">ARCHIVED</span></div>
+<div class="card" style="--c:#4b5563"><h3>regen-pdf</h3><p>Covered by built-in PDF skill.</p><span class="badge b-archived">ARCHIVED</span></div>
+</div>
+</div>
+
+<!-- FILE STRUCTURE -->
+<div class="section">
+<div class="sh"><div class="dot" style="background:#818cf8"></div><span class="st">Clean File Structure (Strategy AGI Detail)</span></div>
+<div class="flow"><span class="l1">/Strategy AGI/</span>
+<span class="arrow">│</span>
+<span class="arrow">├── </span><span class="l1">skills/</span> <span class="l4">← Executive skills (10) + SKILLS_ARCHITECTURE.md</span>
+<span class="arrow">│   ├── </span><span class="l2">myn-{skill}/SKILL.md</span> <span class="l4">← Each skill has references/ subfolder</span>
+<span class="arrow">│   ├── </span>SKILLS_ARCHITECTURE.md <span class="l4">← Single source of truth</span>
+<span class="arrow">│   └── </span>architecture-dashboard.html <span class="l4">← This dashboard</span>
+<span class="arrow">│</span>
+<span class="arrow">├── </span><span class="l1">agents/</span> <span class="l4">← Agent documentation</span>
+<span class="arrow">│   ├── </span>README.md <span class="l4">← Agent inventory (14 agents)</span>
+<span class="arrow">│   ├── </span>PM_WEBDEV_AGENT.md <span class="l4">← Unified PM instructions</span>
+<span class="arrow">│   └── </span>EXECUTION_MAP.md <span class="l4">← Agent calling chains + data contracts</span>
+<span class="arrow">│</span>
+<span class="arrow">├── </span><span class="l1">memory/</span> <span class="l4">← Memory discipline layer</span>
+<span class="arrow">│   ├── </span>README.md <span class="l4">← How agents remember</span>
+<span class="arrow">│   ├── </span>qdrant-collections.md <span class="l4">← Vector DB schemas + queries</span>
+<span class="arrow">│   └── </span>supabase-memory.md <span class="l4">← Structured tables + execution_logs</span>
+<span class="arrow">│</span>
+<span class="arrow">├── </span><span class="l2">agentfield/</span> <span class="l4">← Production system (14 agents, 4 workflows)</span>
+<span class="arrow">├── </span><span class="l3">.claude/skills/</span> <span class="l4">← Operational tools (25, pruned from 35)</span>
+<span class="arrow">├── </span><span style="color:#f472b6">imported-skills/</span> <span class="l4">← Design skills (5)</span>
+<span class="arrow">│</span>
+<span class="arrow">├── </span>01_operating_system/ <span class="l4">← Company docs (13 files: team map, doctrine)</span>
+<span class="arrow">├── </span>02_architecture/ <span class="l4">← Tech stack docs (35 files: STACK_MAP, 13 dashboards)</span>
+<span class="arrow">├── </span>03_repo_management/ <span class="l4">← Deployment docs (9 files)</span>
+<span class="arrow">├── </span>06_research/ <span class="l4">← Investor docs + deliverables (10 files)</span>
+<span class="arrow">├── </span>07_roadmaps/ <span class="l4">← Sprint planning (19 files + OpenAI upgrade bundle)</span>
+<span class="arrow">├── </span>contracts/ <span class="l4">← Hotel/vendor/government (27 PDFs)</span>
+<span class="arrow">├── </span>scripts/ <span class="l4">← Scrapers + utilities (16 files)</span>
+<span class="arrow">├── </span>infrastructure/ <span class="l4">← Qdrant + ingestion (24 files)</span>
+<span class="arrow">│</span>
+<span class="arrow">└── </span><span class="l4">08_archive_from_ai_stack/</span> <span class="l4">← All deprecated content (117 files)</span>
+<span class="arrow">    ├── </span><span class="l4">deprecated_skills/ (9 folders)</span>
+<span class="arrow">    ├── </span><span class="l4">legacy_v1/ (myn_agent_os_v1, pipelines, master-orchestrator)</span>
+<span class="arrow">    ├── </span><span class="l4">generator_scripts/ (8 Python/JS)</span>
+<span class="arrow">    └── </span><span class="l4">session_artifacts/ (20 session reports)</span></div>
+</div>
+
+<div style="text-align:center;padding:24px;color:#444;font-size:11px">
+MYN Skills Architecture — Full Stack Audit completed 2026-03-26<br/>
+Source of truth: skills/SKILLS_ARCHITECTURE.md | 8 project folders | 40+ skills | 14 agents
+</div>
+
+</main>
+
+<!-- Floating Nav -->
+<div class="nav-float">
+<a href="index.html">Command Center</a>
+<a href="agentfield-dashboard.html">AgentField Dashboard</a>
+<a href="agent-os-dashboard.html">Agent OS</a>
+</div>
+
+<!-- FLOATING QUICK-ACCESS PANEL -->
+<style>
+    .quick-access-fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #00d4aa, #00a885);
+        border: none;
+        border-radius: 50%;
+        color: #0a1628;
+        font-size: 24px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(0, 212, 170, 0.4);
+        z-index: 9999;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .quick-access-fab:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 30px rgba(0, 212, 170, 0.6);
+    }
+    .quick-access-panel {
+        position: fixed;
+        bottom: 92px;
+        right: 24px;
+        width: 320px;
+        max-height: 0;
+        overflow: hidden;
+        background: rgba(10, 22, 40, 0.98);
+        border: 1px solid rgba(0, 212, 170, 0.25);
+        border-radius: 16px;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+        transition: max-height 0.35s ease, padding 0.35s ease, opacity 0.35s ease;
+        opacity: 0;
+        padding: 0 20px;
+    }
+    .quick-access-panel.open {
+        max-height: 520px;
+        opacity: 1;
+        padding: 20px;
+    }
+    .qa-header {
+        font-size: 13px;
+        font-weight: 700;
+        color: #00d4aa;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(0, 212, 170, 0.15);
+    }
+    .qa-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #c0d0dd;
+        font-size: 13px;
+        transition: all 0.15s;
+    }
+    .qa-link:hover {
+        background: rgba(0, 212, 170, 0.1);
+        color: #fff;
+    }
+    .qa-link .qa-icon { font-size: 16px; width: 22px; text-align: center; }
+    .qa-link .qa-badge {
+        margin-left: auto;
+        background: rgba(255, 107, 53, 0.2);
+        color: #ff6b35;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 8px;
+    }
+    .qa-section-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #5a7a8a;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 12px 0 4px 12px;
+    }
+</style>
+
+<button class="quick-access-fab" onclick="document.getElementById('quick-access-panel').classList.toggle('open')" title="Quick Access — All Dashboards">⚡</button>
+
+<div class="quick-access-panel" id="quick-access-panel">
+    <div class="qa-header">Quick Access — All Boards</div>
+    <a href="unified-command-center.html" class="qa-link" style="background:rgba(0,212,170,0.08);margin-bottom:4px;">
+        <span class="qa-icon">🎯</span> <strong>Unified Command Center</strong>
+    </a>
+    <div class="qa-section-label">Operational</div>
+    <a href="agentic-os-dashboard.html" class="qa-link"><span class="qa-icon">🤖</span> Agentic OS Dashboard</a>
+    <a href="agentfield-dashboard.html" class="qa-link"><span class="qa-icon">⚙️</span> AgentField Control Plane</a>
+    <a href="review-queue.html" class="qa-link"><span class="qa-icon">📋</span> Review Queue <span class="qa-badge">2</span></a>
+    <div class="qa-section-label">Strategy & Business</div>
+    <a href="business-economics-dashboard.html" class="qa-link"><span class="qa-icon">💰</span> Business Economics</a>
+    <a href="dashboard-master.html" class="qa-link"><span class="qa-icon">📊</span> Master Dashboard</a>
+    <div class="qa-section-label">Reference</div>
+    <a href="index.html" class="qa-link"><span class="qa-icon">🏠</span> Marketing Index</a>
+    <a href="architecture-dashboard.html" class="qa-link"><span class="qa-icon">🏗️</span> Architecture & Skills</a>
+    <a href="supabase-dashboard.html" class="qa-link"><span class="qa-icon">🗄️</span> Supabase Dashboard</a>
+    <a href="team-handoff-dashboard.html" class="qa-link"><span class="qa-icon">👥</span> Team Handoff</a>
+    <a href="master-directory.html" class="qa-link"><span class="qa-icon">📁</span> Master Directory</a>
+</div>
+<!-- END QUICK-ACCESS PANEL -->
+
+</body>
+</html>

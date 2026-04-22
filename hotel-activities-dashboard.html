@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Activities Command Center — MYN</title>
+<style>
+:root {
+  --bg: #0f1419;
+  --bg2: #1a1f2e;
+  --bg3: #232b3b;
+  --border: rgba(255,255,255,0.08);
+  --text: #e7e9ea;
+  --muted: #8899a6;
+  --accent: #4ECDC4;
+  --accent2: #3B82F6;
+  --green: #10B981;
+  --red: #EF4444;
+  --orange: #F59E0B;
+  --purple: #A78BFA;
+  --pink: #EC4899;
+  --cyan: #06B6D4;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+.header { background:linear-gradient(135deg,#0a1628,#0f2b3d); border-bottom:1px solid var(--border); padding:20px 32px; display:flex; align-items:center; justify-content:space-between; }
+.header h1 { font-size:22px; font-weight:700; }
+.header h1 span { color:var(--accent); }
+.header .meta { text-align:right; }
+.header .meta .date { color:var(--muted); font-size:12px; background:var(--bg); padding:6px 14px; border-radius:20px; border:1px solid var(--border); }
+.header .meta .live { color:var(--green); font-size:11px; margin-right:12px; }
+.header .meta .live::before { content:''; display:inline-block; width:6px; height:6px; background:var(--green); border-radius:50%; margin-right:4px; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.tab-bar { display:flex; gap:0; border-bottom:1px solid var(--border); background:var(--bg2); overflow-x:auto; padding:0 16px; }
+.tab { padding:14px 22px; cursor:pointer; font-size:13px; font-weight:500; color:var(--muted); border-bottom:2px solid transparent; white-space:nowrap; transition:all 0.2s; }
+.tab:hover { color:var(--text); background:rgba(255,255,255,0.03); }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+.content { display:block; padding:28px 32px; max-width:1440px; margin:0 auto; }
+.section-divider { border:none; border-top:2px solid var(--accent); margin:40px 32px 0; max-width:1440px; opacity:0.3; }
+.section-title { font-size:18px; font-weight:700; color:var(--accent); padding:20px 32px 0; max-width:1440px; margin:0 auto; text-transform:uppercase; letter-spacing:1px; }
+
+.card { background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:20px; }
+.card h2 { font-size:17px; margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+.card h3 { font-size:14px; margin:16px 0 10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.grid-5 { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; }
+@media(max-width:1100px){ .grid-4,.grid-5{grid-template-columns:repeat(2,1fr);} }
+@media(max-width:768px){ .grid-2,.grid-3,.grid-4,.grid-5{grid-template-columns:1fr;} }
+
+.kpi { background:var(--bg3); border:1px solid var(--border); border-radius:10px; padding:20px; text-align:center; position:relative; overflow:hidden; }
+.kpi .label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+.kpi .value { font-size:28px; font-weight:700; }
+.kpi .sub { font-size:11px; color:var(--muted); margin-top:4px; }
+.kpi .bar { position:absolute; bottom:0; left:0; height:3px; border-radius:0 0 10px 10px; }
+
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th,td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); }
+th { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }
+tr:hover td { background:rgba(255,255,255,0.02); }
+
+.badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+.badge-green { background:rgba(16,185,129,0.15); color:#10B981; }
+.badge-orange { background:rgba(245,158,11,0.15); color:#F59E0B; }
+.badge-red { background:rgba(239,68,68,0.15); color:#EF4444; }
+.badge-blue { background:rgba(59,130,246,0.15); color:#3B82F6; }
+.badge-purple { background:rgba(167,139,250,0.15); color:#A78BFA; }
+.badge-cyan { background:rgba(6,182,212,0.15); color:#06B6D4; }
+.badge-pink { background:rgba(236,72,153,0.15); color:#EC4899; }
+
+.progress-bar { height:8px; background:var(--bg); border-radius:4px; overflow:hidden; margin-top:8px; }
+.progress-fill { height:100%; border-radius:4px; transition:width 0.5s; }
+
+.strategy-card { background:linear-gradient(135deg,rgba(78,205,196,0.08),rgba(59,130,246,0.05)); border:1px solid rgba(78,205,196,0.2); border-radius:10px; padding:20px; }
+.strategy-card h4 { color:var(--accent); font-size:14px; margin-bottom:8px; }
+.strategy-card p { color:var(--muted); font-size:13px; line-height:1.6; }
+
+.target-row { display:flex; align-items:center; gap:16px; padding:14px 0; border-bottom:1px solid var(--border); }
+.target-row:last-child { border:none; }
+.target-rank { width:32px; height:32px; background:var(--accent); color:var(--bg); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; }
+.target-info { flex:1; }
+.target-info .name { font-weight:600; font-size:14px; }
+.target-info .detail { color:var(--muted); font-size:12px; margin-top:2px; }
+.target-score { text-align:right; }
+.target-score .score { font-size:20px; font-weight:700; color:var(--accent); }
+.target-score .label { font-size:10px; color:var(--muted); }
+
+.funnel { display:flex; flex-direction:column; gap:4px; }
+.funnel-stage { display:flex; align-items:center; gap:12px; }
+.funnel-bar { height:36px; border-radius:6px; display:flex; align-items:center; padding:0 14px; font-size:12px; font-weight:600; color:#fff; min-width:60px; transition:width 0.6s; }
+.funnel-label { width:180px; font-size:12px; color:var(--muted); text-align:right; flex-shrink:0; }
+.funnel-count { font-size:12px; color:var(--muted); width:50px; }
+
+.geo-bar { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.geo-bar .city { width:100px; font-size:12px; color:var(--muted); text-align:right; flex-shrink:0; }
+.geo-bar .bar { height:22px; border-radius:4px; background:var(--accent); opacity:0.7; display:flex; align-items:center; padding:0 8px; font-size:11px; font-weight:600; }
+
+.chain-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+@media(max-width:900px){ .chain-grid{grid-template-columns:repeat(2,1fr);} }
+.chain-card { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:16px; }
+.chain-card .chain-name { font-size:14px; font-weight:600; margin-bottom:6px; }
+.chain-card .chain-count { font-size:24px; font-weight:700; color:var(--accent); }
+.chain-card .chain-emails { font-size:11px; color:var(--muted); }
+
+.timeline { position:relative; padding-left:24px; }
+.timeline::before { content:''; position:absolute; left:8px; top:4px; bottom:4px; width:2px; background:var(--border); }
+.timeline-item { position:relative; margin-bottom:20px; }
+.timeline-item::before { content:''; position:absolute; left:-20px; top:4px; width:12px; height:12px; border-radius:50%; border:2px solid var(--accent); background:var(--bg2); }
+.timeline-item.done::before { background:var(--accent); }
+.timeline-item .tl-date { font-size:11px; color:var(--accent); font-weight:600; }
+.timeline-item .tl-title { font-size:14px; font-weight:600; margin:2px 0; }
+.timeline-item .tl-desc { font-size:12px; color:var(--muted); }
+
+.quote-box { background:linear-gradient(135deg,rgba(78,205,196,0.06),transparent); border-left:3px solid var(--accent); padding:16px 20px; border-radius:0 8px 8px 0; margin:16px 0; }
+.quote-box p { font-size:14px; font-style:italic; line-height:1.6; color:var(--text); }
+.quote-box .attr { font-size:11px; color:var(--muted); margin-top:6px; }
+
+.initiative-card { background:var(--bg3); border:1px solid var(--border); border-radius:10px; padding:18px; }
+.initiative-card .init-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.initiative-card .init-title { font-size:14px; font-weight:600; }
+.initiative-card .init-desc { font-size:12px; color:var(--muted); line-height:1.5; }
+.initiative-card .init-owner { font-size:11px; color:var(--cyan); margin-top:8px; }
+
+.scroll-table { overflow-x:auto; }
+</style>
+</head>
+<body>
+<!-- BEGIN MYN-NAV (auto-injected 2026-04-21) -->
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; -webkit-font-smoothing: antialiased; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__inner::-webkit-scrollbar { height: 4px; } .myn-nav__inner::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.25); border-radius: 2px; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-variant-numeric: tabular-nums; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Center</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="master-directory.html" data-page="master-directory">Directory</a>
+  <a href="analytics-dashboard.html" data-page="analytics-dashboard">Analytics</a>
+  <a href="lead-gen-dashboard.html" data-page="lead-gen-dashboard">Leads</a>
+  <a href="hotel-activities-dashboard.html" data-page="hotel-activities-dashboard">Hotels</a>
+  <a href="business-economics-dashboard.html" data-page="business-economics-dashboard">Economics</a>
+  <a href="team-handoff-dashboard.html" data-page="team-handoff-dashboard">Team</a>
+  <a href="architecture-dashboard.html" data-page="architecture-dashboard">Architecture</a>
+  <a href="agent-control-plane.html" data-page="agent-control-plane">Agents</a>
+  <a href="supabase-dashboard.html" data-page="supabase-dashboard">Supabase</a>
+  <a href="paperclip-dashboard.html" data-page="paperclip-dashboard">Paperclip</a>
+  <a href="review-queue.html" data-page="review-queue">Review</a>
+  <a href="4-21-26-full-audit.html" data-page="4-21-26-full-audit">Audit</a>
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date" id="myn-nav-date"></span>
+</div>
+</nav>
+<script>
+(function(){
+  var path = (location.pathname.split('/').pop() || 'index.html').replace('.html','');
+  var links = document.querySelectorAll('.myn-nav a[data-page]');
+  for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('data-page') === path) links[i].classList.add('is-active'); }
+  var d = new Date(); var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var el = document.getElementById('myn-nav-date'); if (el) el.textContent = m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+})();
+</script>
+<!-- END MYN-NAV -->
+
+<div class="header">
+  <div>
+    <h1>Hotel Activities <span>Command Center</span></h1>
+    <div style="color:var(--muted);font-size:13px;margin-top:4px;">MYN Hotel & Hospitality Division — Pipeline, Strategy & Operations</div>
+  </div>
+  <div class="meta">
+    <span class="live">GHL LIVE</span>
+    <span class="date">March 28, 2026</span>
+  </div>
+</div>
+
+<div class="tab-bar" style="flex-wrap:wrap;">
+  <a class="tab active" href="#overview" style="text-decoration:none;">Overview</a>
+  <a class="tab" href="#pipeline" style="text-decoration:none;">Pipeline & Leads</a>
+  <a class="tab" href="#targets" style="text-decoration:none;">Top Targets & Strategy</a>
+  <a class="tab" href="#chains" style="text-decoration:none;">Chain Analysis</a>
+  <a class="tab" href="#outreach" style="text-decoration:none;">Outreach Status</a>
+  <a class="tab" href="#initiatives" style="text-decoration:none;">Initiatives & Team</a>
+  <a class="tab" href="#economics" style="text-decoration:none;">Economics & ROI</a>
+  <a class="tab" href="#fairmont" style="text-decoration:none;">Fairmont Plan</a>
+</div>
+
+<!-- ==================== OVERVIEW ==================== -->
+<div class="section-title" id="overview">1 — Overview</div>
+<div class="content">
+  <div class="grid-5" style="margin-bottom:24px;">
+    <div class="kpi">
+      <div class="label">Total Hotel Leads</div>
+      <div class="value" style="color:var(--accent)">1,199</div>
+      <div class="sub">GHL (557) + Email Pipeline (656)</div>
+      <div class="bar" style="width:100%;background:var(--accent)"></div>
+    </div>
+    <div class="kpi">
+      <div class="label">Active Contracts</div>
+      <div class="value" style="color:var(--green)">5</div>
+      <div class="sub">Westin LB, Westin Sac, Dagny, Intex, Bixby</div>
+      <div class="bar" style="width:30%;background:var(--green)"></div>
+    </div>
+    <div class="kpi">
+      <div class="label">GHL Pipelines</div>
+      <div class="value" style="color:var(--accent2)">6</div>
+      <div class="sub">1,395 total opportunities</div>
+      <div class="bar" style="width:50%;background:var(--accent2)"></div>
+    </div>
+    <div class="kpi">
+      <div class="label">Hotels with Email</div>
+      <div class="value" style="color:var(--orange)">218</div>
+      <div class="sub">39% of GHL hotel leads</div>
+      <div class="bar" style="width:39%;background:var(--orange)"></div>
+    </div>
+    <div class="kpi">
+      <div class="label">Potential Monthly Rev</div>
+      <div class="value" style="color:var(--green)">$8.5K</div>
+      <div class="sub">per activated property</div>
+      <div class="bar" style="width:80%;background:var(--green)"></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>GHL Pipeline Distribution</h2>
+      <div class="funnel">
+        <div class="funnel-stage"><div class="funnel-label">Leads (Unworked)</div><div class="funnel-bar" style="width:100%;background:linear-gradient(90deg,var(--accent),#3B82F6)">635</div><div class="funnel-count">45.5%</div></div>
+        <div class="funnel-stage"><div class="funnel-label">New Sales Pipeline</div><div class="funnel-bar" style="width:98%;background:linear-gradient(90deg,#3B82F6,var(--purple))">627</div><div class="funnel-count">44.9%</div></div>
+        <div class="funnel-stage"><div class="funnel-label">Elementary School</div><div class="funnel-bar" style="width:11%;background:var(--orange)">69</div><div class="funnel-count">4.9%</div></div>
+        <div class="funnel-stage"><div class="funnel-label">LinkedIn Pipeline</div><div class="funnel-bar" style="width:10%;background:var(--pink)">62</div><div class="funnel-count">4.4%</div></div>
+        <div class="funnel-stage"><div class="funnel-label">Cold Email Pipeline</div><div class="funnel-bar" style="width:1%;background:var(--cyan);min-width:40px">2</div><div class="funnel-count">0.1%</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>New Sales Pipeline Stages</h2>
+      <div class="funnel">
+        <div class="funnel-stage"><div class="funnel-label">No Answer</div><div class="funnel-bar" style="width:100%;background:#EF4444">313</div><div class="funnel-count">49.9%</div></div>
+        <div class="funnel-stage"><div class="funnel-label">Not Interested</div><div class="funnel-bar" style="width:27%;background:#F59E0B">83</div><div class="funnel-count">13.2%</div></div>
+        <div class="funnel-stage"><div class="funnel-label">Bad Lead</div><div class="funnel-bar" style="width:23%;background:#6B7280">71</div><div class="funnel-count">11.3%</div></div>
+        <div class="funnel-stage"><div class="funnel-label">Email Requested</div><div class="funnel-bar" style="width:18%;background:var(--accent2)">56</div><div class="funnel-count">8.9%</div></div>
+        <div class="funnel-stage"><div class="funnel-label">Gatekeeper</div><div class="funnel-bar" style="width:16%;background:var(--purple)">50</div><div class="funnel-count">8.0%</div></div>
+        <div class="funnel-stage"><div class="funnel-label">Follow-Up Requested</div><div class="funnel-bar" style="width:5%;background:var(--cyan);min-width:40px">16</div><div class="funnel-count">2.6%</div></div>
+        <div class="funnel-stage"><div class="funnel-label">Contract Sent</div><div class="funnel-bar" style="width:5%;background:var(--green);min-width:40px">14</div><div class="funnel-count">2.2%</div></div>
+        <div class="funnel-stage"><div class="funnel-label">Discovery Calls</div><div class="funnel-bar" style="width:4%;background:var(--accent);min-width:40px">12</div><div class="funnel-count">1.9%</div></div>
+        <div class="funnel-stage"><div class="funnel-label">Onboarding Complete</div><div class="funnel-bar" style="width:1%;background:#10B981;min-width:40px">2</div><div class="funnel-count">0.3%</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Critical Insights</h2>
+    <div class="grid-3">
+      <div class="strategy-card">
+        <h4>635 Unworked Leads</h4>
+        <p>The Leads pipeline has 635 hotel & property leads sitting untouched in the initial stage since Sep 2025. 542 are hotels, 76 are schools. These are your biggest untapped asset — 180 have never been called.</p>
+      </div>
+      <div class="strategy-card">
+        <h4>Email Gap: 61% Missing</h4>
+        <p>Only 218 of 557 GHL hotel leads have email addresses. Enrichment via Clay, Apollo, or LinkedIn scraping could unlock 339 additional email contacts for multi-channel outreach.</p>
+      </div>
+      <div class="strategy-card">
+        <h4>Stale Pipeline</h4>
+        <p>All 1,395 opportunities are status "open" from Aug-Sep 2025. No wins, no losses recorded. 14 contracts were sent but never closed. The pipeline needs a full re-engagement sweep.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PIPELINE & LEADS ==================== -->
+<hr class="section-divider">
+<div class="section-title" id="pipeline">2 — Pipeline & Leads</div>
+<div class="content">
+  <div class="grid-4" style="margin-bottom:24px;">
+    <div class="kpi">
+      <div class="label">GHL Hotel Leads</div>
+      <div class="value" style="color:var(--accent)">557</div>
+      <div class="sub">In Leads pipeline</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Email Pipeline</div>
+      <div class="value" style="color:var(--accent2)">656</div>
+      <div class="sub">Verified hotel contacts</div>
+    </div>
+    <div class="kpi">
+      <div class="label">With Phone</div>
+      <div class="value" style="color:var(--green)">546</div>
+      <div class="sub">98% of GHL leads</div>
+    </div>
+    <div class="kpi">
+      <div class="label">With Email</div>
+      <div class="value" style="color:var(--orange)">218</div>
+      <div class="sub">39% — needs enrichment</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Email Pipeline Sources (656 contacts)</h2>
+    <div class="scroll-table">
+      <table>
+        <thead><tr><th>Source File</th><th>Records</th><th>Quality</th><th>Best Use</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>100-HotelM.xlsx</td><td>454</td><td><span class="badge badge-green">Ready</span></td><td>Cold email, property-level outreach</td><td><span class="badge badge-green">Verified</span></td></tr>
+          <tr><td>Hotel VPs (March)</td><td>41</td><td><span class="badge badge-green">Ready</span></td><td>ABM, executive-level outreach</td><td><span class="badge badge-green">Verified</span></td></tr>
+          <tr><td>Hospitality Tracker</td><td>161</td><td><span class="badge badge-blue">Active</span></td><td>Campaign continuation</td><td><span class="badge badge-orange">In Progress</span></td></tr>
+          <tr><td>John Warm List</td><td>51</td><td><span class="badge badge-purple">Selective</span></td><td>Warm outreach, referrals</td><td><span class="badge badge-blue">Ready</span></td></tr>
+          <tr><td>Boston Luxury Hotels</td><td>269</td><td><span class="badge badge-cyan">Reference</span></td><td>Property intelligence database</td><td><span class="badge badge-cyan">Reference</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Top Email Domains (Chain Intelligence)</h2>
+    <div class="scroll-table">
+      <table>
+        <thead><tr><th>Domain</th><th>Contacts</th><th>Share</th><th>Chain</th><th>Priority</th></tr></thead>
+        <tbody>
+          <tr><td>westin.com</td><td>118</td><td>18.0%</td><td>Starwood / Marriott</td><td><span class="badge badge-green">Active Account</span></td></tr>
+          <tr><td>marriott.com</td><td>54</td><td>8.2%</td><td>Marriott International</td><td><span class="badge badge-blue">ABM Target</span></td></tr>
+          <tr><td>hilton.com</td><td>39</td><td>5.9%</td><td>Hilton Hotels</td><td><span class="badge badge-blue">ABM Target</span></td></tr>
+          <tr><td>fourseasons.com</td><td>16</td><td>2.4%</td><td>Four Seasons</td><td><span class="badge badge-purple">Luxury</span></td></tr>
+          <tr><td>hyatt.com</td><td>15</td><td>2.3%</td><td>Hyatt Hotels</td><td><span class="badge badge-blue">ABM Target</span></td></tr>
+          <tr><td>choicehotels.com</td><td>9</td><td>1.4%</td><td>Choice Hotels</td><td><span class="badge badge-orange">Mid-Scale</span></td></tr>
+          <tr><td>ritzcarlton.com</td><td>7</td><td>1.1%</td><td>Ritz-Carlton</td><td><span class="badge badge-purple">Ultra-Luxury</span></td></tr>
+          <tr><td>caesars.com</td><td>7</td><td>1.1%</td><td>Caesars Entertainment</td><td><span class="badge badge-orange">Gaming/Resort</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Geographic Distribution (Top Markets by Area Code)</h2>
+    <div class="geo-bar"><div class="city">Miami</div><div class="bar" style="width:42%;background:var(--accent)">305 — 42</div></div>
+    <div class="geo-bar"><div class="city">NYC</div><div class="bar" style="width:27%;background:var(--accent2)">212 — 27</div></div>
+    <div class="geo-bar"><div class="city">Chicago</div><div class="bar" style="width:23%;background:var(--purple)">312 — 23</div></div>
+    <div class="geo-bar"><div class="city">San Francisco</div><div class="bar" style="width:21%;background:var(--green)">415 — 21</div></div>
+    <div class="geo-bar"><div class="city">Washington DC</div><div class="bar" style="width:18%;background:var(--pink)">202 — 18</div></div>
+    <div class="geo-bar"><div class="city">Atlanta</div><div class="bar" style="width:18%;background:var(--orange)">404 — 18</div></div>
+    <div class="geo-bar"><div class="city">Orlando</div><div class="bar" style="width:17%;background:var(--cyan)">407 — 17</div></div>
+    <div class="geo-bar"><div class="city">Boston</div><div class="bar" style="width:13%;background:#6EE7B7">617 — 13</div></div>
+    <div class="geo-bar"><div class="city">San Diego</div><div class="bar" style="width:12%;background:#F472B6">619 — 12</div></div>
+    <div class="geo-bar"><div class="city">Naples/SW FL</div><div class="bar" style="width:12%;background:#FBBF24">239 — 12</div></div>
+    <div class="geo-bar"><div class="city">LA West</div><div class="bar" style="width:11%;background:#818CF8">310 — 11</div></div>
+    <div class="geo-bar"><div class="city">Palm Springs</div><div class="bar" style="width:10%;background:#FB923C">760 — 10</div></div>
+  </div>
+</div>
+
+<!-- ==================== TOP TARGETS & STRATEGY ==================== -->
+<hr class="section-divider">
+<div class="section-title" id="targets">3 — Top Targets & Strategy</div>
+<div class="content">
+  <div class="card">
+    <h2>Recommended Top 15 Hotel Targets</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">Scored by: chain relationship strength, geographic proximity to Long Beach, wellness alignment, contact data quality, and revenue potential. Hotels with existing Westin relationship or Hyatt/Marriott chain leverage ranked highest.</p>
+
+    <div class="target-row"><div class="target-rank">1</div><div class="target-info"><div class="name">Fairmont Breakers, Long Beach</div><div class="detail">Active target — Jan 2027 retreat event planned. Strategy & research phase. Partners: Insight Timer, Airbnb, Amazon</div></div><div class="target-score"><div class="score">98</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row"><div class="target-rank">2</div><div class="target-info"><div class="name">Westin Long Beach (Renewal)</div><div class="detail">Active contract — expand programming, add biometric pilot (Yoga Bio Sync), increase F&B integration</div></div><div class="target-score"><div class="score">95</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row"><div class="target-rank">3</div><div class="target-info"><div class="name">The Dagny, Boston (Expansion)</div><div class="detail">Active contract — case study generation, expand to sister properties, proof point for East Coast</div></div><div class="target-score"><div class="score">93</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row"><div class="target-rank">4</div><div class="target-info"><div class="name">Hyatt Regency Long Beach</div><div class="detail">Local + chain leverage (111 Hyatt leads in pipeline). Convention hotel segment — Wellness Gap-Fill Pilot fit</div></div><div class="target-score"><div class="score">90</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row"><div class="target-rank">5</div><div class="target-info"><div class="name">Kimpton Portfolio (55 leads)</div><div class="detail">Boutique/lifestyle chain — 50 with email. Wellness-forward brand DNA. Target: regional wellness director</div></div><div class="target-score"><div class="score">88</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row"><div class="target-rank">6</div><div class="target-info"><div class="name">Miraval Properties (4 leads)</div><div class="detail">Miraval Austin, Arizona, Berkshires + Aviara. Ultra-luxury wellness — highest per-property revenue potential</div></div><div class="target-score"><div class="score">87</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row"><div class="target-rank">7</div><div class="target-info"><div class="name">Four Seasons Portfolio (48 leads)</div><div class="detail">22 with email. Luxury wellness alignment. Target: Spa Directors and GM offices</div></div><div class="target-score"><div class="score">85</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row"><div class="target-rank">8</div><div class="target-info"><div class="name">Ritz-Carlton Westchester + Portfolio</div><div class="detail">7 contacts at ritzcarlton.com. Ultra-luxury segment, strong wellness programming interest</div></div><div class="target-score"><div class="score">84</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row"><div class="target-rank">9</div><div class="target-info"><div class="name">JW Marriott Anaheim Resort</div><div class="detail">Local market (Anaheim), convention segment, 700+ rooms. High-volume wellness gap opportunity</div></div><div class="target-score"><div class="score">82</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row"><div class="target-rank">10</div><div class="target-info"><div class="name">Hilton Portfolio — SoCal Properties</div><div class="detail">88 total Hilton leads, 15 with email. Focus on LA/San Diego/Orange County cluster for pilot density</div></div><div class="target-score"><div class="score">80</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row" style="opacity:0.8"><div class="target-rank" style="background:var(--accent2)">11</div><div class="target-info"><div class="name">Alila Ventana Big Sur</div><div class="detail">Ultra-luxury wellness resort. Hyatt portfolio. Premium programming fit</div></div><div class="target-score"><div class="score">79</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row" style="opacity:0.8"><div class="target-rank" style="background:var(--accent2)">12</div><div class="target-info"><div class="name">Mandarin Oriental NYC + Portfolio</div><div class="detail">2 leads. Ultra-luxury, wellness-first brand positioning</div></div><div class="target-score"><div class="score">78</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row" style="opacity:0.8"><div class="target-rank" style="background:var(--accent2)">13</div><div class="target-info"><div class="name">Rosewood Portfolio (5 leads)</div><div class="detail">The Carlyle + 4 others. Ultra-luxury. Target: wellness programming directors</div></div><div class="target-score"><div class="score">77</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row" style="opacity:0.8"><div class="target-rank" style="background:var(--accent2)">14</div><div class="target-info"><div class="name">Thompson Hotels Portfolio (13 leads)</div><div class="detail">Lifestyle segment. The Beekman, Thompson Central Park. 4 with email</div></div><div class="target-score"><div class="score">76</div><div class="label">SCORE</div></div></div>
+
+    <div class="target-row" style="opacity:0.8"><div class="target-rank" style="background:var(--accent2)">15</div><div class="target-info"><div class="name">Carmel Valley Ranch</div><div class="detail">Premium resort, wellness retreat destination. Northern CA luxury market</div></div><div class="target-score"><div class="score">75</div><div class="label">SCORE</div></div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>Recommended Strategy: 3-Wave Approach</h2>
+      <div class="strategy-card" style="margin-bottom:12px;">
+        <h4>Wave 1: Expand Existing (Weeks 1-2)</h4>
+        <p>Westin LB/Sac expansion, Dagny Boston case study, re-engage 14 "Contract Sent" leads, follow up 16 "Follow-Up Requested." These are warmest — highest close probability.</p>
+      </div>
+      <div class="strategy-card" style="margin-bottom:12px;">
+        <h4>Wave 2: Local + Luxury Chain ABM (Weeks 3-6)</h4>
+        <p>Fairmont Breakers pitch, Hyatt Regency LB pilot, Kimpton portfolio (50 emails ready), Four Seasons (22 emails). Target Spa Directors + Meeting Managers with personalized video outreach (Hedra).</p>
+      </div>
+      <div class="strategy-card">
+        <h4>Wave 3: Full Pipeline Re-Engagement (Weeks 7-12)</h4>
+        <p>Enrich 339 missing emails via Clay/Apollo. Re-qualify 180 untouched leads + 313 "No Answer" leads with refreshed email sequences. Move schools to Kids GHL location.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Buyer Persona Targeting</h2>
+      <div class="strategy-card" style="margin-bottom:12px;">
+        <h4>Primary: Executive Meeting Manager / Catering Manager</h4>
+        <p>Best entry point. Owns small groups, manages event space, evaluates vendors. Lowest barrier to a pilot. Message: "Zero-risk wellness activation for your dead space."</p>
+      </div>
+      <div class="strategy-card" style="margin-bottom:12px;">
+        <h4>Secondary: GM / Hotel Manager</h4>
+        <p>Overall guest experience owner. High leverage once pilot proves results. Message: "Measurable guest satisfaction lift without operational burden."</p>
+      </div>
+      <div class="strategy-card">
+        <h4>Tertiary: Sales Director</h4>
+        <p>Owns occupancy gaps. Needs ROI stories and competitive differentiation. Message: "Hotels with wellness amenities generate 108% higher TRevPAR."</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Market Segmentation Strategy</h2>
+    <div class="grid-2">
+      <div class="strategy-card">
+        <h4>Convention Hotels (High Volume)</h4>
+        <p>Room blocks in hundreds/thousands, F&B minimums focus, wellness = "gap-filler" between sessions. Entry: Wellness Gap-Fill Pilot ($1,500-$3,000). MYN handles instructors, insurance, QR check-in, reporting. Add-on: F&B voucher tracking.</p>
+      </div>
+      <div class="strategy-card">
+        <h4>Boutique/Lifestyle Hotels (High Margin)</h4>
+        <p>Small groups 10-25, wellness as core experience, flexible space. Entry: Recurring programming partnerships. Boutiques are most creative in wellness — ideal for Yoga Bio Sync premium upsell and personalized protocols.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CHAIN ANALYSIS ==================== -->
+<hr class="section-divider">
+<div class="section-title" id="chains">4 — Chain Analysis</div>
+<div class="content">
+  <div class="card">
+    <h2>Hotel Chain Portfolio (GHL Leads)</h2>
+    <div class="chain-grid">
+      <div class="chain-card"><div class="chain-name">Marriott / Starwood</div><div class="chain-count">135</div><div class="chain-emails">71 with email (53%) — Includes Westin (active account), JW, Ritz, Renaissance, Courtyard</div></div>
+      <div class="chain-card"><div class="chain-name">Hyatt</div><div class="chain-count">111</div><div class="chain-emails">16 with email (14%) — Andaz, Park Hyatt, Hyatt Centric, Hyatt Regency</div></div>
+      <div class="chain-card"><div class="chain-name">Independent / Other</div><div class="chain-count">93</div><div class="chain-emails">37 with email (40%) — Boutique, resort, independent properties</div></div>
+      <div class="chain-card"><div class="chain-name">Hilton</div><div class="chain-count">88</div><div class="chain-emails">15 with email (17%) — Conrad, Curio, DoubleTree, Hampton, Embassy</div></div>
+      <div class="chain-card"><div class="chain-name">Kimpton (IHG)</div><div class="chain-count">55</div><div class="chain-emails">50 with email (91%) — Best email coverage! Boutique/wellness aligned</div></div>
+      <div class="chain-card"><div class="chain-name">Four Seasons</div><div class="chain-count">48</div><div class="chain-emails">22 with email (46%) — Ultra-luxury, high per-property value</div></div>
+      <div class="chain-card"><div class="chain-name">Thompson / Hyatt</div><div class="chain-count">13</div><div class="chain-emails">4 with email (31%) — Lifestyle/boutique segment</div></div>
+      <div class="chain-card"><div class="chain-name">Rosewood</div><div class="chain-count">5</div><div class="chain-emails">0 with email — Ultra-luxury, needs enrichment</div></div>
+      <div class="chain-card"><div class="chain-name">Miraval / Hyatt</div><div class="chain-count">4</div><div class="chain-emails">0 with email — Wellness-first, highest alignment</div></div>
+      <div class="chain-card"><div class="chain-name">Mandarin Oriental</div><div class="chain-count">2</div><div class="chain-emails">0 with email — Ultra-luxury tier</div></div>
+      <div class="chain-card"><div class="chain-name">Fairmont</div><div class="chain-count">2</div><div class="chain-emails">2 with email (100%) — Active target (Breakers)</div></div>
+      <div class="chain-card"><div class="chain-name">IHG</div><div class="chain-count">1</div><div class="chain-emails">1 with email — InterContinental</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Chain Strategy Recommendations</h2>
+    <div class="scroll-table">
+      <table>
+        <thead><tr><th>Chain</th><th>Leads</th><th>Email %</th><th>Strategy</th><th>Priority Action</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:600;color:var(--green)">Kimpton</td><td>55</td><td style="color:var(--green)">91%</td><td>Portfolio ABM — highest email readiness</td><td>Launch 5-touch email sequence immediately</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent)">Marriott/Starwood</td><td>135</td><td>53%</td><td>Leverage Westin relationship for warm intros</td><td>Case study from Westin → Marriott portfolio pitch</td></tr>
+          <tr><td style="font-weight:600;color:var(--accent2)">Four Seasons</td><td>48</td><td>46%</td><td>Luxury wellness positioning</td><td>Personalized video outreach (Hedra) to Spa Directors</td></tr>
+          <tr><td style="font-weight:600;color:var(--purple)">Hyatt</td><td>111</td><td style="color:var(--red)">14%</td><td>Enrichment priority — largest untapped volume</td><td>Clay enrichment → email discovery → sequence</td></tr>
+          <tr><td style="font-weight:600;color:var(--orange)">Hilton</td><td>88</td><td style="color:var(--red)">17%</td><td>Enrichment priority — large volume, low data</td><td>Clay enrichment → property-level outreach</td></tr>
+          <tr><td style="font-weight:600;color:var(--pink)">Miraval</td><td>4</td><td style="color:var(--red)">0%</td><td>Manual research — ultra-high value per property</td><td>LinkedIn research → direct outreach to Wellness Dir</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== OUTREACH STATUS ==================== -->
+<hr class="section-divider">
+<div class="section-title" id="outreach">5 — Outreach Status</div>
+<div class="content">
+  <div class="grid-4" style="margin-bottom:24px;">
+    <div class="kpi">
+      <div class="label">Never Contacted</div>
+      <div class="value" style="color:var(--red)">180</div>
+      <div class="sub">32% of hotel leads</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Called, No Answer</div>
+      <div class="value" style="color:var(--orange)">302</div>
+      <div class="sub">1-4 call attempts each</div>
+    </div>
+    <div class="kpi">
+      <div class="label">In Email Pipeline</div>
+      <div class="value" style="color:var(--accent2)">23</div>
+      <div class="sub">4% — massively underutilized</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Warm / Engaged</div>
+      <div class="value" style="color:var(--green)">52</div>
+      <div class="sub">Vicky completed + Pablo calls</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Outreach History Breakdown</h2>
+    <div class="funnel">
+      <div class="funnel-stage"><div class="funnel-label">Untouched</div><div class="funnel-bar" style="width:60%;background:var(--red)">180</div><div class="funnel-count">32.3%</div></div>
+      <div class="funnel-stage"><div class="funnel-label">3 calls, no answer</div><div class="funnel-bar" style="width:39%;background:#F59E0B">116</div><div class="funnel-count">20.8%</div></div>
+      <div class="funnel-stage"><div class="funnel-label">4+ calls, no answer</div><div class="funnel-bar" style="width:27%;background:#F97316">82</div><div class="funnel-count">14.7%</div></div>
+      <div class="funnel-stage"><div class="funnel-label">2 calls, no answer</div><div class="funnel-bar" style="width:17%;background:#FBBF24">52</div><div class="funnel-count">9.3%</div></div>
+      <div class="funnel-stage"><div class="funnel-label">1 call, no answer</div><div class="funnel-bar" style="width:17%;background:#FCD34D">52</div><div class="funnel-count">9.3%</div></div>
+      <div class="funnel-stage"><div class="funnel-label">Pablo cold call</div><div class="funnel-bar" style="width:13%;background:var(--purple)">38</div><div class="funnel-count">6.8%</div></div>
+      <div class="funnel-stage"><div class="funnel-label">In email pipeline</div><div class="funnel-bar" style="width:8%;background:var(--accent2)">23</div><div class="funnel-count">4.1%</div></div>
+      <div class="funnel-stage"><div class="funnel-label">Vicky completed</div><div class="funnel-bar" style="width:5%;background:var(--green)">14</div><div class="funnel-count">2.5%</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Re-Engagement Playbook</h2>
+    <div class="grid-2">
+      <div class="strategy-card">
+        <h4>Phase 1: Quick Wins (180 Untouched)</h4>
+        <p>These leads have never been contacted. Run through Clay enrichment for email + LinkedIn. Launch 5-touch email sequence. Expected conversion: 2-3% (4-5 meetings from 180 leads).</p>
+      </div>
+      <div class="strategy-card">
+        <h4>Phase 2: Multi-Channel (302 No-Answer)</h4>
+        <p>Phone didn't work. Switch to email + LinkedIn + personalized video (Hedra). Send Brand Anthem videos to decision-makers. The 56 who requested email are priority.</p>
+      </div>
+      <div class="strategy-card">
+        <h4>Phase 3: Pipeline Revival (627 Sales Pipeline)</h4>
+        <p>14 "Contract Sent" need immediate follow-up. 16 "Follow-Up Requested" are warm. 7 "Discovery Scheduled" need confirmation. 4 "Discovery Completed" need proposals.</p>
+      </div>
+      <div class="strategy-card">
+        <h4>Phase 4: LinkedIn Campaign (62 contacts)</h4>
+        <p>27 with "Initial Message Sent" — follow up. 28 "Not Started" — begin connection requests. 5 "Connection Requested" — send value message once connected.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>5-Touch Hotel Email Sequence</h2>
+    <div class="scroll-table">
+      <table>
+        <thead><tr><th>Touch</th><th>Day</th><th>Focus</th><th>CTA</th><th>Key Stat</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge badge-blue">1</span></td><td>Day 0</td><td>Guest experience edge</td><td>"Is this relevant?"</td><td>25% higher guest satisfaction</td></tr>
+          <tr><td><span class="badge badge-blue">2</span></td><td>Day 3</td><td>Revenue per room uplift</td><td>"See the full model"</td><td>108% higher TRevPAR</td></tr>
+          <tr><td><span class="badge badge-blue">3</span></td><td>Day 7</td><td>Social proof / case study</td><td>"Here's what similar hotels did"</td><td>Westin case study</td></tr>
+          <tr><td><span class="badge badge-blue">4</span></td><td>Day 14</td><td>Partnership model details</td><td>"Partnership details"</td><td>$0 operational burden</td></tr>
+          <tr><td><span class="badge badge-red">5</span></td><td>Day 21</td><td>Availability / urgency</td><td>"Limited pilot spots for Q2"</td><td>Scarcity + deadline</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== INITIATIVES & TEAM ==================== -->
+<hr class="section-divider">
+<div class="section-title" id="initiatives">6 — Initiatives & Team</div>
+<div class="content">
+  <div class="card">
+    <h2>Active Hotel Initiatives (6 Projects)</h2>
+    <div class="grid-2">
+      <div class="initiative-card">
+        <div class="init-header"><div class="init-title">1. Hotel Wellness Partnerships + Outreach Engine</div><span class="badge badge-blue">In Progress</span></div>
+        <div class="init-desc">Repeatable hotel partnership motion: outreach → procurement → ROI measurement → pilots → retreats. Build the machine.</div>
+        <div class="init-owner">Owner: Ram + Animisha, Chioma, Shivangi, Hotel team</div>
+      </div>
+      <div class="initiative-card">
+        <div class="init-header"><div class="init-title">2. Hotel Scoring Framework + Top-25 List</div><span class="badge badge-orange">Todo</span></div>
+        <div class="init-desc">Ranked top-25 hotels with score breakdown, decision-maker ID, outreach approach, and estimated deal size per property.</div>
+        <div class="init-owner">Owner: Vaishali</div>
+      </div>
+      <div class="initiative-card">
+        <div class="init-header"><div class="init-title">3. Activation Pilot (Voucher + QR)</div><span class="badge badge-orange">Todo</span></div>
+        <div class="init-desc">F&B lift measurement system using GHL + n8n + Google Sheets. QR redemption tracking for wellness activations.</div>
+        <div class="init-owner">Owner: Ram Bhakt</div>
+      </div>
+      <div class="initiative-card">
+        <div class="init-header"><div class="init-title">4. Website & Hotel Pitch Assets</div><span class="badge badge-blue">In Progress</span></div>
+        <div class="init-desc">Redesigned hotel landing page, pitch deck, one-pager, pricing sheet for hospitality decision-makers.</div>
+        <div class="init-owner">Owner: Grace</div>
+      </div>
+      <div class="initiative-card">
+        <div class="init-header"><div class="init-title">5. GHL CRM Structure (Pipeline + Fields)</div><span class="badge badge-orange">Todo</span></div>
+        <div class="init-desc">Custom fields, tags, workflow triggers for hotel pipeline in GoHighLevel. Proper stage tracking and automation.</div>
+        <div class="init-owner">Owner: Charisma, Vaishali, Grace</div>
+      </div>
+      <div class="initiative-card">
+        <div class="init-header"><div class="init-title">6. CRM + Automation Stack</div><span class="badge badge-blue">In Progress</span></div>
+        <div class="init-desc">Email sequences, GHL workflows, deliverability optimization, imports, and reporting automation.</div>
+        <div class="init-owner">Owner: Animisha/Mishu</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Hotel Division Team</h2>
+    <div class="scroll-table">
+      <table>
+        <thead><tr><th>Person</th><th>Role</th><th>Key Deliverable</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight:600">Ram Bhakt</td><td>CEO / Sales / Product</td><td>Strategy, client relationships, Fairmont pitch</td><td><span class="badge badge-green">Active</span></td></tr>
+          <tr><td style="font-weight:600">Naveen</td><td>Hotels & Procurement Lead</td><td>Hotel outreach, procurement, partnership ops</td><td><span class="badge badge-green">Active</span></td></tr>
+          <tr><td style="font-weight:600">Grace</td><td>Graphics, Messaging, CX</td><td>Fairmont pitch visuals, retreat experience design</td><td><span class="badge badge-blue">In Progress</span></td></tr>
+          <tr><td style="font-weight:600">Sunmeet</td><td>Graphics & Messaging</td><td>Retreat marketing assets, hotel activation visuals</td><td><span class="badge badge-blue">In Progress</span></td></tr>
+          <tr><td style="font-weight:600">Vaishali</td><td>Growth Analytics & ROI</td><td>Hotel ROI model, Looker dashboards, pricing</td><td><span class="badge badge-blue">In Progress</span></td></tr>
+          <tr><td style="font-weight:600">Diksha</td><td>Org Chart & Infrastructure</td><td>Organization structure documentation</td><td><span class="badge badge-blue">In Progress</span></td></tr>
+          <tr><td style="font-weight:600">Chioma</td><td>CX & Stakeholders</td><td>Stakeholder CX table, decision points</td><td><span class="badge badge-blue">In Progress</span></td></tr>
+          <tr><td style="font-weight:600">Neha</td><td>Design Operator</td><td>Branding, Canva production, pitch visuals</td><td><span class="badge badge-green">Active</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ECONOMICS & ROI ==================== -->
+<hr class="section-divider">
+<div class="section-title" id="economics">7 — Economics & ROI</div>
+<div class="content">
+  <div class="grid-3" style="margin-bottom:24px;">
+    <div class="kpi">
+      <div class="label">Revenue Per Property/Month</div>
+      <div class="value" style="color:var(--green)">$11.2K</div>
+      <div class="sub">Total revenue impact (gross)</div>
+      <div class="bar" style="width:100%;background:var(--green)"></div>
+    </div>
+    <div class="kpi">
+      <div class="label">Program Cost</div>
+      <div class="value" style="color:var(--orange)">$3.25K</div>
+      <div class="sub">$2,500 - $4,000 range</div>
+      <div class="bar" style="width:29%;background:var(--orange)"></div>
+    </div>
+    <div class="kpi">
+      <div class="label">Net Positive Per Property</div>
+      <div class="value" style="color:var(--accent)">$7.75K</div>
+      <div class="sub">$7,000 - $8,500 range</div>
+      <div class="bar" style="width:69%;background:var(--accent)"></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>Monthly ROI Per Property (Conservative)</h2>
+      <table>
+        <thead><tr><th>Revenue Category</th><th>Estimate</th><th>Share</th></tr></thead>
+        <tbody>
+          <tr><td>Incremental Spa Revenue</td><td style="font-weight:600;color:var(--green)">$6,300</td><td>56.3%</td></tr>
+          <tr><td>Group/Event Add-Ons</td><td style="font-weight:600;color:var(--green)">$2,000</td><td>17.9%</td></tr>
+          <tr><td>Incremental F&B Revenue</td><td style="font-weight:600;color:var(--green)">$1,900</td><td>17.0%</td></tr>
+          <tr><td>Sponsorship Offset</td><td style="font-weight:600;color:var(--green)">$1,000</td><td>8.9%</td></tr>
+          <tr style="background:rgba(78,205,196,0.08)"><td style="font-weight:700">Total Revenue Impact</td><td style="font-weight:700;color:var(--accent)">$11,200</td><td>100%</td></tr>
+          <tr><td>Program Cost</td><td style="color:var(--red)">($2,500 - $4,000)</td><td></td></tr>
+          <tr style="background:rgba(16,185,129,0.08)"><td style="font-weight:700">Net Positive Impact</td><td style="font-weight:700;color:var(--green)">$7,000 - $8,500</td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Market Proof Points</h2>
+      <div class="strategy-card" style="margin-bottom:12px;">
+        <h4>108% Higher TRevPAR</h4>
+        <p>Hotels with significant wellness amenities generated 108% higher total revenue per available room in 2024.</p>
+      </div>
+      <div class="strategy-card" style="margin-bottom:12px;">
+        <h4>73% Plan Trips Around Wellness</h4>
+        <p>73% of travelers now plan trips around improving physical and mental health — wellness is no longer a perk.</p>
+      </div>
+      <div class="strategy-card" style="margin-bottom:12px;">
+        <h4>$1.2T Wellness Tourism by 2027</h4>
+        <p>Wellness tourism projected to reach $1.2 trillion globally by 2027, up from $817B in 2022.</p>
+      </div>
+      <div class="strategy-card">
+        <h4>80% Return Rate with Personalized Wellness</h4>
+        <p>80% of hotel guests more likely to return if personalized wellness services are offered during their stay.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Pilot Offer: Wellness Gap-Fill ($1,500 - $3,000)</h2>
+    <div class="grid-3">
+      <div class="strategy-card">
+        <h4>What's Included</h4>
+        <p>2-week trial. 2 wellness activations per week (e.g., Saturday + Sunday morning yoga). MYN handles: certified instructors, liability insurance, QR code check-in, post-pilot reporting.</p>
+      </div>
+      <div class="strategy-card">
+        <h4>Optional Add-Ons</h4>
+        <p>F&B voucher tracking (measure lift), spa cross-promotion, guest satisfaction survey, social media content capture, Brand Anthem video for hotel marketing.</p>
+      </div>
+      <div class="strategy-card">
+        <h4>Conversion Path</h4>
+        <p>Pilot ($1.5-3K) → Monthly retainer ($2.5-4K/mo) → Multi-property deal → Enterprise wellness infrastructure contract. Break-even in first 10 days.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Revenue Projection: Pipeline to Revenue</h2>
+    <table>
+      <thead><tr><th>Scenario</th><th>Properties Activated</th><th>Monthly Rev</th><th>Annual Rev</th><th>Assumptions</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge badge-red">Conservative</span></td><td>3</td><td style="color:var(--green)">$23,250</td><td style="color:var(--green)">$279,000</td><td>0.5% close rate on 557 leads + 5 existing</td></tr>
+        <tr><td><span class="badge badge-orange">Likely</span></td><td>8</td><td style="color:var(--green)">$62,000</td><td style="color:var(--green)">$744,000</td><td>1.5% close rate + Fairmont + 2 expansions</td></tr>
+        <tr><td><span class="badge badge-green">Optimistic</span></td><td>15</td><td style="color:var(--green)">$116,250</td><td style="color:var(--green)">$1,395,000</td><td>3% close + chain portfolio deals + Olympics prep</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== FAIRMONT PLAN ==================== -->
+<hr class="section-divider">
+<div class="section-title" id="fairmont">8 — Fairmont Plan</div>
+<div class="content">
+  <div class="grid-3" style="margin-bottom:24px;">
+    <div class="kpi">
+      <div class="label">Event Date</div>
+      <div class="value" style="color:var(--accent);font-size:22px;">Jan 20, 2027</div>
+      <div class="sub">Yoga + Wellness Retreat</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Status</div>
+      <div class="value" style="color:var(--orange);font-size:22px;">Research</div>
+      <div class="sub">Strategy & research phase</div>
+    </div>
+    <div class="kpi">
+      <div class="label">Days Until Event</div>
+      <div class="value" style="color:var(--purple)" id="fairmont-days">298</div>
+      <div class="sub">~10 months</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>Research Tasks</h2>
+      <div class="timeline">
+        <div class="timeline-item"><div class="tl-date">Priority</div><div class="tl-title">Research hotel demographic, social media, ownership</div><div class="tl-desc">Identify stakeholder names and decision-makers at Fairmont Breakers</div></div>
+        <div class="timeline-item"><div class="tl-date">Priority</div><div class="tl-title">Determine space availability</div><div class="tl-desc">Yoga and Mommy and Me class spaces, rental rates, food charges</div></div>
+        <div class="timeline-item"><div class="tl-date">Week 2</div><div class="tl-title">Create AI images of spaces</div><div class="tl-desc">Visualize spaces with yoga participants for pitch deck</div></div>
+        <div class="timeline-item"><div class="tl-date">Week 2</div><div class="tl-title">Find local partners</div><div class="tl-desc">Event planners, promoters, previous partners within 5 miles of 90803</div></div>
+        <div class="timeline-item"><div class="tl-date">Week 3</div><div class="tl-title">Influencer strategy</div><div class="tl-desc">Local wellness organizations, micro-influencers for co-promotion</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Marketing & Pitch Tasks</h2>
+      <div class="timeline">
+        <div class="timeline-item"><div class="tl-date">Week 3-4</div><div class="tl-title">Create marketing plan</div><div class="tl-desc">Full marketing plan for Jan 2027 retreat event</div></div>
+        <div class="timeline-item"><div class="tl-date">Week 4</div><div class="tl-title">Pitch to hotel leadership</div><div class="tl-desc">ROI strategy presentation with Grace's visuals</div></div>
+        <div class="timeline-item"><div class="tl-date">Week 5</div><div class="tl-title">Design experience messaging</div><div class="tl-desc">Grace: Fairmont-specific messaging and experience design</div></div>
+        <div class="timeline-item"><div class="tl-date">Week 6</div><div class="tl-title">Pricing determination</div><div class="tl-desc">Vaishali: pricing model using hotel ROI examples</div></div>
+        <div class="timeline-item"><div class="tl-date">Ongoing</div><div class="tl-title">Partner outreach</div><div class="tl-desc">Desired: Insight Timer, Airbnb Experiences, Amazon</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Event Groups</h2>
+    <div class="grid-2">
+      <div class="strategy-card">
+        <h4>Group 1: LBSOY Graduates Reunion</h4>
+        <p>Long Beach School of Yoga graduates reunion event at Fairmont Breakers. Community-driven, brand authority, local press opportunity.</p>
+      </div>
+      <div class="strategy-card">
+        <h4>Group 2: Hotel Day Retreat</h4>
+        <p>Premium day retreat for yoga enthusiasts and executives. Mommy and Me + local vendors. Revenue-generating activation with sponsor partners.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Olympics Preparedness (2028 LA)</h2>
+    <div class="quote-box">
+      <p>The hotel infrastructure and local event system being built for Fairmont also serves as prep for 2028 LA Olympics wellness programming. Every hotel activation, vendor relationship, and protocol developed now becomes reusable infrastructure for the Olympics wellness market.</p>
+      <div class="attr">— Strategic alignment: Hotels + Events + Olympics</div>
+    </div>
+  </div>
+</div>
+
+<!-- No JavaScript required — all sections visible for email compatibility -->
+
+</body>
+</html>

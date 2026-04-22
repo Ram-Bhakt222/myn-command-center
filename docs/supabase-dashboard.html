@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MYN Supabase & Auth Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #111827;
+    --bg3: #1a1f2e;
+    --border: #1e293b;
+    --border-light: #334155;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --dim: #64748b;
+    --accent: #818cf8;
+    --accent-glow: rgba(129,140,248,0.15);
+    --emerald: #10b981;
+    --emerald-glow: rgba(16,185,129,0.12);
+    --cyan: #06b6d4;
+    --amber: #f59e0b;
+    --amber-glow: rgba(245,158,11,0.12);
+    --rose: #f43f5e;
+    --rose-glow: rgba(244,63,94,0.12);
+    --purple: #a78bfa;
+    --pink: #ec4899;
+    --orange: #f97316;
+    --teal: #14b8a6;
+    --sky: #38bdf8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; }
+  body { display: flex; flex-direction: column; }
+
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(129,140,248,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(129,140,248,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* ── Header ── */
+  .header {
+    position: relative; z-index: 10; background: linear-gradient(135deg, var(--bg2), var(--bg3));
+    border-bottom: 1px solid var(--border); padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .header .left { display: flex; align-items: center; gap: 12px; }
+  .header .logo {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--emerald), var(--teal));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #fff; box-shadow: 0 0 20px rgba(16,185,129,0.2);
+  }
+  .header h1 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #f1f5f9 30%, var(--emerald)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .header .sub { color: var(--muted); font-size: 11px; margin-top: 1px; }
+  .header .right { display: flex; align-items: center; gap: 10px; }
+  .badge { font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.4px; }
+  .badge-accent { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(129,140,248,0.25); }
+  .badge-live { background: var(--emerald-glow); color: var(--emerald); border: 1px solid rgba(16,185,129,0.25); animation: pulse 2s ease-in-out infinite; }
+  .badge-amber { background: var(--amber-glow); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 4px rgba(16,185,129,0.2); } 50% { box-shadow: 0 0 12px rgba(16,185,129,0.4); } }
+  .clock { color: var(--muted); font-size: 11px; background: var(--bg); padding: 4px 12px; border-radius: 20px; border: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+
+  /* ── Tabs ── */
+  .tab-bar {
+    position: relative; z-index: 10; display: flex; gap: 0; background: var(--bg2);
+    border-bottom: 1px solid var(--border); padding: 0 12px; flex-shrink: 0; overflow-x: auto;
+  }
+  .tab {
+    padding: 11px 18px; cursor: pointer; font-size: 12px; font-weight: 600;
+    color: var(--dim); text-transform: uppercase; letter-spacing: 0.7px;
+    border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .tab:hover { color: var(--muted); background: rgba(255,255,255,0.02); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab .ico { font-size: 13px; }
+  .tab .cnt { font-size: 9px; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 8px; }
+  .tab.active .cnt { background: var(--accent-glow); color: var(--accent); }
+
+  /* ── Panels ── */
+  .panel { display: none; flex: 1; overflow-y: auto; padding: 24px; position: relative; z-index: 1; }
+  .panel.active { display: block; }
+  .panel h2 { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 6px; background: linear-gradient(135deg, #f1f5f9, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .panel .intro { color: var(--muted); font-size: 13px; margin-bottom: 24px; line-height: 1.6; max-width: 800px; }
+
+  /* ── Cards ── */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .card:hover { border-color: var(--border-light); }
+  .card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .card h4 { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin: 14px 0 8px; }
+
+  /* ── Grids ── */
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .g5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+  @media (max-width: 1100px) { .g3, .g4, .g5 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 700px) { .g2, .g3, .g4, .g5 { grid-template-columns: 1fr; } }
+
+  /* ── Stat Boxes ── */
+  .stat { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+  .stat .num { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; }
+  .stat .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-accent .num { color: var(--accent); }
+  .stat-emerald .num { color: var(--emerald); }
+  .stat-amber .num { color: var(--amber); }
+  .stat-rose .num { color: var(--rose); }
+  .stat-cyan .num { color: var(--cyan); }
+  .stat-purple .num { color: var(--purple); }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--dim); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+  tr:hover td { background: rgba(255,255,255,0.015); }
+
+  /* ── Tags ── */
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; margin: 1px 2px; }
+  .tag-green { background: var(--emerald-glow); color: var(--emerald); }
+  .tag-amber { background: var(--amber-glow); color: var(--amber); }
+  .tag-rose { background: var(--rose-glow); color: var(--rose); }
+  .tag-blue { background: var(--accent-glow); color: var(--accent); }
+  .tag-cyan { background: rgba(6,182,212,0.12); color: var(--cyan); }
+  .tag-purple { background: rgba(167,139,250,0.12); color: var(--purple); }
+  .tag-dim { background: rgba(100,116,139,0.12); color: var(--dim); }
+
+  /* ── Progress Bar ── */
+  .progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; margin: 6px 0; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+  .fill-green { background: var(--emerald); }
+  .fill-amber { background: var(--amber); }
+  .fill-accent { background: var(--accent); }
+  .fill-rose { background: var(--rose); }
+
+  /* ── Section Headers ── */
+  .section-hdr { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--dim); margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .section-hdr .line { flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Flow Diagram ── */
+  .flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 12px 0; }
+  .flow-step { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+  .flow-step.active-step { border-color: var(--emerald); background: var(--emerald-glow); color: var(--emerald); }
+  .flow-step.warn-step { border-color: var(--amber); background: var(--amber-glow); color: var(--amber); }
+  .flow-step.error-step { border-color: var(--rose); background: var(--rose-glow); color: var(--rose); }
+  .flow-arrow { color: var(--dim); font-size: 16px; margin: 0 6px; }
+
+  /* ── Mini List ── */
+  .list-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 12px; }
+  .list-item:last-child { border-bottom: none; }
+  .list-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: var(--emerald); box-shadow: 0 0 6px rgba(16,185,129,0.4); }
+  .dot-amber { background: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,0.4); }
+  .dot-rose { background: var(--rose); box-shadow: 0 0 6px rgba(244,63,94,0.4); }
+  .dot-blue { background: var(--accent); box-shadow: 0 0 6px rgba(129,140,248,0.4); }
+  .dot-dim { background: var(--dim); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .header { padding: 10px 14px; }
+    .header h1 { font-size: 15px; }
+    .tab { padding: 9px 12px; font-size: 10px; }
+    .panel { padding: 16px; }
+    .header .badge { display: none; }
+  }
+</style>
+</head>
+<body>
+<!-- BEGIN MYN-NAV (auto-injected 2026-04-21) -->
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; -webkit-font-smoothing: antialiased; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__inner::-webkit-scrollbar { height: 4px; } .myn-nav__inner::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.25); border-radius: 2px; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-variant-numeric: tabular-nums; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Center</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="master-directory.html" data-page="master-directory">Directory</a>
+  <a href="analytics-dashboard.html" data-page="analytics-dashboard">Analytics</a>
+  <a href="lead-gen-dashboard.html" data-page="lead-gen-dashboard">Leads</a>
+  <a href="hotel-activities-dashboard.html" data-page="hotel-activities-dashboard">Hotels</a>
+  <a href="business-economics-dashboard.html" data-page="business-economics-dashboard">Economics</a>
+  <a href="team-handoff-dashboard.html" data-page="team-handoff-dashboard">Team</a>
+  <a href="architecture-dashboard.html" data-page="architecture-dashboard">Architecture</a>
+  <a href="agent-control-plane.html" data-page="agent-control-plane">Agents</a>
+  <a href="supabase-dashboard.html" data-page="supabase-dashboard">Supabase</a>
+  <a href="paperclip-dashboard.html" data-page="paperclip-dashboard">Paperclip</a>
+  <a href="review-queue.html" data-page="review-queue">Review</a>
+  <a href="4-21-26-full-audit.html" data-page="4-21-26-full-audit">Audit</a>
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date" id="myn-nav-date"></span>
+</div>
+</nav>
+<script>
+(function(){
+  var path = (location.pathname.split('/').pop() || 'index.html').replace('.html','');
+  var links = document.querySelectorAll('.myn-nav a[data-page]');
+  for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('data-page') === path) links[i].classList.add('is-active'); }
+  var d = new Date(); var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var el = document.getElementById('myn-nav-date'); if (el) el.textContent = m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+})();
+</script>
+<!-- END MYN-NAV -->
+
+<div class="bg-grid"></div>
+
+<!-- ═══ HEADER ═══ -->
+<header class="header">
+  <div class="left">
+    <div class="logo">S</div>
+    <div>
+      <h1>Supabase & Auth Dashboard</h1>
+      <div class="sub">myn.org User Flows · Auth State · Database Tables</div>
+    </div>
+  </div>
+  <div class="right">
+    <span class="badge badge-accent">12 Users</span>
+    <span class="badge badge-accent">19 Tables</span>
+    <span class="badge badge-amber">4 Pending Delete</span>
+    <span class="badge badge-live">● PRODUCTION</span>
+    <span class="clock" id="clock"></span>
+  </div>
+</header>
+
+<!-- ═══ TAB BAR ═══ -->
+<nav class="tab-bar">
+  <div class="tab active" onclick="show('overview')"><span class="ico">◉</span> Overview</div>
+  <div class="tab" onclick="show('users')"><span class="ico">◆</span> Auth Users <span class="cnt">12</span></div>
+  <div class="tab" onclick="show('workflows')"><span class="ico">▤</span> User Flows <span class="cnt">5</span></div>
+  <div class="tab" onclick="show('tables')"><span class="ico">▦</span> Tables <span class="cnt">19</span></div>
+  <div class="tab" onclick="show('endpoints')"><span class="ico">⌘</span> API Endpoints <span class="cnt">17</span></div>
+  <div class="tab" onclick="show('issues')"><span class="ico">◧</span> Known Issues <span class="cnt">6</span></div>
+  <div class="tab" onclick="show('testreport')"><span class="ico">✓</span> Test Report <span class="cnt">NEW</span></div>
+</nav>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PANEL: Overview                             -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="panel active" id="overview">
+  <h2>Supabase Overview</h2>
+  <p class="intro">Production Supabase instance shared across Strategy AGI, myn.org, and myn.com. Project ID: fazmwdhhessljlyxndee</p>
+
+  <div class="g5" style="margin-bottom: 24px;">
+    <div class="stat stat-accent"><div class="num">12</div><div class="lbl">Auth Users</div></div>
+    <div class="stat stat-emerald"><div class="num">19</div><div class="lbl">Active Tables</div></div>
+    <div class="stat stat-amber"><div class="num">4</div><div class="lbl">Providers</div></div>
+    <div class="stat stat-cyan"><div class="num">17</div><div class="lbl">API Endpoints</div></div>
+    <div class="stat stat-rose"><div class="num">4</div><div class="lbl">Pending Deletes</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <h3>🔗 Connection</h3>
+      <table>
+        <tr><td style="color:var(--muted)">Provider</td><td>Supabase Cloud</td></tr>
+        <tr><td style="color:var(--muted)">Project</td><td><span class="tag tag-blue">fazmwdhhessljlyxndee</span></td></tr>
+        <tr><td style="color:var(--muted)">Domain</td><td>fazmwdhhessljlyxndee.supabase.co</td></tr>
+        <tr><td style="color:var(--muted)">Auth</td><td>Email/Password + OAuth</td></tr>
+        <tr><td style="color:var(--muted)">Shared By</td><td>Strategy AGI · myn.org · myn.com</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>🔑 Auth Configuration</h3>
+      <table>
+        <tr><td style="color:var(--muted)">Providers</td><td><span class="tag tag-green">Email</span> <span class="tag tag-blue">Google</span> <span class="tag tag-purple">Facebook</span> <span class="tag tag-cyan">LinkedIn</span></td></tr>
+        <tr><td style="color:var(--muted)">Email Verification</td><td><span class="tag tag-amber">Required</span></td></tr>
+        <tr><td style="color:var(--muted)">Session Storage</td><td>localStorage (Supabase JS SDK)</td></tr>
+        <tr><td style="color:var(--muted)">Middleware Cookie</td><td><code style="color:var(--cyan);font-size:11px">access_token</code> · 1hr expiry</td></tr>
+        <tr><td style="color:var(--muted)">OAuth Callback</td><td><code style="color:var(--cyan);font-size:11px">/auth/callback</code></td></tr>
+        <tr><td style="color:var(--muted)">Token Refresh</td><td>Auto via authedFetch() · 1 retry on 401</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📊 User Breakdown</h3>
+    <div class="g4">
+      <div style="text-align:center;">
+        <div style="font-family:'Space Grotesk';font-size:32px;font-weight:700;color:var(--accent)">8</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:4px">Google OAuth</div>
+        <div class="progress-bar"><div class="progress-fill fill-accent" style="width:66%"></div></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:'Space Grotesk';font-size:32px;font-weight:700;color:var(--emerald)">2</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:4px">Email + Social</div>
+        <div class="progress-bar"><div class="progress-fill fill-green" style="width:16%"></div></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:'Space Grotesk';font-size:32px;font-weight:700;color:var(--amber)">1</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:4px">Email Only</div>
+        <div class="progress-bar"><div class="progress-fill fill-amber" style="width:8%"></div></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:'Space Grotesk';font-size:32px;font-weight:700;color:var(--rose)">1</div>
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:4px">Unverified</div>
+        <div class="progress-bar"><div class="progress-fill fill-rose" style="width:8%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🌐 Environment Variables</h3>
+    <table>
+      <thead><tr><th>Variable</th><th>System</th><th>Security</th></tr></thead>
+      <tbody>
+        <tr><td><code style="color:var(--cyan);font-size:11px">NEXT_PUBLIC_SUPABASE_URL</code></td><td>myn.org · myn.com</td><td><span class="tag tag-green">Browser-safe</span></td></tr>
+        <tr><td><code style="color:var(--cyan);font-size:11px">NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td><td>myn.org · myn.com</td><td><span class="tag tag-green">Browser-safe</span></td></tr>
+        <tr><td><code style="color:var(--cyan);font-size:11px">SUPABASE_URL</code></td><td>Strategy AGI</td><td><span class="tag tag-rose">Server-only</span></td></tr>
+        <tr><td><code style="color:var(--cyan);font-size:11px">SUPABASE_KEY</code></td><td>Strategy AGI</td><td><span class="tag tag-rose">Server-only</span></td></tr>
+        <tr><td><code style="color:var(--cyan);font-size:11px">SUPABASE_SERVICE_ROLE_KEY</code></td><td>myn.org (API routes)</td><td><span class="tag tag-rose">Server-only</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PANEL: Auth Users                           -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="panel" id="users">
+  <h2>Auth Users</h2>
+  <p class="intro">All Supabase auth.users records as of 2026-03-23. Users flagged for deletion are highlighted.</p>
+
+  <div class="card">
+    <h3>👥 User Registry</h3>
+    <table>
+      <thead>
+        <tr><th>Display Name</th><th>Email</th><th>Provider(s)</th><th>Created</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Buhaina Buhaina</td><td>bbuhaina@gmail.com</td>
+          <td><span class="tag tag-blue">Google</span></td>
+          <td>2026-03-06</td><td><span class="tag tag-green">Active</span></td>
+        </tr>
+        <tr>
+          <td>ch.dawood Tahir</td><td>chdawoodtahir@gmail.com</td>
+          <td><span class="tag tag-green">Email</span> <span class="tag tag-purple">Facebook</span></td>
+          <td>2025-10-06</td><td><span class="tag tag-green">Active</span></td>
+        </tr>
+        <tr>
+          <td>Zeeky</td><td>davidbrown4806@gmail.com</td>
+          <td><span class="tag tag-blue">Google</span></td>
+          <td>2026-03-06</td><td><span class="tag tag-green">Active</span></td>
+        </tr>
+        <tr>
+          <td>Elque Anito</td><td>elqueanito@gmail.com</td>
+          <td><span class="tag tag-blue">Google</span></td>
+          <td>2025-02-22</td><td><span class="tag tag-green">Active</span></td>
+        </tr>
+        <tr>
+          <td>Ismart Carlisle</td><td>ismart.carlisle@gmail.com</td>
+          <td><span class="tag tag-blue">Google</span></td>
+          <td>2025-10-07</td><td><span class="tag tag-green">Active</span></td>
+        </tr>
+        <tr>
+          <td>My Yoga Network</td><td>longbeachschoolofyoga@gmail.com</td>
+          <td><span class="tag tag-blue">Google</span></td>
+          <td>2026-03-19</td><td><span class="tag tag-green">Active</span></td>
+        </tr>
+        <tr>
+          <td>Muhammad Dawood Tahir</td><td>muhammaddawoodtahir@gmail.com</td>
+          <td><span class="tag tag-green">Email</span> <span class="tag tag-blue">Google</span></td>
+          <td>2025-10-02</td><td><span class="tag tag-green">Active</span></td>
+        </tr>
+        <tr>
+          <td>MYNMarketing</td><td>mynmarketing2023@gmail.com</td>
+          <td><span class="tag tag-blue">Google</span></td>
+          <td>2026-03-04</td><td><span class="tag tag-green">Active</span></td>
+        </tr>
+        <tr style="background:rgba(244,63,94,0.04);">
+          <td style="color:var(--rose)">Ram Bhakt</td><td style="color:var(--rose)">myyoganetwork.connect@gmail.com</td>
+          <td><span class="tag tag-blue">Google</span></td>
+          <td>2026-03-18</td><td><span class="tag tag-rose">DELETE</span></td>
+        </tr>
+        <tr style="background:rgba(244,63,94,0.04);">
+          <td style="color:var(--rose)">Ram Bhakt</td><td style="color:var(--rose)">ram@myyoganetwork.com</td>
+          <td><span class="tag tag-blue">Google</span></td>
+          <td>2026-03-08</td><td><span class="tag tag-rose">DELETE</span></td>
+        </tr>
+        <tr style="background:rgba(244,63,94,0.04);">
+          <td style="color:var(--rose)">Ram Bhakt</td><td style="color:var(--rose)">sideoutbox@gmail.com</td>
+          <td><span class="tag tag-blue">Google</span></td>
+          <td>2025-10-16</td><td><span class="tag tag-rose">DELETE</span></td>
+        </tr>
+        <tr style="background:rgba(244,63,94,0.04);">
+          <td style="color:var(--rose)">Test User</td><td style="color:var(--rose)">testuser@myyoganetwork.com</td>
+          <td><span class="tag tag-green">Email</span></td>
+          <td>2026-03-23</td><td><span class="tag tag-rose">DELETE</span> <span class="tag tag-amber">Unverified</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="border-color: rgba(244,63,94,0.3); background: rgba(244,63,94,0.03);">
+    <h3 style="color:var(--rose);">⚠ Cleanup Action Required</h3>
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;">
+      4 users flagged for deletion: 3× Ram Bhakt (duplicate test accounts) + 1× Test User (unverified test account).
+      Ram will re-register with a single clean account after cleanup.
+      <br><br>
+      <strong style="color:var(--text)">Delete in Supabase Dashboard:</strong> Authentication → Users → Click user row → Delete user
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PANEL: User Flows                           -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="panel" id="workflows">
+  <h2>User-Facing Workflows</h2>
+  <p class="intro">Step-by-step flows documenting the actual user journey through myn.org — from signup to dashboard.</p>
+
+  <!-- Flow 1: Signup -->
+  <div class="card">
+    <h3>1️⃣ Signup → Email Verification → Dashboard</h3>
+    <div class="flow">
+      <div class="flow-step">/auth/signup</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Form: Name + Email + Password</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step active-step">supabase.auth.signUp()</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">auth.users record created</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step warn-step">Verification email sent</div>
+    </div>
+    <div class="flow" style="margin-top:8px;">
+      <div class="flow-step">User clicks email link</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">/auth/callback</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step active-step">Cookie set (1hr)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">/dashboard</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">/onboarding (first time)</div>
+    </div>
+    <h4>Key Details</h4>
+    <div class="list-item"><div class="list-dot dot-green"></div><span>Component: <code style="color:var(--cyan);font-size:11px">src/components/Pages/Auth_Pages/Sign_Up_with_Bg_image/index.js</code></span></div>
+    <div class="list-item"><div class="list-dot dot-amber"></div><span>Success message shown on same page — no redirect to login</span></div>
+    <div class="list-item"><div class="list-dot dot-blue"></div><span>Social login available: Google, Facebook, LinkedIn</span></div>
+    <div class="list-item"><div class="list-dot dot-amber"></div><span>Callback has 5-second safety timeout → fallback to manual session check</span></div>
+  </div>
+
+  <!-- Flow 2: Login -->
+  <div class="card">
+    <h3>2️⃣ Login → Dashboard</h3>
+    <div class="flow">
+      <div class="flow-step">/auth/login</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Form: Email + Password</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step active-step">supabase.auth.signInWithPassword()</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step active-step">Cookie set</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">window.location.href = "/dashboard"</div>
+    </div>
+    <h4>Key Details</h4>
+    <div class="list-item"><div class="list-dot dot-green"></div><span>Validates email format + password ≥ 6 chars before calling Supabase</span></div>
+    <div class="list-item"><div class="list-dot dot-blue"></div><span>Uses hard redirect (window.location.href) not Next.js router.push</span></div>
+    <div class="list-item"><div class="list-dot dot-amber"></div><span>Forgot password: <code style="color:var(--cyan);font-size:11px">/admin-pages/auth_pages/password_reset</code></span></div>
+  </div>
+
+  <!-- Flow 3: OAuth -->
+  <div class="card">
+    <h3>3️⃣ Social Login (OAuth)</h3>
+    <div class="flow">
+      <div class="flow-step">Social button click</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step active-step">socialLogin(provider)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">OAuth consent screen</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">/auth/callback</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step active-step">Session + cookie</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">/dashboard</div>
+    </div>
+  </div>
+
+  <!-- Flow 4: Logout -->
+  <div class="card">
+    <h3>4️⃣ Logout</h3>
+    <div class="flow">
+      <div class="flow-step">Header menu → Logout</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step error-step">Clear React state</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step error-step">Clear cookie</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step error-step">supabase.auth.signOut()</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step error-step">POST /api/auth/logout</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">/auth/login</div>
+    </div>
+    <div class="list-item" style="margin-top:8px;"><div class="list-dot dot-amber"></div><span>Also clears <code style="color:var(--cyan);font-size:11px">dashboard_plugins</code> from localStorage</span></div>
+  </div>
+
+  <!-- Flow 5: Session -->
+  <div class="card">
+    <h3>5️⃣ Session & Token Refresh</h3>
+    <div class="g2">
+      <div>
+        <h4>Dual-Layer Token Storage</h4>
+        <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>localStorage</strong> — Full Supabase session (access + refresh token). Used by Supabase JS SDK.</span></div>
+        <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Cookie</strong> — access_token mirror, 1hr expiry. Used by Next.js edge middleware.</span></div>
+      </div>
+      <div>
+        <h4>Auto-Refresh Flow</h4>
+        <div class="list-item"><div class="list-dot dot-blue"></div><span>authedFetch() sends Bearer token</span></div>
+        <div class="list-item"><div class="list-dot dot-amber"></div><span>Backend returns 401 → triggers refresh</span></div>
+        <div class="list-item"><div class="list-dot dot-green"></div><span>supabase.auth.refreshSession() → new token</span></div>
+        <div class="list-item"><div class="list-dot dot-green"></div><span>Retries request (once only)</span></div>
+        <div class="list-item"><div class="list-dot dot-rose"></div><span>If refresh fails → returns 401 (no forced logout)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Route Protection -->
+  <div class="card">
+    <h3>🛡 Route Protection (Middleware)</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">File: <code style="color:var(--cyan)">src/middleware.js</code> — runs at edge before page loads</p>
+    <table>
+      <thead><tr><th>Category</th><th>Routes</th><th>Behavior</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tag-green">PUBLIC</span></td><td><code style="font-size:11px">/</code> · <code style="font-size:11px">/auth/login</code> · <code style="font-size:11px">/auth/signup</code></td><td>No auth required</td></tr>
+        <tr><td><span class="tag tag-blue">LOGIN-LOCKED</span></td><td><code style="font-size:11px">/auth/login</code> · <code style="font-size:11px">/auth/signup</code></td><td>If logged in → redirect /dashboard</td></tr>
+        <tr><td><span class="tag tag-amber">AUTH-REQUIRED</span></td><td><code style="font-size:11px">/dashboard/*</code> · <code style="font-size:11px">/onboarding</code> · <code style="font-size:11px">/account/*</code></td><td>No cookie → redirect /auth/login</td></tr>
+        <tr><td><span class="tag tag-dim">EXCLUDED</span></td><td><code style="font-size:11px">/_next/*</code> · <code style="font-size:11px">/api/*</code> · static assets</td><td>No middleware</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PANEL: Tables                               -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="panel" id="tables">
+  <h2>Database Tables</h2>
+  <p class="intro">All Supabase tables across Strategy AGI, myn.org, and myn.com. Organized by migration batch.</p>
+
+  <!-- ── Original Tables ── -->
+  <div class="section-hdr">Original Tables (Pre-Migration) <span class="line"></span></div>
+
+  <div class="g2">
+    <div class="card">
+      <h3>linkedin_profiles</h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> Strategy AGI (Apify → n8n)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (dashboard, scraper apps)</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">name</span><span class="tag tag-dim">headline</span><span class="tag tag-dim">company</span><span class="tag tag-dim">location</span><span class="tag tag-dim">profile_url</span><span class="tag tag-dim">connections</span><span class="tag tag-dim">summary</span><span class="tag tag-dim">scraped_at</span></div>
+    </div>
+
+    <div class="card">
+      <h3>instagram_profiles</h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> Strategy AGI (Apify → n8n)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (dashboard)</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">username</span><span class="tag tag-dim">bio</span><span class="tag tag-dim">followers</span><span class="tag tag-dim">posts_count</span><span class="tag tag-dim">content_themes</span><span class="tag tag-dim">scraped_at</span></div>
+    </div>
+
+    <div class="card">
+      <h3>website_scraping</h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> Strategy AGI (Apify → n8n)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (dashboard)</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">domain</span><span class="tag tag-dim">title</span><span class="tag tag-dim">description</span><span class="tag tag-dim">services</span><span class="tag tag-dim">contacts</span><span class="tag tag-dim">crawled_at</span></div>
+    </div>
+
+    <div class="card">
+      <h3>writing_styles</h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> Strategy AGI (Style Cloner)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org · cold email personalization</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">person_name</span><span class="tag tag-dim">style_framework</span><span class="tag tag-dim">tone</span><span class="tag tag-dim">formality</span><span class="tag tag-dim">vocabulary_patterns</span><span class="tag tag-dim">created_at</span></div>
+    </div>
+
+    <div class="card">
+      <h3>execution_logs</h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> Strategy AGI (all agents via n8n)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (analytics)</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">agent_name</span><span class="tag tag-dim">workflow_id</span><span class="tag tag-dim">input_summary</span><span class="tag tag-dim">output_summary</span><span class="tag tag-dim">status</span><span class="tag tag-dim">duration_ms</span><span class="tag tag-dim">executed_at</span></div>
+    </div>
+
+    <div class="card">
+      <h3>hotels</h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> Strategy AGI / manual</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.com (/hotels, /hotel/[id])</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">id</span><span class="tag tag-dim">name</span><span class="tag tag-dim">location</span><span class="tag tag-dim">description</span><span class="tag tag-dim">image_url</span><span class="tag tag-dim">amenities</span><span class="tag tag-dim">contact</span></div>
+    </div>
+
+    <div class="card">
+      <h3>hotel_classes <span class="tag tag-amber">Replaced by classes</span></h3>
+      <div class="list-item"><div class="list-dot dot-dim"></div><span>Legacy table. Superseded by Migration 003 <strong>classes</strong> table.</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">id</span><span class="tag tag-dim">hotel_id</span><span class="tag tag-dim">class_name</span><span class="tag tag-dim">instructor</span><span class="tag tag-dim">schedule</span><span class="tag tag-dim">capacity</span><span class="tag tag-dim">price</span></div>
+    </div>
+
+    <div class="card">
+      <h3>class_registrations <span class="tag tag-amber">Legacy</span></h3>
+      <div class="list-item"><div class="list-dot dot-dim"></div><span>Legacy table. Superseded by Migration 003 <strong>class_registrations</strong> (expanded).</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">id</span><span class="tag tag-dim">class_id</span><span class="tag tag-dim">student_name</span><span class="tag tag-dim">email</span><span class="tag tag-dim">phone</span><span class="tag tag-dim">registered_at</span></div>
+    </div>
+  </div>
+
+  <!-- ── Migration 001 ── -->
+  <div class="section-hdr">Migration 001 — User Profiles & Hotel Context <span class="tag tag-green">LIVE</span> <span class="line"></span></div>
+
+  <div class="g2">
+    <div class="card" style="border-color: rgba(16,185,129,0.3);">
+      <h3>user_profiles <span class="tag tag-green">RLS</span></h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> myn.org (onboarding, profile edit), auto-created on signup</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (UserProfileContext, WRIA)</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">id (FK auth.users)</span><span class="tag tag-dim">email</span><span class="tag tag-dim">role</span><span class="tag tag-dim">reason_joined</span><span class="tag tag-dim">phone</span><span class="tag tag-dim">linkedin</span><span class="tag tag-dim">instagram</span><span class="tag tag-dim">city</span><span class="tag tag-dim">bio</span><span class="tag tag-dim">onboarding_complete</span><span class="tag tag-dim">profile_complete</span></div>
+    </div>
+
+    <div class="card" style="border-color: rgba(16,185,129,0.3);">
+      <h3>hotel_context <span class="tag tag-green">RLS</span></h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> myn.org (onboarding Google Places, profile edit)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (dashboard, WRIA system prompt)</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">hotel_id</span><span class="tag tag-dim">name</span><span class="tag tag-dim">google_place_id</span><span class="tag tag-dim">rooms</span><span class="tag tag-dim">avg_occupancy_pct</span><span class="tag tag-dim">adr</span><span class="tag tag-dim">wellness_participation_pct</span><span class="tag tag-dim">property_tier</span><span class="tag tag-dim">amenities[]</span><span class="tag tag-dim">current_programs[]</span></div>
+    </div>
+
+    <div class="card" style="border-color: rgba(16,185,129,0.3);">
+      <h3>wria_chat_history <span class="tag tag-green">RLS</span></h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> myn.org (WRIA co-pilot chat)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (chat history display)</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">user_id</span><span class="tag tag-dim">hotel_context_id</span><span class="tag tag-dim">session_id</span><span class="tag tag-dim">role</span><span class="tag tag-dim">content</span><span class="tag tag-dim">focus_area</span><span class="tag tag-dim">tokens_used</span></div>
+    </div>
+  </div>
+
+  <!-- ── Migration 002 ── -->
+  <div class="section-hdr">Migration 002 — Enrichment, Actions, AI & Memory <span class="tag tag-amber">PENDING</span> <span class="line"></span></div>
+
+  <div class="g2">
+    <div class="card" style="border-color: rgba(245,158,11,0.3);">
+      <h3>hotel_enrichment <span class="tag tag-amber">Pending</span> <span class="tag tag-green">RLS</span></h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> Strategy AGI (Apify scrapers via n8n)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (edit profile auto-population)</span></div>
+      <div class="list-item"><div class="list-dot dot-amber"></div><span><strong>Sources:</strong> google_places, website_scrape, linkedin_company, instagram, tripadvisor, booking_com</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">hotel_context_id</span><span class="tag tag-dim">source</span><span class="tag tag-dim">gp_*</span><span class="tag tag-dim">ws_*</span><span class="tag tag-dim">li_*</span><span class="tag tag-dim">ig_*</span><span class="tag tag-dim">rv_*</span><span class="tag tag-dim">raw_data (JSONB)</span><span class="tag tag-dim">enrichment_status</span></div>
+    </div>
+
+    <div class="card" style="border-color: rgba(245,158,11,0.3);">
+      <h3>user_actions <span class="tag tag-amber">Pending</span> <span class="tag tag-green">RLS</span></h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> myn.org (POST /api/actions/track)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (analytics), Strategy AGI (behavior patterns)</span></div>
+      <div class="list-item"><div class="list-dot dot-amber"></div><span><strong>Categories:</strong> auth, profile, feature, enrichment, ai, export, navigation</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">user_id</span><span class="tag tag-dim">action_type</span><span class="tag tag-dim">action_category</span><span class="tag tag-dim">page_path</span><span class="tag tag-dim">target_entity</span><span class="tag tag-dim">metadata (JSONB)</span><span class="tag tag-dim">session_id</span></div>
+    </div>
+
+    <div class="card" style="border-color: rgba(245,158,11,0.3);">
+      <h3>ai_interactions <span class="tag tag-amber">Pending</span> <span class="tag tag-green">RLS</span></h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> Strategy AGI (all LLM calls)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (AI usage dashboard)</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">agent_name</span><span class="tag tag-dim">model_used</span><span class="tag tag-dim">interaction_type</span><span class="tag tag-dim">input_tokens</span><span class="tag tag-dim">output_tokens</span><span class="tag tag-dim">confidence_score</span><span class="tag tag-dim">cost_usd</span><span class="tag tag-dim">status</span></div>
+    </div>
+
+    <div class="card" style="border-color: rgba(245,158,11,0.3);">
+      <h3>user_memory <span class="tag tag-amber">Pending</span> <span class="tag tag-green">RLS</span></h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> Strategy AGI (agents write when they learn)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> All agents (injected into system prompts)</span></div>
+      <div class="list-item"><div class="list-dot dot-amber"></div><span><strong>Types:</strong> preference, context, learned_pattern, instruction, relationship, milestone, note</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">memory_type</span><span class="tag tag-dim">memory_key</span><span class="tag tag-dim">memory_value</span><span class="tag tag-dim">source_agent</span><span class="tag tag-dim">confidence</span><span class="tag tag-dim">is_active</span><span class="tag tag-dim">superseded_by</span><span class="tag tag-dim">tags[]</span></div>
+    </div>
+  </div>
+
+  <!-- ── Migration 003 ── -->
+  <div class="section-hdr">Migration 003 — Classes, QR Codes & Registrations <span class="tag tag-amber">PENDING</span> <span class="line"></span></div>
+
+  <div class="g2">
+    <div class="card" style="border-color: rgba(245,158,11,0.3);">
+      <h3>classes <span class="tag tag-amber">Pending</span> <span class="tag tag-green">RLS</span></h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> myn.org (class creation, list page edit)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (class list, registrations, QR), myn.com (public pages)</span></div>
+      <div class="list-item"><div class="list-dot dot-amber"></div><span><strong>Types:</strong> yoga, meditation, breathwork, sound_bath, yoga_therapy, retreat, workshop, kids_yoga, corporate, private</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">user_id</span><span class="tag tag-dim">hotel_context_id</span><span class="tag tag-dim">title</span><span class="tag tag-dim">class_type</span><span class="tag tag-dim">level</span><span class="tag tag-dim">date</span><span class="tag tag-dim">start_time</span><span class="tag tag-dim">end_time</span><span class="tag tag-dim">is_recurring</span><span class="tag tag-dim">recurrence_pattern</span><span class="tag tag-dim">capacity</span><span class="tag tag-dim">price</span><span class="tag tag-dim">instructor_name</span><span class="tag tag-dim">status</span><span class="tag tag-dim">is_published</span></div>
+    </div>
+
+    <div class="card" style="border-color: rgba(245,158,11,0.3);">
+      <h3>class_registrations (v2) <span class="tag tag-amber">Pending</span> <span class="tag tag-green">RLS</span></h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> myn.com (public registration), myn.org (walk-in entry)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (registrations page, class summary)</span></div>
+      <div class="list-item"><div class="list-dot dot-amber"></div><span><strong>Sources:</strong> web, qr_scan, walk_in, phone, concierge, api</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">class_id</span><span class="tag tag-dim">guest_name</span><span class="tag tag-dim">guest_email</span><span class="tag tag-dim">status</span><span class="tag tag-dim">registration_source</span><span class="tag tag-dim">payment_status</span><span class="tag tag-dim">checked_in</span><span class="tag tag-dim">checked_in_at</span><span class="tag tag-dim">qr_code_id</span></div>
+    </div>
+
+    <div class="card" style="border-color: rgba(245,158,11,0.3);">
+      <h3>qr_codes <span class="tag tag-amber">Pending</span> <span class="tag tag-green">RLS</span></h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> myn.org (QR generator page)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (QR dashboard), myn.com (redirect via short_code)</span></div>
+      <div class="list-item"><div class="list-dot dot-amber"></div><span><strong>Targets:</strong> class_registration, hotel_page, custom_url</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">target_type</span><span class="tag tag-dim">target_url</span><span class="tag tag-dim">label</span><span class="tag tag-dim">theme</span><span class="tag tag-dim">size</span><span class="tag tag-dim">short_code</span><span class="tag tag-dim">total_scans</span><span class="tag tag-dim">unique_scans</span><span class="tag tag-dim">is_active</span></div>
+    </div>
+
+    <div class="card" style="border-color: rgba(245,158,11,0.3);">
+      <h3>qr_scans <span class="tag tag-amber">Pending</span></h3>
+      <div class="list-item"><div class="list-dot dot-blue"></div><span><strong>Written by:</strong> myn.com (scan redirect endpoint)</span></div>
+      <div class="list-item"><div class="list-dot dot-green"></div><span><strong>Read by:</strong> myn.org (QR analytics dashboard)</span></div>
+      <div class="list-item"><div class="list-dot dot-amber"></div><span><strong>Trigger:</strong> Auto-increments qr_codes.total_scans on insert</span></div>
+      <h4>Key Columns</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;"><span class="tag tag-dim">qr_code_id</span><span class="tag tag-dim">scanned_at</span><span class="tag tag-dim">ip_address</span><span class="tag tag-dim">user_agent</span><span class="tag tag-dim">city</span><span class="tag tag-dim">country</span><span class="tag tag-dim">converted</span><span class="tag tag-dim">registration_id</span></div>
+    </div>
+  </div>
+
+  <!-- ── Views ── -->
+  <div class="section-hdr">Views & Functions <span class="line"></span></div>
+
+  <div class="g3">
+    <div class="card">
+      <h3 style="color:var(--cyan)">hotel_enrichment_status</h3>
+      <div class="list-item"><div class="list-dot dot-cyan"></div><span>Quick lookup of which sources are complete per hotel</span></div>
+      <div style="margin-top:4px;"><span class="tag tag-amber">Migration 002</span></div>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--cyan)">user_activity_summary</h3>
+      <div class="list-item"><div class="list-dot dot-cyan"></div><span>Total actions, 7d/30d counts, last active per user</span></div>
+      <div style="margin-top:4px;"><span class="tag tag-amber">Migration 002</span></div>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--cyan)">class_summary</h3>
+      <div class="list-item"><div class="list-dot dot-cyan"></div><span>Class data + registration counts by status + fill rate %</span></div>
+      <div style="margin-top:4px;"><span class="tag tag-amber">Migration 003</span></div>
+    </div>
+  </div>
+
+  <!-- ── Planned Tables ── -->
+  <div class="section-hdr">Planned Tables <span class="line"></span></div>
+
+  <div class="g2">
+    <div class="card" style="border-style:dashed;">
+      <h3 style="color:var(--dim)">leads <span class="tag tag-dim">Planned</span></h3>
+      <div class="list-item"><div class="list-dot dot-dim"></div><span>Lead capture from myn.com forms</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;"><span class="tag tag-dim">name</span><span class="tag tag-dim">email</span><span class="tag tag-dim">source_page</span><span class="tag tag-dim">division</span><span class="tag tag-dim">utm_params</span></div>
+    </div>
+    <div class="card" style="border-style:dashed;">
+      <h3 style="color:var(--dim)">analytics_events <span class="tag tag-dim">Planned</span></h3>
+      <div class="list-item"><div class="list-dot dot-dim"></div><span>Server-side analytics from myn.com</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;"><span class="tag tag-dim">event_type</span><span class="tag tag-dim">page</span><span class="tag tag-dim">referrer</span><span class="tag tag-dim">metadata</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PANEL: API Endpoints                        -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="panel" id="endpoints">
+  <h2>API Endpoints</h2>
+  <p class="intro">Auth-related API routes used by myn.org. All proxied to FastAPI backend at mynapi.onrender.com via next.config.mjs.</p>
+
+  <div class="card">
+    <h3>🔐 Authentication</h3>
+    <table>
+      <thead><tr><th>Endpoint</th><th>Method</th><th>Purpose</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/auth/me</code></td>
+          <td><span class="tag tag-blue">POST</span></td>
+          <td>Validate Supabase token, return user object</td>
+          <td>Returns: user_id, email, role, full_name, avatar_url, provider, email_verified</td>
+        </tr>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/auth/logout</code></td>
+          <td><span class="tag tag-blue">POST</span></td>
+          <td>Logout endpoint</td>
+          <td style="color:var(--amber)">No-op — all cleanup is client-side</td>
+        </tr>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/auth/supabase-login</code></td>
+          <td><span class="tag tag-blue">POST</span></td>
+          <td>Reserved for future SSO</td>
+          <td><span class="tag tag-dim">Not in use</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>👤 Profile & Hotel</h3>
+    <table>
+      <thead><tr><th>Endpoint</th><th>Method</th><th>Purpose</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/profile/context</code></td>
+          <td><span class="tag tag-green">GET</span> <span class="tag tag-purple">PATCH</span></td>
+          <td>User profile data</td>
+          <td>role, email, phone, linkedin, bio, onboarding_complete, profile_complete</td>
+        </tr>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/hotel/context</code></td>
+          <td><span class="tag tag-green">GET</span> <span class="tag tag-purple">PATCH</span></td>
+          <td>Hotel property data</td>
+          <td>name, address, rooms, ADR, occupancy, wellness metrics, current programs</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>📍 Places (Onboarding)</h3>
+    <table>
+      <thead><tr><th>Endpoint</th><th>Method</th><th>Purpose</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/places/autocomplete</code></td>
+          <td><span class="tag tag-green">GET</span></td>
+          <td>Google Places search</td>
+          <td>Used in onboarding hotel selection. Params: q, type=lodging</td>
+        </tr>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/places/details</code></td>
+          <td><span class="tag tag-green">GET</span></td>
+          <td>Google Places detail</td>
+          <td>Returns: address, coordinates, website, city, state, country</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="border-color: rgba(245,158,11,0.3);">
+    <h3>📋 Classes <span class="tag tag-amber">New — needs FastAPI</span></h3>
+    <table>
+      <thead><tr><th>Endpoint</th><th>Method</th><th>Purpose</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/classes</code></td>
+          <td><span class="tag tag-green">GET</span></td>
+          <td>List all classes for user</td>
+          <td>Supports ?status= filter. Returns with registration counts.</td>
+        </tr>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/classes</code></td>
+          <td><span class="tag tag-blue">POST</span></td>
+          <td>Create a new class</td>
+          <td>Body: title, description, date, start_time, end_time, location, capacity, class_type, level, price</td>
+        </tr>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/classes/:id</code></td>
+          <td><span class="tag tag-purple">PATCH</span></td>
+          <td>Update a class</td>
+          <td>Partial update. Used by list page edit modal + publish/cancel actions.</td>
+        </tr>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/classes/:id</code></td>
+          <td><span class="tag tag-rose">DELETE</span></td>
+          <td>Delete a class</td>
+          <td>Cascades to registrations and QR codes via FK.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="border-color: rgba(245,158,11,0.3);">
+    <h3>🎫 Registrations <span class="tag tag-amber">New — needs FastAPI</span></h3>
+    <table>
+      <thead><tr><th>Endpoint</th><th>Method</th><th>Purpose</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/classes/registrations</code></td>
+          <td><span class="tag tag-green">GET</span></td>
+          <td>List registrations for user's classes</td>
+          <td>Supports ?class_id= and ?status= filters.</td>
+        </tr>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/classes/:id/register</code></td>
+          <td><span class="tag tag-blue">POST</span></td>
+          <td>Register a guest for a class</td>
+          <td>Public endpoint (no auth). Body: guest_name, guest_email, guest_phone, source</td>
+        </tr>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/classes/registrations/:id</code></td>
+          <td><span class="tag tag-purple">PATCH</span></td>
+          <td>Update registration status</td>
+          <td>Check-in, confirm, cancel, mark attended/no_show.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="border-color: rgba(245,158,11,0.3);">
+    <h3>📱 QR Codes <span class="tag tag-amber">New — needs FastAPI</span></h3>
+    <table>
+      <thead><tr><th>Endpoint</th><th>Method</th><th>Purpose</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/qr-codes</code></td>
+          <td><span class="tag tag-green">GET</span></td>
+          <td>List user's QR codes</td>
+          <td>Returns with scan counts.</td>
+        </tr>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/qr-codes</code></td>
+          <td><span class="tag tag-blue">POST</span></td>
+          <td>Create a QR code</td>
+          <td>Body: target_type, target_url, label, theme, size. Generates short_code.</td>
+        </tr>
+        <tr>
+          <td><code style="color:var(--cyan);font-size:11px">/api/qr-codes/:id</code></td>
+          <td><span class="tag tag-rose">DELETE</span></td>
+          <td>Delete a QR code</td>
+          <td>Cascades to qr_scans.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PANEL: Known Issues                         -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="panel" id="issues">
+  <h2>Known Issues & Observations</h2>
+  <p class="intro">Issues discovered during auth flow testing on 2026-03-23.</p>
+
+  <div class="card" style="border-left: 3px solid var(--amber);">
+    <h3>⚠ Signup does not redirect after success</h3>
+    <p style="font-size:12px;color:var(--muted);line-height:1.6;">After successful signup, user sees "Account created!" message but stays on <code style="color:var(--cyan)">/auth/signup</code>. They must manually navigate to login or wait for verification email. Consider redirecting to a "check your email" page.</p>
+    <div style="margin-top:8px;"><span class="tag tag-amber">UX</span> <span class="tag tag-dim">auth/signup</span></div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--amber);">
+    <h3>⚠ "Remember me" checkbox is UI-only</h3>
+    <p style="font-size:12px;color:var(--muted);line-height:1.6;">The checkbox exists on both login and signup pages but has no backend persistence. Session always expires in 1 hour regardless. Either implement extended sessions or remove the checkbox.</p>
+    <div style="margin-top:8px;"><span class="tag tag-amber">UX</span> <span class="tag tag-dim">auth/login</span> <span class="tag tag-dim">auth/signup</span></div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--amber);">
+    <h3>⚠ Password reset route unverified</h3>
+    <p style="font-size:12px;color:var(--muted);line-height:1.6;">"Forgot Password?" links to <code style="color:var(--cyan)">/admin-pages/auth_pages/password_reset</code>. This route needs verification that it exists and works correctly end-to-end.</p>
+    <div style="margin-top:8px;"><span class="tag tag-amber">Verify</span> <span class="tag tag-dim">auth/login</span></div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--rose);">
+    <h3>🔴 Onboarding is not enforced</h3>
+    <p style="font-size:12px;color:var(--muted);line-height:1.6;">Dashboard renders even if <code style="color:var(--cyan)">onboarding_complete = false</code>. There's only a profile completeness nudge (< 70% threshold). Consider forcing onboarding redirect for new users.</p>
+    <div style="margin-top:8px;"><span class="tag tag-rose">Logic Gap</span> <span class="tag tag-dim">dashboard</span> <span class="tag tag-dim">onboarding</span></div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--dim);">
+    <h3>ℹ Logout API is a no-op</h3>
+    <p style="font-size:12px;color:var(--muted);line-height:1.6;"><code style="color:var(--cyan)">POST /api/auth/logout</code> returns <code style="color:var(--cyan)">{ success: true }</code> without doing anything server-side. All cleanup happens client-side (clear state, cookie, localStorage). Fine for now but limits server-side session revocation.</p>
+    <div style="margin-top:8px;"><span class="tag tag-dim">Low Priority</span> <span class="tag tag-dim">api/auth</span></div>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--dim);">
+    <h3>ℹ Profile completeness threshold</h3>
+    <p style="font-size:12px;color:var(--muted);line-height:1.6;">HeaderMenu shows "Complete profile" button when <code style="color:var(--cyan)">getProfileCompleteness()</code> returns < 70%. This nudges users to <code style="color:var(--cyan)">/account/profile</code>. The threshold and scoring logic are in UserProfileContext.</p>
+    <div style="margin-top:8px;"><span class="tag tag-dim">Info</span> <span class="tag tag-dim">header</span></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PANEL: Test Report                         -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="panel" id="testreport">
+  <h2>Full Product Test Report</h2>
+  <p class="intro">Comprehensive audit of every user-facing flow in myn.org — code review + live browser tests. Conducted 2026-03-23. Covers 18 pages across 7 sections.</p>
+
+  <!-- ── Summary Stats ── -->
+  <div class="g5" style="margin-bottom: 24px;">
+    <div class="stat stat-emerald"><div class="num">11</div><div class="lbl">Pages Passed</div></div>
+    <div class="stat stat-amber"><div class="num">4</div><div class="lbl">Pages with Warnings</div></div>
+    <div class="stat stat-rose"><div class="num">3</div><div class="lbl">Critical Issues</div></div>
+    <div class="stat stat-accent"><div class="num">18</div><div class="lbl">Pages Audited</div></div>
+    <div class="stat stat-cyan"><div class="num">19</div><div class="lbl">Tables Live</div></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 1: AUTH FLOW                    -->
+  <!-- ═══════════════════════════════════════ -->
+  <div style="margin: 28px 0 12px; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px;">1. Authentication Flow</div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> Login Page</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/auth/login</code></td></tr>
+      <tr><td style="color:var(--muted)">Data Source</td><td>Supabase Auth (<code style="color:var(--cyan);font-size:11px">supabase.auth.signInWithPassword</code>)</td></tr>
+      <tr><td style="color:var(--muted)">OAuth</td><td><span class="tag tag-blue">Google</span> <span class="tag tag-purple">Facebook</span> <span class="tag tag-cyan">LinkedIn</span> all wired</td></tr>
+      <tr><td style="color:var(--muted)">Token Sync</td><td>Cookie <code style="color:var(--cyan);font-size:11px">access_token</code> set on login for middleware gate</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> Email + OAuth login functional, redirects to <code style="color:var(--cyan);font-size:11px">/dashboard</code></td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> Signup Page</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/auth/signup</code></td></tr>
+      <tr><td style="color:var(--muted)">Data Source</td><td>Supabase Auth (<code style="color:var(--cyan);font-size:11px">supabase.auth.signUp</code>)</td></tr>
+      <tr><td style="color:var(--muted)">Verified</td><td>Form renders, validation on all fields, success message displayed</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> <span class="tag tag-amber">UX note: stays on /auth/signup after success instead of redirecting</span></td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> OAuth Callback</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/auth/callback</code></td></tr>
+      <tr><td style="color:var(--muted)">Flow</td><td>Listens for <code style="color:var(--cyan);font-size:11px">SIGNED_IN</code> event → sets cookie → redirects to <code style="color:var(--cyan);font-size:11px">/dashboard</code></td></tr>
+      <tr><td style="color:var(--muted)">Safety Net</td><td>5-second fallback check if auth event doesn't fire</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> Well-implemented with fallback logic</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> Middleware Route Protection</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">File</td><td><code style="color:var(--cyan);font-size:11px">/src/middleware.js</code></td></tr>
+      <tr><td style="color:var(--muted)">Public Routes</td><td><code style="color:var(--cyan);font-size:11px">/</code>, <code style="color:var(--cyan);font-size:11px">/auth/login</code>, <code style="color:var(--cyan);font-size:11px">/auth/signup</code></td></tr>
+      <tr><td style="color:var(--muted)">Security Headers</td><td>X-Content-Type-Options, X-Frame-Options, CSP, X-XSS-Protection, Permissions-Policy</td></tr>
+      <tr><td style="color:var(--muted)">Auth Check</td><td>Cookie-based fast gate → FastAPI JWT validation on API calls</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> Unauthenticated users redirected to login, authed users can't access login/signup</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 2: DASHBOARD                    -->
+  <!-- ═══════════════════════════════════════ -->
+  <div style="margin: 28px 0 12px; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px;">2. Dashboard Pages</div>
+
+  <div class="card" style="border-left: 3px solid var(--amber);">
+    <h3><span style="color:var(--amber)">⚠</span> Main Dashboard</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/dashboard</code></td></tr>
+      <tr><td style="color:var(--muted)">Component</td><td>Shell — dynamic import of <code style="color:var(--cyan);font-size:11px">DashboardContent</code> with SSR disabled</td></tr>
+      <tr><td style="color:var(--muted)">Data Source</td><td>None (loading spinner only)</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-amber">WARN</span> Placeholder page — shows spinner, no real dashboard content yet</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> Hotel Wellness Command Center</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/dashboard/hotel</code></td></tr>
+      <tr><td style="color:var(--muted)">Data Sources</td><td><code style="color:var(--cyan);font-size:11px">useUserProfile()</code> + <code style="color:var(--cyan);font-size:11px">authedFetch("/api/hotel/metrics")</code> + <code style="color:var(--cyan);font-size:11px">/api/hotel/schedule</code> + <code style="color:var(--cyan);font-size:11px">/api/marketing/campaigns</code></td></tr>
+      <tr><td style="color:var(--muted)">Features</td><td>KPI cards with sparklines, status pills, retreat pipeline, class schedule</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> Full-featured ops dashboard with live metrics</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> WRIA AI Co-Pilot</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/dashboard/hotel/wria</code></td></tr>
+      <tr><td style="color:var(--muted)">Features</td><td>Prompt library (8 categories × 4 prompts), focus area selector, auto system prompt from profile</td></tr>
+      <tr><td style="color:var(--muted)">Context</td><td><code style="color:var(--cyan);font-size:11px">buildWRIASystemPrompt(focusArea)</code> injects hotel context, user context, completeness score</td></tr>
+      <tr><td style="color:var(--muted)">Nudge</td><td>Shows progress bar if profile &lt; 80% complete</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> AI chat interface with rich context injection</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 3: ONBOARDING + PROFILE         -->
+  <!-- ═══════════════════════════════════════ -->
+  <div style="margin: 28px 0 12px; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px;">3. Onboarding &amp; Profile</div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> Onboarding Flow</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/onboarding</code></td></tr>
+      <tr><td style="color:var(--muted)">Steps</td><td>1. Select role → 2. Select reason → 3. Search hotel (Google Places) → 4. Save &amp; redirect</td></tr>
+      <tr><td style="color:var(--muted)">Data Sources</td><td><code style="color:var(--cyan);font-size:11px">authedFetch("/api/places/autocomplete")</code> + <code style="color:var(--cyan);font-size:11px">/api/places/details</code></td></tr>
+      <tr><td style="color:var(--muted)">Saves To</td><td>Supabase <code style="color:var(--cyan);font-size:11px">user_profiles</code> + <code style="color:var(--cyan);font-size:11px">hotel_context</code></td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> Multi-step wizard with Google Places autocomplete, debounce, fallback handling</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> Extended Profile (Manage Profile)</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/account/profile</code></td></tr>
+      <tr><td style="color:var(--muted)">Tabs</td><td>Personal Info → Hotel Context → Property Details → Marketing Setup</td></tr>
+      <tr><td style="color:var(--muted)">Data Source</td><td><code style="color:var(--cyan);font-size:11px">useUserProfile()</code> context + PATCH via <code style="color:var(--cyan);font-size:11px">authedFetch</code></td></tr>
+      <tr><td style="color:var(--muted)">Completeness</td><td>Score 0–100% with missing fields list, nudge banner at &lt; 90%</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> 4-tab form pre-seeded from context, multi-select for amenities &amp; programs</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--rose);">
+    <h3><span style="color:var(--rose)">✗</span> Business Profile</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/business-profile</code></td></tr>
+      <tr><td style="color:var(--muted)">Data Source</td><td><code style="color:var(--cyan);font-size:11px">authedFetch("/api/business", { method: "POST" })</code></td></tr>
+      <tr><td style="color:var(--muted)">Issue 1</td><td><span class="tag tag-rose">BUG</span> Form not pre-populated — no GET on load, always blank</td></tr>
+      <tr><td style="color:var(--muted)">Issue 2</td><td><span class="tag tag-rose">BUG</span> Always POSTs — creates duplicate records instead of PATCH/upsert</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-rose">FAIL</span> Needs GET to pre-fill + upsert logic to prevent duplicates</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 4: CLASSES (LIVE TESTED)        -->
+  <!-- ═══════════════════════════════════════ -->
+  <div style="margin: 28px 0 12px; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px;">4. Class Management (Live Browser Tested)</div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> Create Class</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/classes</code></td></tr>
+      <tr><td style="color:var(--muted)">Data Source</td><td>Supabase direct insert → <code style="color:var(--cyan);font-size:11px">classes</code> table</td></tr>
+      <tr><td style="color:var(--muted)">Live Test</td><td>Created <strong>"Morning Vinyasa Flow"</strong> — 2026-03-25, 07:00–08:00, Rooftop Wellness Deck, cap 20</td></tr>
+      <tr><td style="color:var(--muted)">Test ID</td><td><code style="color:var(--cyan);font-size:11px">03817de2-f1e9-4323-9ec5-9c95105a02e9</code></td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> Success toast, record confirmed in Supabase</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> All Classes (List)</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/classes/list</code></td></tr>
+      <tr><td style="color:var(--muted)">Data Source</td><td>Supabase direct query → <code style="color:var(--cyan);font-size:11px">classes</code> table by <code style="color:var(--cyan);font-size:11px">user_id</code></td></tr>
+      <tr><td style="color:var(--muted)">Features</td><td>Search, status filter, stats row, inline edit modal, status toggle, delete</td></tr>
+      <tr><td style="color:var(--muted)">Live Test</td><td>1 Total Classes · Yoga · 2026-03-25 · 07:00–08:00 · Cap 20 · Draft</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> Fetches from Supabase, renders with edit/delete controls</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> Registrations</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/classes/registrations</code></td></tr>
+      <tr><td style="color:var(--muted)">Data Source</td><td>Supabase direct → <code style="color:var(--cyan);font-size:11px">classes</code> + <code style="color:var(--cyan);font-size:11px">class_registrations</code></td></tr>
+      <tr><td style="color:var(--muted)">Features</td><td>Class filter dropdown, status filter, check-in button, registration status update</td></tr>
+      <tr><td style="color:var(--muted)">Live Test</td><td>"Morning Vinyasa Flow" in dropdown · 0 registrations (expected)</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> Page loads, queries both tables correctly</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--amber);">
+    <h3><span style="color:var(--amber)">⚠</span> QR Code Generator</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/classes/qr</code></td></tr>
+      <tr><td style="color:var(--muted)">Data Source</td><td>Supabase direct → <code style="color:var(--cyan);font-size:11px">classes</code> + <code style="color:var(--cyan);font-size:11px">qr_codes</code></td></tr>
+      <tr><td style="color:var(--muted)">Live Test</td><td>Generated <strong>"Morning Flow — Lobby QR"</strong>, saved to Supabase, displayed in table</td></tr>
+      <tr><td style="color:var(--muted)">Issue</td><td><span class="tag tag-amber">WARN</span> QR image is a placeholder SVG pattern — not real QR encoding. Needs <code style="color:var(--cyan);font-size:11px">qrcode</code> library</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> (data flow works) <span class="tag tag-amber">WARN</span> (visual QR is fake)</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 5: SCRAPER APPS                 -->
+  <!-- ═══════════════════════════════════════ -->
+  <div style="margin: 28px 0 12px; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px;">5. Scraper Apps</div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> Website Analyzer</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/apps/website-analyzer</code></td></tr>
+      <tr><td style="color:var(--muted)">Data Source</td><td><code style="color:var(--cyan);font-size:11px">fetch(NEXT_PUBLIC_API_URL + "/n8n/website/public")</code></td></tr>
+      <tr><td style="color:var(--muted)">Guard</td><td>Requires <code style="color:var(--cyan);font-size:11px">user.website</code> in profile, validates URL format</td></tr>
+      <tr><td style="color:var(--muted)">Security</td><td>DOMPurify.sanitize() on HTML response</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> URL validation solid, sanitized output, requires profile completion</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> Instagram Scraper</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/apps/instagram-scrapper</code></td></tr>
+      <tr><td style="color:var(--muted)">Data Source</td><td><code style="color:var(--cyan);font-size:11px">fetch(NEXT_PUBLIC_API_URL + "/n8n/instagram/public")</code></td></tr>
+      <tr><td style="color:var(--muted)">Guard</td><td>Requires <code style="color:var(--cyan);font-size:11px">user.instagram</code> in profile</td></tr>
+      <tr><td style="color:var(--muted)">Note</td><td><span class="tag tag-amber">WARN</span> Regex-based markdown formatter is fragile</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-green">PASS</span> Functional flow with DOMPurify sanitization</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--rose);">
+    <h3><span style="color:var(--rose)">✗</span> LinkedIn Scraper</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/apps/linkedin-scrapper</code></td></tr>
+      <tr><td style="color:var(--muted)">Data Source</td><td>Hardcoded n8n call with static payload</td></tr>
+      <tr><td style="color:var(--muted)">Issue</td><td><span class="tag tag-rose">DEMO ONLY</span> Hardcoded: Country="us", Location="California", Role="Web Developer", max_jobs_count=5</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-rose">FAIL</span> No user input controls — always returns same stale data</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--rose);">
+    <h3><span style="color:var(--rose)">✗</span> Jobs Scraper</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Route</td><td><code style="color:var(--cyan);font-size:11px">/apps/jobs-scrapper</code></td></tr>
+      <tr><td style="color:var(--muted)">Data Source</td><td>Identical hardcoded n8n call (copy-paste of LinkedIn scraper)</td></tr>
+      <tr><td style="color:var(--muted)">Issue</td><td><span class="tag tag-rose">DEMO ONLY</span> Same hardcoded payload, no user customization</td></tr>
+      <tr><td style="color:var(--muted)">Result</td><td><span class="tag tag-rose">FAIL</span> Duplicate of LinkedIn scraper — not functional</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 6: NAVIGATION & SIDEBAR         -->
+  <!-- ═══════════════════════════════════════ -->
+  <div style="margin: 28px 0 12px; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px;">6. Navigation &amp; Layout</div>
+
+  <div class="card">
+    <h3>🗂 Sidebar Menu Structure</h3>
+    <table>
+      <thead><tr><th style="width:200px">Menu Item</th><th>Route</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Dashboard</td><td><code style="color:var(--cyan);font-size:11px">/dashboard</code></td><td><span class="tag tag-amber">Shell only</span></td></tr>
+        <tr><td style="padding-left:20px">Wellness Operations</td><td><code style="color:var(--cyan);font-size:11px">/dashboard/hotel</code></td><td><span class="tag tag-green">Working</span></td></tr>
+        <tr><td style="padding-left:20px">WRIA AI Co-Pilot</td><td><code style="color:var(--cyan);font-size:11px">/dashboard/hotel/wria</code></td><td><span class="tag tag-green">Working</span></td></tr>
+        <tr><td>All Classes</td><td><code style="color:var(--cyan);font-size:11px">/classes/list</code></td><td><span class="tag tag-green">Working</span></td></tr>
+        <tr><td>Create a Class</td><td><code style="color:var(--cyan);font-size:11px">/classes</code></td><td><span class="tag tag-green">Working</span></td></tr>
+        <tr><td>Registrations</td><td><code style="color:var(--cyan);font-size:11px">/classes/registrations</code></td><td><span class="tag tag-green">Working</span></td></tr>
+        <tr><td>QR Codes</td><td><code style="color:var(--cyan);font-size:11px">/classes/qr</code></td><td><span class="tag tag-green">Working</span> <span class="tag tag-amber">Fake QR</span></td></tr>
+        <tr><td>Manage Profile</td><td><code style="color:var(--cyan);font-size:11px">/account/profile</code></td><td><span class="tag tag-green">Working</span></td></tr>
+        <tr><td>Business Profile</td><td><code style="color:var(--cyan);font-size:11px">/business-profile</code></td><td><span class="tag tag-rose">Broken</span></td></tr>
+        <tr><td>Website Analyzer</td><td><code style="color:var(--cyan);font-size:11px">/apps/website-analyzer</code></td><td><span class="tag tag-green">Working</span></td></tr>
+        <tr><td>Jobs Scraper</td><td><code style="color:var(--cyan);font-size:11px">/apps/jobs-scrapper</code></td><td><span class="tag tag-rose">Demo only</span></td></tr>
+        <tr><td>Instagram Scraper</td><td><code style="color:var(--cyan);font-size:11px">/apps/instagram-scrapper</code></td><td><span class="tag tag-green">Working</span></td></tr>
+        <tr><td>LinkedIn Scraper</td><td><code style="color:var(--cyan);font-size:11px">/apps/linkedin-scrapper</code></td><td><span class="tag tag-rose">Demo only</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>🏗 Architecture Summary</h3>
+    <table>
+      <thead><tr><th style="width:200px">Component</th><th>Pattern</th><th>Health</th></tr></thead>
+      <tbody>
+        <tr><td>Auth</td><td>Supabase Auth → cookie sync → middleware gate</td><td><span class="tag tag-green">Solid</span></td></tr>
+        <tr><td>Token Refresh</td><td><code style="color:var(--cyan);font-size:11px">authedFetch()</code> auto-refresh on 401 (1 retry)</td><td><span class="tag tag-green">Solid</span></td></tr>
+        <tr><td>Class Pages</td><td>Direct Supabase client (bypasses FastAPI proxy)</td><td><span class="tag tag-green">Solid</span></td></tr>
+        <tr><td>Profile Pages</td><td><code style="color:var(--cyan);font-size:11px">authedFetch</code> → FastAPI proxy → Supabase</td><td><span class="tag tag-green">Solid</span></td></tr>
+        <tr><td>Scraper Apps</td><td><code style="color:var(--cyan);font-size:11px">fetch(NEXT_PUBLIC_API_URL)</code> → n8n workflows</td><td><span class="tag tag-amber">Mixed</span></td></tr>
+        <tr><td>Context Layer</td><td>AuthContext + UserProfileContext (hotel + user data)</td><td><span class="tag tag-green">Solid</span></td></tr>
+        <tr><td>WRIA System Prompt</td><td>Auto-built from profile completeness + hotel context</td><td><span class="tag tag-green">Solid</span></td></tr>
+        <tr><td>RLS Policies</td><td><code style="color:var(--cyan);font-size:11px">auth.uid() = user_id</code> on all user tables</td><td><span class="tag tag-green">Solid</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- SECTION 7: DATABASE                     -->
+  <!-- ═══════════════════════════════════════ -->
+  <div style="margin: 28px 0 12px; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px;">7. Database Integrity</div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> All 19 Tables Live</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">Migration 001</td><td><span class="tag tag-green">LIVE</span> profiles, user_profiles, hotel_contacts, hotel_context</td></tr>
+      <tr><td style="color:var(--muted)">Migration 002</td><td><span class="tag tag-green">LIVE</span> hotel_enrichment, user_actions, ai_interactions, user_memory</td></tr>
+      <tr><td style="color:var(--muted)">Migration 003</td><td><span class="tag tag-green">LIVE</span> classes, class_registrations, qr_codes, qr_scans</td></tr>
+      <tr><td style="color:var(--muted)">Views</td><td><span class="tag tag-green">LIVE</span> hotel_enrichment_status, user_activity_summary, class_summary</td></tr>
+      <tr><td style="color:var(--muted)">Trigger</td><td><span class="tag tag-green">LIVE</span> <code style="color:var(--cyan);font-size:11px">increment_qr_scan_count()</code></td></tr>
+      <tr><td style="color:var(--muted)">RLS</td><td>All tables enforce <code style="color:var(--cyan);font-size:11px">auth.uid()</code> row-level security</td></tr>
+    </table>
+  </div>
+
+  <div class="card" style="border-left: 3px solid var(--emerald);">
+    <h3><span style="color:var(--emerald)">✓</span> Test Data Verified in Supabase</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:130px">classes</td><td>"Morning Vinyasa Flow" — <code style="color:var(--cyan);font-size:11px">03817de2-f1e9-4323-9ec5-9c95105a02e9</code></td></tr>
+      <tr><td style="color:var(--muted)">qr_codes</td><td>"Morning Flow — Lobby QR" — theme: clean_lobby, 0 scans, active</td></tr>
+      <tr><td style="color:var(--muted)">registrations</td><td>0 (expected — no public registration page yet)</td></tr>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- CRITICAL ISSUES SUMMARY                 -->
+  <!-- ═══════════════════════════════════════ -->
+  <div style="margin: 28px 0 12px; font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:700; color:var(--rose); text-transform:uppercase; letter-spacing:1px;">Critical Issues (Fix Next)</div>
+
+  <div class="g3">
+    <div class="card" style="border-color: rgba(244,63,94,0.3); background: rgba(244,63,94,0.03);">
+      <h3 style="color:var(--rose);font-size:13px;">1. Business Profile duplicates</h3>
+      <p style="font-size:12px;color:var(--muted);line-height:1.5;"><code style="color:var(--cyan);font-size:11px">/business-profile</code> always POSTs, never reads existing data. Fix: add GET on mount + upsert logic.</p>
+    </div>
+    <div class="card" style="border-color: rgba(244,63,94,0.3); background: rgba(244,63,94,0.03);">
+      <h3 style="color:var(--rose);font-size:13px;">2. QR codes are fake images</h3>
+      <p style="font-size:12px;color:var(--muted);line-height:1.5;"><code style="color:var(--cyan);font-size:11px">/classes/qr</code> generates a placeholder SVG, not scannable QR. Fix: install <code style="color:var(--cyan);font-size:11px">qrcode</code> npm package.</p>
+    </div>
+    <div class="card" style="border-color: rgba(244,63,94,0.3); background: rgba(244,63,94,0.03);">
+      <h3 style="color:var(--rose);font-size:13px;">3. LinkedIn + Jobs scrapers are demo</h3>
+      <p style="font-size:12px;color:var(--muted);line-height:1.5;">Both pages use hardcoded payloads. Fix: add user input form or remove from sidebar until ready.</p>
+    </div>
+  </div>
+
+  <!-- Pending Actions -->
+  <div class="card" style="border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.03); margin-top: 16px;">
+    <h3 style="color:var(--amber);">📋 Pending Actions</h3>
+    <table>
+      <tr><td style="color:var(--muted);width:220px">Deploy FastAPI classes router</td><td><code style="color:var(--cyan);font-size:11px">routes/classes.py</code> → add <code style="color:var(--cyan);font-size:11px">app.include_router(classes_router)</code> in main.py on Render</td></tr>
+      <tr><td style="color:var(--muted)">Delete 4 auth users</td><td>3× Ram Bhakt (test dupes) + 1× testuser — manual in Supabase dashboard</td></tr>
+      <tr><td style="color:var(--muted)">Main dashboard content</td><td><code style="color:var(--cyan);font-size:11px">/dashboard</code> is a loading shell — needs real KPI summary or redirect to hotel dashboard</td></tr>
+      <tr><td style="color:var(--muted)">QR library install</td><td><code style="color:var(--cyan);font-size:11px">npm install qrcode</code> + wire into <code style="color:var(--cyan);font-size:11px">/classes/qr</code> page</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ JAVASCRIPT ═══ -->
+<script>
+function show(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+}
+updateClock();
+setInterval(updateClock, 1000);
+</script>
+
+<!-- FLOATING QUICK-ACCESS PANEL -->
+<style>
+    .quick-access-fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, #00d4aa, #00a885);
+        border: none;
+        border-radius: 50%;
+        color: #0a1628;
+        font-size: 24px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(0, 212, 170, 0.4);
+        z-index: 9999;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .quick-access-fab:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 30px rgba(0, 212, 170, 0.6);
+    }
+    .quick-access-panel {
+        position: fixed;
+        bottom: 92px;
+        right: 24px;
+        width: 320px;
+        max-height: 0;
+        overflow: hidden;
+        background: rgba(10, 22, 40, 0.98);
+        border: 1px solid rgba(0, 212, 170, 0.25);
+        border-radius: 16px;
+        box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+        z-index: 9998;
+        transition: max-height 0.35s ease, padding 0.35s ease, opacity 0.35s ease;
+        opacity: 0;
+        padding: 0 20px;
+    }
+    .quick-access-panel.open {
+        max-height: 520px;
+        opacity: 1;
+        padding: 20px;
+    }
+    .qa-header {
+        font-size: 13px;
+        font-weight: 700;
+        color: #00d4aa;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(0, 212, 170, 0.15);
+    }
+    .qa-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #c0d0dd;
+        font-size: 13px;
+        transition: all 0.15s;
+    }
+    .qa-link:hover {
+        background: rgba(0, 212, 170, 0.1);
+        color: #fff;
+    }
+    .qa-link .qa-icon { font-size: 16px; width: 22px; text-align: center; }
+    .qa-link .qa-badge {
+        margin-left: auto;
+        background: rgba(255, 107, 53, 0.2);
+        color: #ff6b35;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 8px;
+    }
+    .qa-section-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #5a7a8a;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 12px 0 4px 12px;
+    }
+</style>
+
+<button class="quick-access-fab" onclick="document.getElementById('quick-access-panel').classList.toggle('open')" title="Quick Access — All Dashboards">⚡</button>
+
+<div class="quick-access-panel" id="quick-access-panel">
+    <div class="qa-header">Quick Access — All Boards</div>
+    <a href="unified-command-center.html" class="qa-link" style="background:rgba(0,212,170,0.08);margin-bottom:4px;">
+        <span class="qa-icon">🎯</span> <strong>Unified Command Center</strong>
+    </a>
+    <div class="qa-section-label">Operational</div>
+    <a href="agentic-os-dashboard.html" class="qa-link"><span class="qa-icon">🤖</span> Agentic OS Dashboard</a>
+    <a href="agentfield-dashboard.html" class="qa-link"><span class="qa-icon">⚙️</span> AgentField Control Plane</a>
+    <a href="review-queue.html" class="qa-link"><span class="qa-icon">📋</span> Review Queue <span class="qa-badge">2</span></a>
+    <div class="qa-section-label">Strategy & Business</div>
+    <a href="business-economics-dashboard.html" class="qa-link"><span class="qa-icon">💰</span> Business Economics</a>
+    <a href="dashboard-master.html" class="qa-link"><span class="qa-icon">📊</span> Master Dashboard</a>
+    <div class="qa-section-label">Reference</div>
+    <a href="index.html" class="qa-link"><span class="qa-icon">🏠</span> Marketing Index</a>
+    <a href="architecture-dashboard.html" class="qa-link"><span class="qa-icon">🏗️</span> Architecture & Skills</a>
+    <a href="supabase-dashboard.html" class="qa-link"><span class="qa-icon">🗄️</span> Supabase Dashboard</a>
+    <a href="team-handoff-dashboard.html" class="qa-link"><span class="qa-icon">👥</span> Team Handoff</a>
+    <a href="master-directory.html" class="qa-link"><span class="qa-icon">📁</span> Master Directory</a>
+</div>
+<!-- END QUICK-ACCESS PANEL -->
+
+</body>
+</html>
