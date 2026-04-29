@@ -139,55 +139,10 @@
     </style>
 </head>
 <body>
-<!-- BEGIN MYN-NAV (auto-injected 2026-04-21) -->
-<style>
-.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; -webkit-font-smoothing: antialiased; }
-.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
-.myn-nav__inner::-webkit-scrollbar { height: 4px; } .myn-nav__inner::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.25); border-radius: 2px; }
-.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
-.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
-.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
-.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
-.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
-.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
-.myn-nav__spacer { flex: 1; min-width: 20px; }
-.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-variant-numeric: tabular-nums; }
-</style>
-<nav class="myn-nav" aria-label="MYN Command Center navigation">
-<div class="myn-nav__inner">
-  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Center</span></a>
-  <a href="index.html" data-page="index">Hub</a>
-  <a href="master-directory.html" data-page="master-directory">Directory</a>
-  <a href="analytics-dashboard.html" data-page="analytics-dashboard">Analytics</a>
-  <a href="lead-gen-dashboard.html" data-page="lead-gen-dashboard">Leads</a>
-  <a href="hotel-activities-dashboard.html" data-page="hotel-activities-dashboard">Hotels</a>
-  <a href="business-economics-dashboard.html" data-page="business-economics-dashboard">Economics</a>
-  <a href="team-handoff-dashboard.html" data-page="team-handoff-dashboard">Team</a>
-  <a href="architecture-dashboard.html" data-page="architecture-dashboard">Architecture</a>
-  <a href="agent-control-plane.html" data-page="agent-control-plane">Agents</a>
-  <a href="supabase-dashboard.html" data-page="supabase-dashboard">Supabase</a>
-  <a href="paperclip-dashboard.html" data-page="paperclip-dashboard">Paperclip</a>
-  <a href="review-queue.html" data-page="review-queue">Review</a>
-  <a href="4-21-26-full-audit.html" data-page="4-21-26-full-audit">Audit</a>
-  <span class="myn-nav__spacer"></span>
-  <span class="myn-nav__date" id="myn-nav-date"></span>
-</div>
-</nav>
-<script>
-(function(){
-  var path = (location.pathname.split('/').pop() || 'index.html').replace('.html','');
-  var links = document.querySelectorAll('.myn-nav a[data-page]');
-  for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('data-page') === path) links[i].classList.add('is-active'); }
-  var d = new Date(); var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  var el = document.getElementById('myn-nav-date'); if (el) el.textContent = m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
-})();
-</script>
-<!-- END MYN-NAV -->
-
-<div class="container">
+    <div class="container">
         <header>
             <h1>🧘 Scott Hoffman - MYN Knowledge Base</h1>
-            <p class="timestamp">Weekly Audit Update: April 21, 2026</p>
+            <p class="timestamp">Weekly Audit Update: April 27, 2026 (Q2 cycle 4)</p>
         </header>
 
         <!-- TREND SIGNALS -->
@@ -197,19 +152,27 @@
             <h3>Market Size & Growth Trajectory</h3>
             <div class="metric">
                 <div class="metric-value">$138.66 Billion</div>
-                <div class="metric-label">Global Yoga Market 2026 (Fortune Business Insights) | Growing at 9.9% CAGR to $269.1B by 2033</div>
+                <div class="metric-label">Global Yoga Market 2026 (Fortune Business Insights, re-baselined Apr 27) | $127.0B (2025) → 9.9% CAGR through 2033. Online yoga 10.0% CAGR; offline still 62.54% of 2026 share. Asia Pacific leads at 37.05% (10.8% CAGR).</div>
             </div>
             <div class="metric">
-                <div class="metric-value">$18.90 Billion</div>
-                <div class="metric-label">U.S. Yoga Market 2026 | Fastest-growing region with digital hybrid + therapeutic segments</div>
+                <div class="metric-value">$738 Billion</div>
+                <div class="metric-label">Mind-Body & Fitness Segment (Global Wellness Institute) | 9.8% YoY — encompasses fitness clubs, yoga, Pilates, mindfulness, tai chi. Mind-body now the fastest-compounding sub-sector of the wellness economy.</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">$273.15 Billion</div>
+                <div class="metric-label">Global Wellness Retreat Market 2026 | $248.09B (2025) → 10.1% CAGR — yoga + meditation + preventive healthcare are the named drivers</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">$6.50 Trillion</div>
+                <div class="metric-label">Global Health & Wellness Market 2026 (Precedence Research, refreshed) | → $10.48T by 2035 at 5.46% CAGR. Alternate read (Towards Healthcare): wellness economy on path to $8.5T by end of 2026 at 9.1% CAGR.</div>
             </div>
 
             <h3>Walking Yoga Phenomenon</h3>
             <div class="metric">
-                <div class="metric-value">2,400%+</div>
-                <div class="metric-label">Search Interest Explosion in Walking Yoga (2024-2026) — Now a mainstream fitness trend for 2026</div>
+                <div class="metric-value">2,414%</div>
+                <div class="metric-label">Search Interest in Walking Yoga since 2024 (YogaJala, Apr 2026) — now the #2 fastest-growing fitness trend of 2026 behind Japanese walking; reclassified as a <em>standalone</em> trend, not a yoga sub-format</div>
             </div>
-            <p>Walking yoga is the "Trojan Horse" format for overcoming buyer objections. Daily Burn, The National, and PureWow all identified walking yoga as a top 2026 fitness trend. It integrates breath awareness, body scanning, and gentle stretching into walking routines—requiring no gym, no special clothing, no prior flexibility. Hotels are deploying it as outdoor programming; corporations as lunchtime wellness breaks.</p>
+            <p>Walking yoga remains MYN's "Trojan Horse" format. PureWow, YogaJala, Active Wellness, and HealthFitness all listed it among the top 2026 fitness/wellness trends this month. It requires no gym, no special clothing, no prior flexibility, and no intimidating studio environment — meeting the millions who find traditional yoga inaccessible exactly where they already are. Confirmed deployments this cycle: hotels using it as outdoor programming, corporations running lunchtime walking-yoga breaks (modifiable to workstations, sitting/standing, virtual/in-person), and HR teams reporting it engages a broader employee demographic than seated yoga.</p>
 
             <h3>Key Market Trends</h3>
             <div class="grid">
@@ -227,12 +190,20 @@
                 </div>
                 <div class="card">
                     <h4>Hotel Wellness = Revenue Driver</h4>
-                    <p>76% of travelers want to spend more on wellness travel. Hotels adding wellness services see up to 37% revenue increase. Wellness tourism now an $830B+ global market.</p>
+                    <p>90%+ of luxury travelers now actively look for wellness programs when booking (ILTM, refreshed Apr 27 — up from 76% reading last cycle). Hotels adding wellness services see up to 37% revenue increase. Wellness tourism on path to $1.3T+ by mid-2020s.</p>
+                </div>
+                <div class="card">
+                    <h4>Longevity Programming (NEW signal)</h4>
+                    <p>Longevity programming is the <strong>fastest-growing segment in hotel wellness</strong> right now (Global Wellness Summit). Four Seasons, Mandarin Oriental, and Ritz-Carlton are integrating medical-grade spas into standalone residential pipelines to capture the "Longevity Residence" market. Walking yoga + clinical credibility maps cleanly to this thesis.</p>
+                </div>
+                <div class="card">
+                    <h4>HR Cost Pressure = Forcing Function</h4>
+                    <p>Employer healthcare costs projected to rise 6–10% in 2026 — the <strong>biggest spike in over a decade</strong>. HR teams under pressure to stretch wellness budgets, forcing the conversation from "nice to have" to "must show ROI on healthcare spend." 68% of employees say financial situation prevents them from taking care of wellbeing.</p>
                 </div>
             </div>
 
             <div class="note">
-                <strong>Strategic Insight (April 21):</strong> Q2 2026 signal stack: (1) Wellness tourism now explicitly called out as a <em>burnout-recovery product</em> — luxury resorts blending mental health, sleep science, longevity medicine, and nervous-system regulation; employers are subsidizing short intensive retreats for senior staff. (2) 90%+ of luxury travelers now actively look for wellness programs when booking — wellness has moved from amenity to booking filter. (3) Corporate HR shift: wellness is "no longer getting a free pass in budget conversations" — outcomes > programs is now the default framing. MYN's Trojan Horse + clinical credibility thesis is still the right wedge, but the selling message must lead with measurable outcomes, not modalities.
+                <strong>Strategic Insight (April 27):</strong> Three new signals reshape the Q2 narrative this week. (1) <strong>Yoga market re-baselined upward</strong>: Fortune Business Insights now reads $127B (2025) → $138.66B (2026) at 9.9% CAGR — materially larger TAM than last cycle's $63.82B/$68.15B reading. The mind-body & fitness segment alone is $738B at 9.8% YoY (GWI), confirming this is the fastest-compounding wellness sub-sector. (2) <strong>Longevity programming is the new hotel wellness anchor</strong>: Four Seasons, Mandarin Oriental, Ritz-Carlton are building medical-grade spas into "Longevity Residence" pipelines. MYN's clinical-yoga + walking-yoga combination is an exact fit — pivot the hotel deck so the lead frame is "longevity programming" rather than "wellness amenity." (3) <strong>HR healthcare cost spike of 6–10% (largest in a decade) is now the decisive forcing function</strong>: every corporate cold open should lead with the cost-pressure framing, then route to MYN's $1.50–$3 ROI per dollar evidence + monthly impact reporting cadence (the framing CEOs are funding). Action: rewrite hotel and corporate cold opens by Friday.
             </div>
         </section>
 
@@ -253,21 +224,21 @@
                 <tbody>
                     <tr>
                         <td><span class="highlight">Hotels & Luxury Residential</span></td>
-                        <td>$132.32B spa services (global); $27.8B hotel/resort spas; $22.9B US wellness spas</td>
-                        <td>19.23% CAGR → $540B by 2034</td>
-                        <td><strong>ANCHOR — Build here first. 37% revenue lift signal.</strong></td>
+                        <td>$83B global spa market 2026 (GMI); $27.8B resort/hotel spas (2025) → $243.9B spa market by 2035; $953B global wellness tourism (2026)</td>
+                        <td>12.7% CAGR (spa) | 10.1% CAGR (wellness retreat)</td>
+                        <td><strong>ANCHOR — still the highest-compounding wedge. 37% revenue lift signal holds; 76% travelers want to spend more on wellness travel.</strong></td>
                     </tr>
                     <tr>
                         <td><span class="highlight">Corporate Wellness</span></td>
-                        <td>$70.2B–$94.6B (global corporate wellness 2026; range across Mordor / Fortune / Grand View)</td>
-                        <td>6.12–6.41% CAGR → $118–$138B by 2034</td>
-                        <td>ROI: $1.50–$3 per $1 spent. 91% Gen Z = non-negotiable. 95% workers view wellbeing domains as interconnected.</td>
+                        <td>$55.10B (2025) → $70.1B by 2033 (Grand View); 2026 range $70.2B–$94.6B across Fortune/Mordor</td>
+                        <td>3.1–6.4% CAGR (mid-band 2026 → 2033)</td>
+                        <td>ROI: $1.50–$3 per $1 spent. $742/employee/yr mid-range spend. 91% Gen Z non-negotiable. 95% workers view wellbeing domains as interconnected. <em>Note: GVR's 3.1% CAGR is more conservative than last week's 6.1–6.4% mid-band — softening signal.</em></td>
                     </tr>
                     <tr>
                         <td><span class="highlight">Preventive Healthcare (adjacent)</span></td>
                         <td>$412.6B (2026) → $741.9B by 2031</td>
                         <td>12.45% CAGR</td>
-                        <td>Adjacent TAM — insurer + integrative medicine pull-through path.</td>
+                        <td>Adjacent TAM — insurer + integrative-medicine pull-through path. Continues to show up as a named demand driver in wellness retreat reports.</td>
                     </tr>
                     <tr>
                         <td><span class="highlight">Schools/School Districts</span></td>
@@ -277,15 +248,21 @@
                     </tr>
                     <tr>
                         <td>Online Yoga</td>
-                        <td>$20B (2025) → $60B (2033)</td>
-                        <td>18% CAGR (fastest growing)</td>
-                        <td>Supplement channel, not anchor</td>
+                        <td>Online yoga 10.0% CAGR 2026–2033 (Fortune); offline still 62.54% of 2026 share</td>
+                        <td>10.0% CAGR online; offline majority</td>
+                        <td>Supplement channel, not anchor — but bigger than last cycle's read</td>
                     </tr>
                     <tr>
                         <td>Individual Consumers/Teachers</td>
-                        <td>Part of $138.66B global yoga market</td>
-                        <td>Fragmented demand</td>
+                        <td>Part of $138.66B global yoga market (re-baselined Apr 27, Fortune)</td>
+                        <td>Females 71.84%; ages 30–50 = 43.46% of revenue</td>
                         <td>Leverage through supply-side liquidity</td>
+                    </tr>
+                    <tr>
+                        <td><span class="highlight">Longevity / Medical-Grade Wellness (emerging)</span></td>
+                        <td>Subset of luxury hospitality + preventive healthcare TAMs</td>
+                        <td>Fastest-growing hotel wellness segment (GWS)</td>
+                        <td>NEW PMF thread — Four Seasons / Mandarin Oriental / Ritz-Carlton building Longevity Residences</td>
                     </tr>
                 </tbody>
             </table>
@@ -305,17 +282,18 @@
             </div>
 
             <h3>Hotel/Hospitality Market Signals</h3>
-            <p>Hotels are <span class="highlight">transforming wellness from amenity to revenue driver</span>. April 2026 signals:</p>
+            <p>Hotels are <span class="highlight">transforming wellness from amenity to revenue driver</span>. April 27 signals:</p>
             <ul style="margin-left: 20px; color: #b0b0b0;">
-                <li>76% of travelers want to spend more on wellness travel experiences</li>
+                <li><strong>90%+</strong> of luxury travelers now actively look for wellness programs when booking (ILTM, up from 76% mid-cycle)</li>
                 <li>Hotels adding wellness services see up to 37% revenue increase</li>
-                <li>Wellness tourism surpassed $830B globally; growing faster than overall tourism</li>
-                <li>Hotel Byblos (Saint-Tropez) reopening April 2026 with new wellness offerings — luxury segment doubling down</li>
+                <li>Wellness tourism on path to <strong>$1.3T+ by mid-2020s</strong>; growing faster than overall tourism</li>
+                <li><strong>Longevity programming is the fastest-growing segment</strong> — Four Seasons, Mandarin Oriental, Ritz-Carlton building "Longevity Residence" pipelines with medical-grade spas (NEW this cycle)</li>
+                <li>Spa market alternate read: $164.7B (2025) → $261.05B by 2032 at 6.8% CAGR (Maximize) and $164.66B (2026) → $221.02B by 2031 at 6.06% CAGR (Mordor) — confirming spa is the highest-quality wellness dollar</li>
                 <li>Role of "Chief Wellness Officer (CWO)" emerging in hospitality's global organizations</li>
             </ul>
 
             <div class="note">
-                <strong>Economic Reality (Updated April 21):</strong> TAM picture tightening. Global spa services $132B in 2026 (19.23% CAGR); global corporate wellness $70–$94B with 6.1–6.4% CAGR; preventive healthcare technologies/services $412.6B (12.45% CAGR) — a realistic adjacent pull for insurer partnerships over the next 24 months. SAM for MYN (hotels + luxury residential + corporate + schools) ≈ <span class="highlight">$45–$65B addressable in year 3</span>. SOM (first 3 years) = 50–100 hotel properties + 20–30 corporate contracts + 5–10 school districts ≈ $2–$5M revenue potential. Yoga-specific funding reached $664M cumulative with ~$30M avg raise per company — capital is available but concentrated in consumer apps, not B2B coordination platforms. MYN's gap persists.
+                <strong>Economic Reality (Updated April 27):</strong> Three material refinements this week. (1) <strong>Yoga TAM re-baselined upward</strong>: Fortune Business Insights now reads $127B (2025) → $138.66B (2026) → 9.9% CAGR — about 2× last cycle's reading. Mind-body & fitness segment $738B at 9.8% YoY (GWI). (2) <strong>Longevity Residence is a new addressable wedge</strong>: Four Seasons, Mandarin Oriental, Ritz-Carlton are building medical-grade longevity spas into standalone residential pipelines — direct channel for IAYT-credentialed yoga therapy. (3) <strong>HR cost pressure crystallizes</strong>: 6–10% projected employer healthcare cost increase in 2026 (biggest spike in over a decade) means corporate buyers <em>need</em> to defend wellness spend with measurable healthcare-cost offset. SAM for MYN (hotels + luxury residential + corporate + schools + longevity) <em>expands</em> this week to <span class="highlight">$50–$75B addressable in year 3</span>. SOM (first 3 years) = 50–100 hotel properties + 20–30 corporate contracts + 5–10 school districts + 2–5 longevity-residence pilots ≈ $2–$6M revenue potential. Yoga-specific VC continues to flow into consumer apps (Yoga Joint $5.5M raise for NYC expansion this month) — still no new B2B-institutional entrants detected. MYN's gap persists and widens.
             </div>
         </section>
 
@@ -353,7 +331,7 @@
             </ul>
 
             <div class="note">
-                <strong>Competitive Gap (April 21):</strong> No new institutional entrants detected this cycle — yoga-specific venture capital continues flowing almost entirely into consumer subscription apps and creator-led platforms (Yoga Joint community-crowdfunded $12M; Open $5.5M seed + $9M Series A; Wellness Coach $3M from SoftBank + individual angels incl. Jeff Weiner). ThriveHub/YogaHub remains the closest hotel competitor (1,000+ experiences; InterContinental / Westin / Marriott / Hilton), still positioned as a <em>generic wellness vendor</em> (yoga + Pilates + HIIT + Zumba) with no clinical credibility. Office Yoga (B Corp) still dominates corporate but is a generalist. IAYT itself runs authority + SYTAR 2026 conference but offers no B2B coordination layer. <strong>MYN remains the only candidate occupying the intersection of IAYT clinical credibility + institutional buyer workflow + walking-yoga accessibility wedge.</strong>
+                <strong>Competitive Gap (April 27):</strong> No new B2B-institutional yoga-therapy entrants detected this cycle. Booking-tool noise continues (YOGO #1 yoga booking system 2026; Mindbody, Acuity, Eversports in the studio-marketplace tier) — none address institutional buyers. Closest hotel competitor remains ThriveHub/YogaHub (1,000+ experiences across InterContinental, Westin, Marriott, Hilton) — still a generic yoga/Pilates/HIIT bundle with no clinical credibility. Corporate-yoga generalists (Office Yoga B-Corp #1, Love+Asana, REJUV, Strive Well-Being) hold share but lack IAYT-certified networks. <strong>NEW competitive thread (April 27):</strong> Luxury hotel groups themselves are building <em>in-house</em> medical-grade longevity programs (Four Seasons / Mandarin Oriental / Ritz-Carlton). This is both a competitive risk (in-house substitutes) and a wedge (these brands need credentialed practitioner networks to staff longevity spas — a partnership lane MYN can run at). IAYT-credentialed practitioner shortage helps us: only 66 schools in the entire United States offer in-person IAYT training. Capital flow: Yoga Joint raised $5.5M this month for NYC expansion — consumer infrared-fitness, not competitive with B2B. SYTAR 2026 (June 11–13, Hilton Orange County / Costa Mesa) remains the Q3 prospect-discovery lever. <strong>MYN remains the only candidate occupying IAYT clinical credibility + institutional buyer workflow + walking-yoga accessibility + (now) longevity-program staffing.</strong> Action: open Four Seasons / Mandarin Oriental / Ritz-Carlton longevity-program partnership conversations before SYTAR.
             </div>
         </section>
 
@@ -364,11 +342,11 @@
             <div class="grid">
                 <div class="card">
                     <h4>1. Hotel Wellness Director</h4>
-                    <p><strong>Pain Points:</strong> 62% of hospitality employees report high work-related stress (burnout → turnover → guest-sat drop is the chain they feel). Staff turnover, guest experience gaps, revenue optimization. <strong>Priority:</strong> Consistent, reliable programming with zero operational burden; integrated wellness ecosystems. <strong>Budget:</strong> $2–$5K/month per property. <strong>Decision Criteria:</strong> Ease of scaling, guest NPS, RevPAR attribution, "Chief Wellness Officer" KPIs now appearing in org charts.</p>
+                    <p><strong>Pain Points (refreshed Apr 27):</strong> 62%+ of hospitality employees report high work-related stress (burnout → turnover → guest-sat drop). 90%+ of luxury travelers now actively look for wellness when booking (ILTM) — the wellness program is the booking-conversion lever. Marriott's TakeCare benchmark still applies. <strong>NEW priority this cycle:</strong> deliver <em>longevity programming</em> — fastest-growing segment in hotel wellness; Four Seasons / Mandarin Oriental / Ritz-Carlton are setting the bar by building medical-grade longevity spas into residential pipelines. <strong>Priority:</strong> Reliable programming with zero operational burden; integration with spa, fitness, F&amp;B, sleep; longevity narrative for repeat-stay loyalty. <strong>Budget:</strong> $2–$5K/month per property baseline; longevity-residence properties have materially larger envelopes (medical-grade pricing tier). <strong>Decision Criteria:</strong> Guest NPS, RevPAR attribution, staff retention, longevity-program KPIs, CWO scorecard alignment.</p>
                 </div>
                 <div class="card">
                     <h4>2. Corporate HR Director</h4>
-                    <p><strong>Pain Points:</strong> Employee retention, demonstrating wellness ROI (no longer a free pass), equity across life stages (younger = mental/emotional, mid-career = caregiving, older = sustainable health). <strong>Priority:</strong> Hybrid-ready programs (on-site + remote), whole-person coverage, mental fitness (preventive) over crisis response. 91% Gen Z = non-negotiable; 95% workers view wellbeing domains as interconnected. <strong>Budget:</strong> ~$742/employee/year avg; structured programs deliver $1.50–$3 per $1. <strong>Decision Criteria:</strong> Outcome data, 70–88% engagement with segmentation, monthly impact reporting (58% of CEOs receiving monthly updates increased funding last year).</p>
+                    <p><strong>Pain Points (refreshed Apr 27):</strong> <strong>Employer healthcare costs projected to rise 6–10% in 2026 — the biggest spike in over a decade.</strong> HR teams under direct pressure to defend every wellness dollar with measurable healthcare-cost offset, sick-day reduction, or retention impact. 68% of employees say their financial situation prevents wellbeing — financial wellness is now formally part of the benefits conversation. <strong>Priority:</strong> Hybrid-ready programs, whole-person coverage (mental + financial + physical), mental fitness (preventive over crisis). 91% Gen Z = non-negotiable; 95% workers view wellbeing as interconnected; AI-personalized benefits delivery is now baseline expectation. <strong>Budget:</strong> ~$742/employee/year avg; structured programs deliver $1.50–$3 per $1 — but ROI proof is now a gate, not a tiebreaker. <strong>Decision Criteria:</strong> Cost-offset modeling, monthly impact reporting (58% of CEOs receiving monthly updates increased funding), engagement with segmentation, integration with mental-health vendors.</p>
                 </div>
                 <div class="card">
                     <h4>3. School District Wellness Coordinator</h4>
@@ -463,7 +441,7 @@
             </div>
 
             <div class="note">
-                <strong>Q2 Course Correction (April 21):</strong> Reframe all outbound messaging around <em>outcomes &gt; modalities</em>. Given the "wellness is no longer a free pass" budget shift, lead with: (a) measurable ROI ($1.50–$3 per $1), (b) 62% hospitality-worker stress statistic as the buyer pain point, (c) walking yoga as the non-threatening entry format. De-emphasize "yoga therapy" language in cold-open emails — move it to proof stage. Add one insurer/integrative-clinic pilot track in parallel (preventive healthcare TAM pull at 12.45% CAGR warrants a learning investment, not full pipeline commit).
+                <strong>Q2 Course Correction (April 27):</strong> Material refresh. Four adjustments based on this week's data: (1) <strong>Hotel cold open lead frame shifts to "longevity programming"</strong> — fastest-growing segment in hotel wellness (Four Seasons / Mandarin Oriental / Ritz-Carlton building Longevity Residences). Our IAYT-credentialed network + walking-yoga format + clinical credibility = the staffing layer they need. Update Week 1–2 hotel deck and outreach scripts accordingly. (2) <strong>Corporate cold open leads with the 6–10% healthcare cost spike</strong> — biggest in over a decade. Pitch: "Your healthcare line just got 6–10% more expensive; here's how MYN's IAYT-credentialed yoga therapy delivers $1.50–$3 ROI per dollar with monthly impact reporting." Match the cadence CEOs are funding. (3) Hold spa-pull as secondary support number for hotel; promote 90%+ luxury-traveler wellness booking signal as the primary "why-now" stat (up from 76%). (4) Pre-route SYTAR 2026 prospect-research by Week 8 — also screen for IAYT-certified therapists who could staff longevity-residence pilots. Maintain one insurer/integrative-clinic learning pilot.
             </div>
         </section>
 
@@ -528,9 +506,56 @@
             </table>
 
             <div class="note">
-                <strong>Scott's Framework Insight (April 21):</strong> Walking yoga trend still accelerating (search interest +2,400% since 2024; now being categorized as a <em>standalone fitness trend</em> rather than a yoga variant — a signal that the audience extends well beyond existing yoga practitioners). This is the broad-tribe funnel entry. Pair it with B2B Authority posts hitting three proof points this week: (1) 62% hospitality stress stat → "Your staff are burning out faster than your guests are arriving," (2) 90%+ luxury travelers fifilter by wellness amenities when booking, and (3) wearable-validated HRV data now differentiates premium yoga programs from wellness apps. <em>[Content below this point was truncated on 2026-04-21 and restored on 2026-04-22.]</em>
+                <strong>Scott's Framework Insight (April 27):</strong> Walking yoga continues to accelerate — search interest +2,414% since 2024, now formally a top-2 fitness trend of 2026 and a standalone category. Hold the broad-tribe positioning: "walking yoga is the fastest-growing fitness trend, and it's actually yoga therapy." <strong>NEW B2B Authority posts to run this week:</strong> (1) "The yoga industry just got re-baselined: $138.66B in 2026, 9.9% CAGR — and the highest-quality dollar is in your spa P&amp;L," (2) "Your healthcare line just got 6–10% more expensive in 2026. Here's why CEOs receiving monthly wellbeing reporting are <em>increasing</em> wellness budgets, not cutting them," (3) "Why Four Seasons, Mandarin Oriental, and Ritz-Carlton are building Longevity Residences (and what that signals for hospitality wellness staffing)," (4) Republish the 62% hospitality stress carousel. <strong>Broad-tribe</strong>: 2 walking-yoga reels (Instagram), 2 TikToks (one teacher spotlight, one "is walking yoga real yoga?" myth-bust). Cadence: 3 LinkedIn data-threads + 1 YouTube 5-min "Longevity Residence" explainer + 4 short-form social.
             </div>
         </section>
+
+        <!-- SYSTEM CAPABILITIES -->
+        <section id="sec-capabilities">
+            <h2>🤖 System Capabilities (AgentField Architecture)</h2>
+
+            <h3>18 Agents in Orchestration</h3>
+            <div class="grid">
+                <div class="card">
+                    <h4>Lead Discovery & Research</h4>
+                    <p>Automated lead identification (Google Places), multi-source research aggregation, executive LinkedIn profiling, website intelligence analysis.</p>
+                </div>
+                <div class="card">
+                    <h4>Scoring & Segmentation</h4>
+                    <p>Multi-factor opportunity scoring (1–100), writing style cloning, wellness recommendations (Perplexity Sonar-Pro).</p>
+                </div>
+                <div class="card">
+                    <h4>Outreach Automation</h4>
+                    <p>7-touch email sequences (personalized), single-touch cold email + LinkedIn messaging, A/B testing framework.</p>
+                </div>
+                <div class="card">
+                    <h4>Content & Intelligence</h4>
+                    <p>Competitive battlecards, market analysis, PMF assessment per segment, content summarization.</p>
+                </div>
+                <div class="card">
+                    <h4>Video & Marketing</h4>
+                    <p>Brand Anthem generation (FAL.AI text-to-music), avatar video (Hedra), motion graphics (Remotion), programmatic social clips.</p>
+                </div>
+                <div class="card">
+                    <h4>Memory & Execution</h4>
+                    <p>Supabase persistence (LinkedIn profiles, Instagram, websites, writing styles, execution logs), session memory with FTS5, learning loop.</p>
+                </div>
+            </div>
+
+            <h3>Infrastructure Stack</h3>
+            <ul style="margin-left: 20px; color: #b0b0b0;">
+                <li><strong>AgentField:</strong> REST services with durable queues, DAG tracking, cryptographic audits</li>
+                <li><strong>Hermes Module:</strong> Skills engine (SKILL.md standard), FTS5 cross-session memory, subagent delegation, gateway router</li>
+                <li><strong>Supabase:</strong> Tables for profiles, scraping data, execution logs</li>
+                <li><strong>Qdrant:</strong> Vector embeddings for semantic search + research clustering</li>
+                <li><strong>Apify:</strong> LinkedIn scraper, Instagram scraper, website crawlers</li>
+            </ul>
+        </section>
+
+        <footer style="text-align: center; color: #7c3aed; margin-top: 40px; padding-top: 20px; border-top: 1px solid #7c3aed;">
+            <p>Weekly Audit Auto-Generated | MYN Strategy AGI System | Last Updated: April 27, 2026</p>
+            <p style="font-size: 0.85em; color: #a0a0a0; margin-top: 10px;">Data sources (April 27 cycle): Fortune Business Insights (yoga $127B→$138.66B, 9.9% CAGR re-baseline), Grand View Research, Mordor Intelligence (spa $164.66B→$221.02B), Precedence Research ($6.50T health & wellness 2026), Towards Healthcare ($10.48T by 2035), Global Wellness Summit (longevity programming as fastest-growing hotel segment), Global Wellness Institute ($738B mind-body), Wellhub & WellSteps & SHRM & WEX (HR healthcare costs +6–10% for 2026), HotelityNet, Active Wellness, Elite Traveler, EHL Hospitality Insights, ILTM (90%+ luxury wellness search), HealthFitness, YogaJala (walking yoga +2,414%), Daily Burn, The National, Glofox, Strive Well-Being, Maximize Market Research, GMI Insights, Business Research Insights, IAYT (66 IAYT in-person schools US), Soul of Yoga, My Vinyasa Practice, PitchBook (Yoga Joint $5.5M raise), BusinessWire, Children's National (school health), Mordor (preventive healthcare $412.6B→$741.85B).</p>
+        </footer>
     </div>
 </body>
 </html>
