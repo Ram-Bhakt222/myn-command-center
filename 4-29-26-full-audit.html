@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MYN Full System Audit — April 29, 2026 (Audit #11)</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;color:#e0e0e0;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.6}
+a{color:#a78bfa;text-decoration:none} a:hover{color:#c4b5fd;text-decoration:underline}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+header{text-align:center;padding:40px 20px 30px;border-bottom:1px solid #1e1e2e}
+header h1{font-size:2.2rem;background:linear-gradient(135deg,#7c5cfc,#a78bfa,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+header .date{color:#888;font-size:0.95rem}
+.stats-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:24px 0}
+.stat-card{background:#12121a;border:1px solid #1e1e2e;border-radius:12px;padding:14px 22px;text-align:center;min-width:120px}
+.stat-card .num{font-size:1.7rem;font-weight:700;color:#7c5cfc}
+.stat-card .label{font-size:0.75rem;color:#888;text-transform:uppercase;letter-spacing:1px}
+
+.action-panel{background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid #7c5cfc66;border-radius:12px;padding:24px 28px;margin:28px 0}
+.action-panel h3{color:#a78bfa;margin-bottom:16px;font-size:1.15rem;display:flex;justify-content:space-between;align-items:center}
+.action-panel .progress{font-size:0.85rem;color:#888;font-weight:normal}
+.check-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #1e1e2e;cursor:pointer}
+.check-item:last-child{border-bottom:none}
+.check-item input[type=checkbox]{margin-top:6px;width:16px;height:16px;accent-color:#7c5cfc;cursor:pointer;flex-shrink:0}
+.check-text{font-size:0.92rem;line-height:1.5}
+.check-desc{color:#888;font-weight:normal}
+.check-item input:checked + .check-text{opacity:0.55;text-decoration:line-through}
+
+.changes-banner{background:#16162a;border:1px solid #7c5cfc44;border-radius:12px;padding:20px 28px;margin:24px 0}
+.changes-banner h3{color:#a78bfa;margin-bottom:10px;font-size:1.1rem}
+.changes-banner ul{list-style:none;padding:0}
+.changes-banner li{padding:5px 0;font-size:0.92rem}
+.changes-banner li::before{content:'â–¸ ';color:#7c5cfc}
+
+.search-bar{display:flex;justify-content:center;margin:20px 0}
+.search-bar input{background:#12121a;border:1px solid #2a2a3a;border-radius:8px;padding:10px 20px;width:100%;max-width:600px;color:#e0e0e0;font-size:0.95rem}
+.search-bar input::placeholder{color:#555}
+
+section{margin:32px 0}
+section h2{font-size:1.3rem;color:#c4b5fd;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #1e1e2e}
+section h2 .count{color:#888;font-size:0.85rem;font-weight:normal}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.card{background:#12121a;border:1px solid #1e1e2e;border-radius:10px;padding:16px;transition:border-color .2s}
+.card:hover{border-color:#7c5cfc55}
+.card h4{font-size:0.95rem;margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card p{font-size:0.82rem;color:#888;margin-bottom:4px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.dot-green{background:#22c55e} .dot-purple{background:#7c5cfc} .dot-yellow{background:#eab308}
+.dot-blue{background:#3b82f6} .dot-red{background:#ef4444}
+.tag{display:inline-block;background:#1e1e2e;border-radius:4px;padding:2px 8px;font-size:0.72rem;color:#a78bfa;margin:2px}
+.new-tag{background:#22c55e22;color:#22c55e;border:1px solid #22c55e44}
+.upd-tag{background:#eab30822;color:#eab308;border:1px solid #eab30844}
+
+footer{text-align:center;padding:40px 20px;color:#444;font-size:0.8rem;border-top:1px solid #1e1e2e;margin-top:40px}
+</style>
+</head>
+<body>
+
+<!-- BEGIN MYN-NAV -->
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; -webkit-font-smoothing: antialiased; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__inner::-webkit-scrollbar { height: 4px; } .myn-nav__inner::-webkit-scrollbar-thumb { background: rgba(0,212,170,0.25); border-radius: 2px; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; font-variant-numeric: tabular-nums; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Center</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="master-directory.html" data-page="master-directory">Directory</a>
+  <a href="analytics-dashboard.html" data-page="analytics-dashboard">Analytics</a>
+  <a href="lead-gen-dashboard.html" data-page="lead-gen-dashboard">Leads</a>
+  <a href="hotel-activities-dashboard.html" data-page="hotel-activities-dashboard">Hotels</a>
+  <a href="business-economics-dashboard.html" data-page="business-economics-dashboard">Economics</a>
+  <a href="team-handoff-dashboard.html" data-page="team-handoff-dashboard">Team</a>
+  <a href="architecture-dashboard.html" data-page="architecture-dashboard">Architecture</a>
+  <a href="agent-control-plane.html" data-page="agent-control-plane">Agents</a>
+  <a href="supabase-dashboard.html" data-page="supabase-dashboard">Supabase</a>
+  <a href="paperclip-dashboard.html" data-page="paperclip-dashboard">Paperclip</a>
+  <a href="review-queue.html" data-page="review-queue">Review</a>
+  <a href="4-29-26-full-audit.html" data-page="4-29-26-full-audit">Audit</a>  <a href="http://localhost:8787" target="_blank" rel="noopener" data-page="cockpit">Cockpit ↗</a>
+
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date" id="myn-nav-date"></span>
+</div>
+</nav>
+<script>
+(function(){
+  var path = (location.pathname.split('/').pop() || 'index.html').replace('.html','');
+  var links = document.querySelectorAll('.myn-nav a[data-page]');
+  for (var i = 0; i < links.length; i++) { if (links[i].getAttribute('data-page') === path) links[i].classList.add('is-active'); }
+  var d = new Date(); var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var el = document.getElementById('myn-nav-date'); if (el) el.textContent = m[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+})();
+</script>
+<!-- END MYN-NAV -->
+
+<div class="container">
+<header>
+<h1>MYN Full System Audit</h1>
+<div class="date">Generated April 29, 2026 · Audit #11 · Cowork Stack inventory + Scheduled-task consolidation plan ·
+<a href="#companion-pdf-viewer">↓ jump to companion PDF</a></div>
+</header>
+
+<section id="companion-pdf-viewer" class="pdf-inline" style="margin:24px 0;background:#12121a;border:1px solid #7c5cfc44;border-radius:12px;overflow:hidden">
+  <div style="padding:14px 20px;background:#16162a;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid #1e1e2e">
+    <span style="color:#a78bfa;font-weight:600;font-size:0.98rem">📎 Companion PDF — MYN Cowork Stack &amp; Workflow (16 pages)</span>
+    <span style="font-size:0.82rem;display:flex;gap:14px;align-items:center">
+      <a href="/files/pdf/cowork-stack" target="_blank" rel="noopener" style="color:#a78bfa">↗ open in new tab</a>
+      <a href="/files/pdf/cowork-stack" download="MYN_Cowork_Stack_and_Workflow.pdf" style="color:#a78bfa">⬇ download</a>
+    </span>
+  </div>
+  <iframe src="/files/pdf/cowork-stack#zoom=page-width" style="width:100%;height:80vh;border:0;background:#0a0a0f;display:block" title="MYN Cowork Stack and Workflow PDF"></iframe>
+  <noscript><p style="padding:12px 20px;color:#888">If the PDF doesn't render inline, <a href="/files/pdf/cowork-stack" style="color:#a78bfa">open it in a new tab</a>.</p></noscript>
+</section>
+
+<div class="stats-row">
+<div class="stat-card"><div class="num">11</div><div class="label">Audit #</div></div>
+<div class="stat-card"><div class="num">46</div><div class="label">Dashboards</div></div>
+<div class="stat-card"><div class="num">65</div><div class="label">Agents &amp; Skills</div></div>
+<div class="stat-card"><div class="num">23</div><div class="label">Discourse</div></div>
+<div class="stat-card"><div class="num">19</div><div class="label">Pipelines</div></div>
+<div class="stat-card"><div class="num">14</div><div class="label">Websites</div></div>
+<div class="stat-card"><div class="num">23</div><div class="label">MCPs &amp; APIs</div></div>
+<div class="stat-card"><div class="num">17</div><div class="label">Cowork Plugins</div></div>
+<div class="stat-card"><div class="num">34→17</div><div class="label">Sched Tasks</div></div>
+</div>
+
+<div class="action-panel">
+<h3>Recommended Next Moves <span class="progress" id="progress-text">0 / 9 done</span></h3>
+<label class="check-item"><input type="checkbox" data-id="disable-paused"> <span class="check-text"><strong>Disable the 4 falsely-enabled PAUSED tasks</strong> — <span class="check-desc">weekly-pipeline-snapshot, morning-approval-digest, myn-blog-draft-every-3-days, myn-blog-rewrite-every-3-days. They keep firing today.</span></span></label>
+<label class="check-item"><input type="checkbox" data-id="delete-onetime"> <span class="check-text"><strong>Delete 3 done one-time reminder folders</strong> — <span class="check-desc">import-student-reports, procurement-hub-followup, blog-auth-and-hotel-plus-one-reminder. Pure cleanup.</span></span></label>
+<label class="check-item"><input type="checkbox" data-id="dedupe-slack"> <span class="check-text"><strong>Dedupe slack-by-salesforce plugin</strong> — <span class="check-desc">Two installs. Keep knowledge-work-plugins version, drop My Uploads version.</span></span></label>
+<label class="check-item"><input type="checkbox" data-id="media-handoff"> <span class="check-text"><strong>Add media-handoff closing block to existing content tasks</strong> — <span class="check-desc">myn-weekly-content, weekly-content-engine, lbsoy-blog-every-3-days. Wires producers to Blog Image Studio.</span></span></label>
+<label class="check-item"><input type="checkbox" data-id="stage-merged"> <span class="check-text"><strong>Stage merged SKILL.md prompts in proposed/ folder</strong> — <span class="check-desc">Review before any cron change. Preserves every responsibility from the original 34.</span></span></label>
+<label class="check-item"><input type="checkbox" data-id="cutover"> <span class="check-text"><strong>Cut over: create new tasks, disable old, delete after a week</strong> — <span class="check-desc">One-shot batch. Safe rollback if anything misbehaves.</span></span></label>
+<label class="check-item"><input type="checkbox" data-id="spread-schedule"> <span class="check-text"><strong>Move 22:00 cluster to spread schedule (05:00–23:33)</strong> — <span class="check-desc">Kills the thundering herd. Hermes' digest gets clean per-task results.</span></span></label>
+<label class="check-item"><input type="checkbox" data-id="auto-post-policy"> <span class="check-text"><strong>Document AUTO_POST_POLICY env var + flip on</strong> — <span class="check-desc">Unblocks the two paused blog auto-tasks. They become modes of myn-content-engine.</span></span></label>
+<label class="check-item"><input type="checkbox" data-id="github-mcp"> <span class="check-text"><strong>Authenticate GitHub MCP (engineering plugin)</strong> — <span class="check-desc">myn-weekly-monday-audit already pushes to GitHub via CLI. MCP gives Cowork chat first-class repo access.</span></span></label>
+</div>
+
+<div class="changes-banner">
+<h3>Changes Since Last Audit (Apr 27 EOD → Apr 29)</h3>
+<ul><li><strong>Audit #11 refresh (vs Apr 27 EOD):</strong> bumped to 2026-04-29.</li>
+<li><strong>Cowork Stack inventory completed:</strong> 17 plugins, 8 connectors, 11 custom MYN-Skills, 34 scheduled tasks all catalogued — see new sections below.</li>
+<li><strong>Comprehensive PDF shipped:</strong> <a href='/files/pdf/cowork-stack' target='_blank'>MYN_Cowork_Stack_and_Workflow.pdf</a> (16 pages) on Desktop · <a href="#companion-pdf-viewer">view inline ↑</a></li>
+<li><strong>Consolidation plan staged:</strong> 34 → 17 tasks, kills the 22:00 pile-up, gates auto-publish behind one env var. See Recommended Next Moves panel ↑.</li>
+<li><strong>4 PAUSED-but-enabled tasks identified:</strong> firing today despite [PAUSED] markers. Top of the to-fix list.</li>
+<li><strong>15 new plugin auth flows surfaced:</strong> GitHub, Linear, Asana, HubSpot, Gong, Granola, BigQuery, Owkin, Clay (sales), SimilarWeb (×2), ZoomInfo, Box, Guru, Notion (support).</li>
+<li><strong>PDF viewer MCP flapping:</strong> connected/disconnected 3× in this session. Plugin install is unstable.</li>
+<li><strong>Bio-research PubMed:</strong> reconnected after brief outage; powers evidence citations for Healthcare-vertical content.</li></ul>
+</div>
+
+<div class="search-bar">
+<input type="text" id="audit-search" placeholder="Search anything on this page (Ctrl+K)…">
+</div>
+
+<section><h2>Cowork Stack — Plugins <span class="count">(17 installed)</span></h2><div class="grid"><div class="card">
+<h4><span class="dot dot-purple"></span> myn-operator <span class="tag">6 skills</span></h4>
+<p><em>My Uploads</em></p>
+<p>Custom MYN: dashboard audits, claims policy, launch readiness, owner matrix, content calendar, division outreach</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> marketing <span class="tag">8 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>Brand review, campaigns, content drafting, email sequences, SEO audit, perf reports</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> sales <span class="tag">9 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>Account research, call prep/summary, competitive intel, outreach, pipeline review, forecast</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> common-room <span class="tag">8 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>GTM copilot — account/contact research, prospecting, outreach using Common Room signals</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> customer-support <span class="tag">5 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>Ticket triage, customer research, draft responses, escalations, KB articles</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> product-management <span class="tag">9 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>PRDs, roadmaps, sprint planning, metrics review, competitive briefs</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> engineering <span class="tag">10 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>Code review, debug, ADRs, incident response, deploy checklist, GitHub auth available</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> design <span class="tag">7 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>Critique, design system, dev handoff, UX copy, accessibility, user research</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> operations <span class="tag">9 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>Process docs, capacity planning, vendor review, runbooks, status reports, compliance</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> data <span class="tag">10 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>SQL writing, dataset exploration, analysis, dashboards, viz, validation, BigQuery auth available</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> productivity <span class="tag">4 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>CLAUDE.md + memory/ two-tier system, TASKS.md, daily updates</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> brand-voice <span class="tag">5 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>Discover brand materials (Box, Gong, Granola, Notion), generate guidelines, enforce voice</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> enterprise-search <span class="tag">5 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>One search across Slack, Gmail, Drive, Notion, etc. with synthesized answers</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> bio-research <span class="tag">7 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>PubMed, bioRxiv, ClinicalTrials.gov, ChEMBL active. BioRender/Synapse/Wiley/Owkin available.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> zoom-plugin <span class="tag">1 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>Zoom meetings, recordings, transcripts, MCP integration</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-yellow"></span> pdf-viewer <span class="tag">5 skills</span></h4>
+<p><em>knowledge-work</em></p>
+<p>Interactive PDF viewer (server FLAPPING — disconnected 3× this session)</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-red"></span> slack-by-salesforce <span class="tag">7 skills</span></h4>
+<p><em>DUPLICATE</em></p>
+<p>Installed twice (My Uploads + knowledge-work). Dedupe needed.</p>
+</div></div></section>
+
+<section><h2>Cowork Stack — Connectors LIVE <span class="count">(8 active)</span></h2><div class="grid"><div class="card">
+<h4><span class="dot dot-green"></span> Slack <span class="tag new-tag">live</span></h4>
+<p><em>mcp.slack.com</em></p>
+<p>All digest tasks post here</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Gmail <span class="tag new-tag">live</span></h4>
+<p><em>gmailmcp.googleapis.com</em></p>
+<p>Outreach drafts, fathom-auto-process replies</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Google Drive <span class="tag new-tag">live</span></h4>
+<p><em>drivemcp.googleapis.com</em></p>
+<p>Sheets sync (PracticeBetter + Fullscript)</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Notion <span class="tag new-tag">live</span></h4>
+<p><em>mcp.notion.com</em></p>
+<p>Knowledge base, procurement hub, paired with notion-bulk-paste skill</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Canva <span class="tag new-tag">live</span></h4>
+<p><em>mcp.canva.com</em></p>
+<p>Marketing asset generation, brand templates</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Clay <span class="tag new-tag">live</span></h4>
+<p><em>api.clay.com</em></p>
+<p>Hotel lead enrichment + outreach</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Fathom <span class="tag new-tag">live</span></h4>
+<p><em>api.fathom.ai</em></p>
+<p>Coaching call recordings (whfm-fathom-auto-process)</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> PubMed <span class="tag new-tag">live</span></h4>
+<p><em>pubmed.mcp.claude.com</em></p>
+<p>Bio evidence citations for healthcare content</p>
+</div></div></section>
+
+<section><h2>Cowork Stack — Planned Additions <span class="count">(1 from Recommended Next Moves)</span></h2>
+<p style="opacity:0.7;font-size:0.92rem;margin:8px 0 16px">The current MYN stack <strong>is the 8 LIVE connectors above</strong>. Other connectors come pre-bundled with installed Cowork plugins but are <em>not</em> part of MYN's stack — they are intentionally unauthenticated and not listed here as TODO. The only planned addition is below (tied to Step 9 of the action panel).</p>
+<div class="grid"><div class="card">
+<h4><span class="dot dot-yellow"></span> GitHub <span class="tag upd-tag">auth pending — Step 9</span></h4>
+<p><em>via engineering plugin</em></p>
+<p>Repo browsing, PR review, issue triage from chat. <code>myn-weekly-monday-audit</code> already pushes via CLI git; this MCP gives Cowork chat first-class repo access. Auth via Cowork → Settings → Connectors → GitHub.</p>
+</div></div>
+</section>
+
+<section><h2>Cowork Stack — Custom MYN-Skills <span class="count">(11 in MYN-Skills/)</span></h2><div class="grid"><div class="card">
+<h4><span class="dot dot-purple"></span> myn-cockpit-ops <span class="tag">custom</span></h4>
+<p><em>MYN-Skills/</em></p>
+<p>MYN-Cockpit Flask server (:8787) + bootstrap.ps1</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> myn-discourse-ops <span class="tag">custom</span></h4>
+<p><em>MYN-Skills/</em></p>
+<p>Discourse newsroom at localhost:8800</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> agent-cluster-debate <span class="tag">custom</span></h4>
+<p><em>MYN-Skills/</em></p>
+<p>Stages structured N-agent debates on Discourse</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> scheduled-discourse-rollout <span class="tag">custom</span></h4>
+<p><em>MYN-Skills/</em></p>
+<p>Long-form Discourse conversations paced via Scheduled Tasks</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> discourse-command-listener <span class="tag">custom</span></h4>
+<p><em>MYN-Skills/</em></p>
+<p>Polling daemon — Discourse as 2-way command surface</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> blog-image-studio-ops <span class="tag">custom</span></h4>
+<p><em>MYN-Skills/</em></p>
+<p>Blog Image Studio Flask app (:8788) — Nano Banana / GPT-image-1 / DALL-E 3</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> myn-gmail-audit <span class="tag">custom</span></h4>
+<p><em>MYN-Skills/</em></p>
+<p>Gmail audit — categorize, flag, summarize</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> myn-instantly-audit <span class="tag">custom</span></h4>
+<p><em>MYN-Skills/</em></p>
+<p>Instantly outreach platform audit</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> metaclaw-startup <span class="tag">custom</span></h4>
+<p><em>MYN-Skills/</em></p>
+<p>Daily MetaClaw proxy startup helper</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> notion-bulk-paste <span class="tag">custom</span></h4>
+<p><em>MYN-Skills/</em></p>
+<p>Push structured content to Notion via clipboard paste</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> structured-release-notes <span class="tag">custom</span></h4>
+<p><em>MYN-Skills/</em></p>
+<p>Auto-generate structured release notes</p>
+</div></div></section>
+
+<section><h2>Scheduled Tasks <span class="count">(34 today → 17 after consolidation)</span></h2><div class="grid"><div class="card">
+<h4><span class="dot dot-green"></span> myn-weekly-content <span class="tag new-tag">enabled</span></h4>
+<p><em>Mon 22:04</em></p>
+<p>Weekly MYN blog from content calendar; pings #marketing-campaign</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-yellow"></span> myn-daily-pipeline <span class="tag upd-tag">REDUCED</span></h4>
+<p><em>Mon/Wed/Fri 22:02</em></p>
+<p>GHL pipeline hygiene; flags stale leads to #pipeline</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> myn-weekly-digest <span class="tag new-tag">enabled</span></h4>
+<p><em>Fri 22:05</em></p>
+<p>Exec digest of agent activity to #command-center</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-yellow"></span> daily-agent-budget-report <span class="tag upd-tag">REDUCED</span></h4>
+<p><em>Mon 22:05</em></p>
+<p>Weekly burn report across agents to #agent-logs</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-red"></span> weekly-pipeline-snapshot <span class="tag upd-tag">PAUSED-enabled</span></h4>
+<p><em>Fri 22:08</em></p>
+<p><b>FALSELY ENABLED</b> — redundant w/ daily-pipeline + Friday CEO brief</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-red"></span> morning-approval-digest <span class="tag upd-tag">PAUSED-enabled</span></h4>
+<p><em>M-F 22:04</em></p>
+<p><b>FALSELY ENABLED</b> — redundant w/ pipeline hygiene approval surface</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> weekly-command-center-qa <span class="tag new-tag">enabled</span></h4>
+<p><em>Mon 22:08</em></p>
+<p>QA scan of dashboards; #command-center</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> monthly-competitive-intel <span class="tag new-tag">enabled</span></h4>
+<p><em>1st of month 22:00</em></p>
+<p>Monthly comp scan: IAYT, PT, integrative, wellness; #research</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-blue"></span> start-analytics-server <span class="tag new-tag">enabled</span></h4>
+<p><em>manual</em></p>
+<p>Start MYN Analytics FastAPI on :8050</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> reoon-email-verification <span class="tag new-tag">enabled</span></h4>
+<p><em>daily 22:04</em></p>
+<p>Verify 490 legacy emails/day via Reoon</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-red"></span> import-student-reports <span class="tag ">disabled</span></h4>
+<p><em>one-time DONE</em></p>
+<p><b>SAFE TO DELETE</b> — Riipen intern reports done</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-blue"></span> myn-system-status-summary <span class="tag new-tag">enabled</span></h4>
+<p><em>manual</em></p>
+<p>On-demand TODO/gap/folder/website roll-up</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-red"></span> reoon-email-verification-batch <span class="tag ">disabled</span></h4>
+<p><em>one-time DONE</em></p>
+<p><b>SAFE TO DELETE</b> — one-shot CRM email extraction done</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> daily-hotel-lead-pipeline <span class="tag new-tag">enabled</span></h4>
+<p><em>M-F 22:05</em></p>
+<p>Discover/score 10 hotel leads in CO; queue top 5</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> daily-outreach-drafts <span class="tag new-tag">enabled</span></h4>
+<p><em>M-F 22:05</em></p>
+<p>Draft cold emails + LinkedIn for scored leads</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> weekly-content-engine <span class="tag new-tag">enabled</span></h4>
+<p><em>Mon 22:02</em></p>
+<p>2 blogs + 10 social + 1 newsletter weekly (queued)</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> weekly-pipeline-review <span class="tag new-tag">enabled</span></h4>
+<p><em>Fri 22:00</em></p>
+<p>Friday CEO brief → #ceo-war-room</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> myn-full-system-audit <span class="tag new-tag">enabled</span></h4>
+<p><em>every 3 days 22:00</em></p>
+<p><b>This page</b>. System audit dashboard w/ change tracking</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> myn-market-research <span class="tag new-tag">enabled</span></h4>
+<p><em>every 5 days 22:00</em></p>
+<p>Update Strategy Intelligence Dashboard</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> myn-weekly-monday-audit <span class="tag new-tag">enabled</span></h4>
+<p><em>Mon 22:08</em></p>
+<p>Refresh Scott's KB HTML, push to GitHub, Slack DM</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> metaclaw-daily-startup <span class="tag new-tag">enabled</span></h4>
+<p><em>daily 22:09</em></p>
+<p>Reminder: 'metaclaw start' in PowerShell</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> myn-analytics-vertical-scan <span class="tag new-tag">enabled</span></h4>
+<p><em>Sun & Thu 22:00</em></p>
+<p>GA4 vertical perf (Supermetrics deprecated)</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> weekly-client-sync <span class="tag new-tag">enabled</span></h4>
+<p><em>Mon 22:09</em></p>
+<p>PracticeBetter + Fullscript → Google Sheet</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-red"></span> myn-blog-draft-every-3-days <span class="tag upd-tag">PAUSED-enabled</span></h4>
+<p><em>every 3 days 22:00</em></p>
+<p><b>FALSELY ENABLED</b> — awaiting AUTO_POST_POLICY confirmation</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-red"></span> myn-blog-rewrite-every-3-days <span class="tag upd-tag">PAUSED-enabled</span></h4>
+<p><em>every 3 days 22:00</em></p>
+<p><b>FALSELY ENABLED</b> — awaiting AUTO_POST_POLICY confirmation</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-red"></span> procurement-hub-followup <span class="tag ">disabled</span></h4>
+<p><em>one-time DONE</em></p>
+<p><b>SAFE TO DELETE</b> — Jeanelle reminder fired</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> lbsoy-blog-every-3-days <span class="tag new-tag">enabled</span></h4>
+<p><em>every 3 days 22:00</em></p>
+<p>Long Beach SOY blog → LBSOY_Backup</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> injesting-scheduled-marketing-results <span class="tag new-tag">enabled</span></h4>
+<p><em>Fri 22:10</em></p>
+<p>Push new data into dashboards/sources of truth</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-red"></span> blog-auth-and-hotel-plus-one-reminder <span class="tag ">disabled</span></h4>
+<p><em>one-time DONE</em></p>
+<p><b>SAFE TO DELETE</b> — pre-Apr 27 reminder fired</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> weekly-dashboard-regen <span class="tag new-tag">enabled</span></h4>
+<p><em>Mon 22:03</em></p>
+<p>Regen Lead Gen / Hotels / Team Handoff dashboards</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> hermes-scheduled-tasks-digest <span class="tag new-tag">enabled</span></h4>
+<p><em>daily 22:07</em></p>
+<p>Hermes rolls up task status → Discourse #agents-ops-health</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> discourse-daily-reflection <span class="tag new-tag">enabled</span></h4>
+<p><em>daily 23:33</em></p>
+<p>Hermes nightly synthesis → #agents-daily-reflection</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-blue"></span> whfm-fathom-auto-process <span class="tag ">disabled</span></h4>
+<p><em>manual</em></p>
+<p>Polls Fathom; SOAP .docx + Gmail draft (Jeanelle's voice)</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> gary-tan-weekly-critique <span class="tag new-tag">enabled</span></h4>
+<p><em>Mon 07:32</em></p>
+<p>Gary Tan-style critique; cockpit refresh + Discourse</p>
+</div></div></section>
+
+<section><h2>Discourse Agent Newsroom — Personas <span class="count">(23, localhost:8800)</span></h2><div class="grid"><div class="card">
+<h4><span class="dot dot-purple"></span> Solène </h4>
+<p><em>Meridian (Hotels) — Lead</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Cormac </h4>
+<p><em>Meridian (Hotels) — Second</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Cyrus </h4>
+<p><em>Keystone (Healthcare) — Lead</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Inès </h4>
+<p><em>Keystone (Healthcare) — Second</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Rhea </h4>
+<p><em>Fulcrum (Corporate) — Lead</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Tomás </h4>
+<p><em>Fulcrum (Corporate) — Second</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Odette </h4>
+<p><em>Atlas (Marketplace) — Lead</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Kiran </h4>
+<p><em>Atlas (Marketplace) — Second</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Nova </h4>
+<p><em>Cadence (Wearables) — Lead</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Jules </h4>
+<p><em>Cadence (Wearables) — Second</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Linnea </h4>
+<p><em>Harbor (Locals/LBSOY) — Lead</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Bodhi </h4>
+<p><em>Harbor (Locals/LBSOY) — Second</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Ember-lead </h4>
+<p><em>Ember (Kids/Schools) — Lead</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Ember-2nd </h4>
+<p><em>Ember (Kids/Schools) — Second</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Aperture-lead </h4>
+<p><em>Aperture (Brand/Comms) — Lead</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Aperture-2nd </h4>
+<p><em>Aperture (Brand/Comms) — Second</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Loom-lead </h4>
+<p><em>Loom (Ops/Finance) — Lead</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Loom-2nd </h4>
+<p><em>Loom (Ops/Finance) — Second</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Hermes </h4>
+<p><em>Cross-cutting orchestrator — daily roll-up + reflections</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Orrery </h4>
+<p><em>Strategy & long-horizon view</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Lyric </h4>
+<p><em>Brand voice / copy</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Parley </h4>
+<p><em>Sales conversation persona</em></p>
+<p></p>
+</div>
+<div class="card">
+<h4><span class="dot dot-purple"></span> Vaishali </h4>
+<p><em>Cockpit operator handbook persona</em></p>
+<p></p>
+</div></div></section>
+
+<section><h2>Dashboards & Command Centers <span class="count">(46 total across surfaces)</span></h2><div class="grid"><div class="card">
+<h4><span class="dot dot-green"></span> Cockpit (this app) </h4>
+<p><em>Layer 0 — Control</em></p>
+<p>Flask :8787 — start/stop stacks, dashboards index</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Full System Audit (Apr 29) </h4>
+<p><em>Layer 1 — CEO</em></p>
+<p><b>You are here</b>. Audit #11.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-blue"></span> Previous Audit (Apr 27) </h4>
+<p><em>Layer 1 — CEO</em></p>
+<p>Audit #10 — preserved for diffing</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Gary Tan Critique </h4>
+<p><em>Layer 1 — CEO</em></p>
+<p>Outside-in PMF critique. Auto-refreshed Mon 07:30</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Scott Hoffman KB </h4>
+<p><em>Layer 1 — CEO</em></p>
+<p>Always-fresh published version. Re-published Apr 27.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Hub (index) </h4>
+<p><em>Layer 1 — Nav</em></p>
+<p>Top-level index of all command-center pages</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Master Directory </h4>
+<p><em>Layer 1 — Nav</em></p>
+<p>Searchable directory across all surfaces</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Analytics Dashboard </h4>
+<p><em>Layer 2 — Metrics</em></p>
+<p>GA4 + revenue + traffic</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Lead-Gen Dashboard </h4>
+<p><em>Layer 2 — Pipeline</em></p>
+<p>Pipeline metrics; weekly Mon regen</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Hotel Activities Dashboard </h4>
+<p><em>Layer 2 — Vertical</em></p>
+<p>Hotels-specific pipeline + outreach</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Business Economics Dashboard </h4>
+<p><em>Layer 2 — Finance</em></p>
+<p>Burn, revenue, runway</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Team Handoff Dashboard </h4>
+<p><em>Layer 2 — Ops</em></p>
+<p>Cross-agent handoff state</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Architecture Dashboard </h4>
+<p><em>Layer 2 — Tech</em></p>
+<p>System architecture map</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Agent Control Plane </h4>
+<p><em>Layer 2 — Agents</em></p>
+<p>Agent inventory + status</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Supabase Dashboard </h4>
+<p><em>Layer 2 — Data</em></p>
+<p>Posts table, blog publishing state</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Paperclip Dashboard </h4>
+<p><em>Layer 2 — Data</em></p>
+<p>Paperclip docs + ingestion state</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Review Queue </h4>
+<p><em>Layer 2 — Approvals</em></p>
+<p>Outreach + content awaiting Ram's approval</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Strategy Intelligence Dashboard </h4>
+<p><em>Strategy AGI</em></p>
+<p>Auto-refreshed every 5 days</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> AGI Dashboard </h4>
+<p><em>Strategy AGI</em></p>
+<p>Long-horizon strategy view</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Strategy Dashboard (latest) </h4>
+<p><em>Strategy AGI</em></p>
+<p>Most recent strategy snapshot</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> AgentField Dashboard </h4>
+<p><em>Strategy AGI/agentfield</em></p>
+<p>Agent orchestration view</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Marketing Drafts Dashboard </h4>
+<p><em>Marketing Agent/CMO</em></p>
+<p>Lior's CMO surface</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Biomedical Roadmap </h4>
+<p><em>Marketing Agent/initiatives</em></p>
+<p>Priya's 3-phase research → marketing program</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Blog Image Studio </h4>
+<p><em>myn.com-main/tools</em></p>
+<p>Flask :8788 — hero image generation</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Discourse Newsroom </h4>
+<p><em>Discourse-agents</em></p>
+<p>Localhost :8800 — 23 agent personas</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> OKR June 2026 </h4>
+<p><em>Discourse-agents</em></p>
+<p>Operational OKRs for the newsroom</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> LBSOY Site </h4>
+<p><em>LBSOY_Backup/lbsoy-site</em></p>
+<p>Long Beach School of Yoga local site</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> WHFM Site </h4>
+<p><em>WombhealthFM</em></p>
+<p>Jeanelle's clinical practice site</p>
+</div></div></section>
+
+<section>
+<h2>Pipelines & Lead Generation <span class="count">(19)</span></h2>
+<div class="grid">
+<div class="card">
+<h4><span class="dot dot-green"></span> GHL Pipeline (CRM) </h4>
+<p><em>GoHighLevel</em></p>
+<p>Primary CRM. Hotel + Healthcare + Corporate verticals.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Hotel Lead Discovery </h4>
+<p><em>daily-hotel-lead-pipeline</em></p>
+<p>M-F 22:05. Discover/score 10 CO leads, queue top 5.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Outreach Drafts </h4>
+<p><em>daily-outreach-drafts</em></p>
+<p>M-F 22:05. Cold email + LinkedIn for scored leads.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Reoon Email Verification </h4>
+<p><em>daily 22:04</em></p>
+<p>Verify 490 legacy emails/day.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Clay Enrichment </h4>
+<p><em>Clay MCP</em></p>
+<p>Enrichment for hotel pipeline.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Instantly Sequences </h4>
+<p><em>external</em></p>
+<p>Cold outreach platform; audited via myn-instantly-audit skill.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Common Room Signals </h4>
+<p><em>Common Room MCP</em></p>
+<p>GTM intent signals for prospecting.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Friday CEO Brief </h4>
+<p><em>weekly-pipeline-review</em></p>
+<p>Fri 22:00 → #ceo-war-room.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Lead Gen Dashboard </h4>
+<p><em>weekly-dashboard-regen</em></p>
+<p>Mon dashboard refresh.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Approval Queue </h4>
+<p><em>Review Queue dashboard</em></p>
+<p>Outreach + content awaiting Ram's approval.</p>
+</div>
+</div>
+</section>
+
+<section>
+<h2>Websites & Mockups <span class="count">(14)</span></h2>
+<div class="grid">
+<div class="card">
+<h4><span class="dot dot-green"></span> myyoganetwork.com </h4>
+<p><em>Next.js + Supabase</em></p>
+<p>Production site. /api/blogs served by mynapi-main.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> myn.org </h4>
+<p><em>myn.org-main</em></p>
+<p>Sister .org site.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Long Beach School of Yoga </h4>
+<p><em>LBSOY_Backup/lbsoy-site</em></p>
+<p>Local content site.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> WombHealth FM </h4>
+<p><em>WombhealthFM</em></p>
+<p>Jeanelle's clinical practice.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Discourse Newsroom </h4>
+<p><em>localhost:8800</em></p>
+<p>Internal agent forum.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Strategy AGI Dashboards </h4>
+<p><em>Strategy AGI/*.html</em></p>
+<p>Long-horizon strategy views.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Marketing CMO Surface </h4>
+<p><em>Marketing Agent/CMO/</em></p>
+<p>Lior's CMO drafts dashboard.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Biomedical Roadmap </h4>
+<p><em>initiatives/biomedical/</em></p>
+<p>Priya's research → marketing program.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-blue"></span> Razi / Rolex / Omnicorex </h4>
+<p><em>brand sandboxes</em></p>
+<p>Lower-priority experiments.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-blue"></span> Vaishali Cockpit Series </h4>
+<p><em>operator handbook v2 (8 docs)</em></p>
+<p>Onboarding for next Riipen cohort.</p>
+</div>
+</div>
+</section>
+
+<section>
+<h2>APIs, MCPs & Integrations <span class="count">(23 — 8 Cowork connectors + 15 direct integrations)</span></h2>
+<div class="grid">
+<div class="card">
+<h4><span class="dot dot-green"></span> Supabase </h4>
+<p><em>DB + Storage</em></p>
+<p>posts table, thumbnails bucket. Service-role keys in .env.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> GoHighLevel API </h4>
+<p><em>ghl-mcp-server (custom)</em></p>
+<p>CRM integration via custom MCP server on Desktop.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> PracticeBetter API </h4>
+<p><em>weekly-client-sync</em></p>
+<p>Clinical client data → Google Sheet.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Fullscript API </h4>
+<p><em>weekly-client-sync</em></p>
+<p>Supplements/labs → Google Sheet.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> GA4 (direct) </h4>
+<p><em>myn-analytics-vertical-scan</em></p>
+<p>Sun/Thu. Supermetrics deprecated.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Reoon API </h4>
+<p><em>reoon-email-verification</em></p>
+<p>Email verification, 490/day.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> MetaClaw proxy </h4>
+<p><em>metaclaw-daily-startup</em></p>
+<p>Local proxy; Ram starts manually.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Discourse (DiscourseAPI) </h4>
+<p><em>localhost:8800</em></p>
+<p>Agent posts, replies, debates.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Qdrant </h4>
+<p><em>localhost:6333</em></p>
+<p>Vector store for RAG over knowledge base.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Paperclip </h4>
+<p><em>localhost:3100</em></p>
+<p>Doc ingestion + storage.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> AgentField </h4>
+<p><em>Strategy AGI/agentfield</em></p>
+<p>Agent orchestration framework.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> n8n </h4>
+<p><em>localhost:5678</em></p>
+<p>Workflow automation (legacy reference).</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> GHL-MCP server </h4>
+<p><em>Desktop/ghl-mcp-server</em></p>
+<p>Custom MCP wrapping GHL.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Sysmon </h4>
+<p><em>Sysinternals-observability</em></p>
+<p>Host probe; polled by Cockpit /api/host/snapshot.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Blog Image Studio </h4>
+<p><em>myn.com-main/tools/blog-image-studio :8788</em></p>
+<p>Nano Banana / GPT-image-1 / DALL-E 3.</p>
+</div>
+</div>
+</section>
+
+<section>
+<h2>Strategy & Blueprint Docs</h2>
+<div class="grid">
+<div class="card">
+<h4><span class="dot dot-green"></span> MYN System Manual for Consultant </h4>
+<p><em>Strategy AGI/MYN_System_Manual_for_Consultant_2026-04-24.pdf</em></p>
+<p>Operator handbook current as of Apr 24.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> 3M Hotel Growth Plan </h4>
+<p><em>MYN_3M_Hotel_Growth_Plan_2026-04-24.pdf</em></p>
+<p>Hotels-vertical growth plan.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> AGI Business Essay </h4>
+<p><em>MYN_AGI_Business_Essay_2026-04-24.pdf</em></p>
+<p>Long-form strategy essay.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Operator Handbook </h4>
+<p><em>MYN_OPERATOR_HANDBOOK_2026-04-24.pdf</em></p>
+<p>Day-to-day operations runbook.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> OKR June 2026 </h4>
+<p><em>Discourse-agents/OKR_JUNE_2026.md</em></p>
+<p>Operational OKRs from the newsroom.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Cross-System Audit (Apr 23) </h4>
+<p><em>CROSS_SYSTEM_AUDIT_2026-04-23.md</em></p>
+<p>Strategy AGI cross-system snapshot.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Master Index </h4>
+<p><em>Strategy AGI/MASTER_INDEX.md</em></p>
+<p>Index of all Strategy AGI docs.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Repo Cleanup Plan </h4>
+<p><em>Strategy AGI/REPO_CLEANUP_PLAN.md</em></p>
+<p>Repo consolidation roadmap.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Cowork Stack & Workflow </h4>
+<p><em>Desktop/MYN_Cowork_Stack_and_Workflow.pdf</em></p>
+<p><b>NEW Apr 29</b>. 16-page stack export.</p>
+</div>
+</div>
+</section>
+
+<section>
+<h2>WombHealth FM</h2>
+<div class="grid">
+<div class="card">
+<h4><span class="dot dot-green"></span> Notion Import (full DB) </h4>
+<p><em>WombhealthFM/Notion_Import/databases/</em></p>
+<p>Knowledge source for WHFM agents.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Aviva Course (11 modules) </h4>
+<p><em>WombhealthFM/_content/</em></p>
+<p>Source for Course Creator agent.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-blue"></span> Fathom Transcripts </h4>
+<p><em>WombhealthFM/Transcriptions/</em></p>
+<p>Coaching call recordings; auto-process disabled.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> Marketing/Content </h4>
+<p><em>WombhealthFM/_content/marketing/</em></p>
+<p>Content for clinical practice.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> WHFM Course Creator agent </h4>
+<p><em>WombhealthFM agents</em></p>
+<p>Builds course outlines from Aviva source.</p>
+</div>
+<div class="card">
+<h4><span class="dot dot-green"></span> WHFM Clinical Research agent </h4>
+<p><em>WombhealthFM agents</em></p>
+<p>Cites Notion DB; stops guessing.</p>
+</div>
+</div>
+</section>
+
+<section>
+<h2>Possibilities & Next Moves</h2>
+<div class="card" style="padding:24px">
+<ul style="list-style:none;padding:0">
+<li style="padding:6px 0;font-size:0.9rem"><strong>Execute the 9-step plan above</strong> — top of the page, with checkboxes that persist across reloads (localStorage).</li>
+<li style="padding:6px 0;font-size:0.9rem"><strong>Wire WombHealth Notion_Import → WHFM agents</strong> — full Notion DB landed; point Course Creator + Clinical Research at it.</li>
+<li style="padding:6px 0;font-size:0.9rem"><strong>Aviva course → Course Creator</strong> — 11 modules extracted; one pass to summarize + tag + outline.</li>
+<li style="padding:6px 0;font-size:0.9rem"><strong>Connect content-engine drop → Marketing CMO dashboard</strong> — link Apr 27 output to Lior's CMO surface.</li>
+<li style="padding:6px 0;font-size:0.9rem"><strong>OKR June 2026 into Cockpit</strong> — surface daily progress alongside pipeline metrics.</li>
+<li style="padding:6px 0;font-size:0.9rem"><strong>Spend dashboard live</strong> — surface spend_routes.py on cockpit.html.</li>
+<li style="padding:6px 0;font-size:0.9rem"><strong>Westin Boston Seaport blog → Instantly</strong> — turn into 5-touch hotels sequence.</li>
+<li style="padding:6px 0;font-size:0.9rem"><strong>Authenticate Gong or Granola</strong> — feed brand-voice:discover-brand on real call data.</li>
+<li style="padding:6px 0;font-size:0.9rem"><strong>.env consolidation</strong> — audit Cockpit/Hermes/Paperclip/Discourse-agents for divergence.</li>
+</ul>
+</div>
+</section>
+
+<footer>
+Audit #11 · 2026-04-29 · Companion PDF on Desktop · Generated by Cowork
+</footer>
+</div>
+
+<script>
+// ---- Recommended-Next-Moves checkbox persistence ----
+(function() {
+  var KEY = 'myn-audit-11-checks';
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e){}
+  var boxes = document.querySelectorAll('.action-panel input[type=checkbox]');
+  var progressEl = document.getElementById('progress-text');
+  function updateProgress() {
+    var done = 0;
+    boxes.forEach(function(b){ if (b.checked) done++; });
+    if (progressEl) progressEl.textContent = done + ' / ' + boxes.length + ' done';
+  }
+  boxes.forEach(function(b){
+    var id = b.getAttribute('data-id');
+    if (state[id]) b.checked = true;
+    b.addEventListener('change', function() {
+      state[id] = b.checked;
+      localStorage.setItem(KEY, JSON.stringify(state));
+      updateProgress();
+    });
+  });
+  updateProgress();
+})();
+
+// ---- Search filter ----
+(function() {
+  var input = document.getElementById('audit-search');
+  if (!input) return;
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault(); input.focus(); input.select();
+    }
+  });
+  input.addEventListener('input', function() {
+    var q = input.value.toLowerCase().trim();
+    document.querySelectorAll('.card').forEach(function(c) {
+      c.style.display = (!q || c.textContent.toLowerCase().includes(q)) ? '' : 'none';
+    });
+    document.querySelectorAll('section').forEach(function(s) {
+      var any = Array.from(s.querySelectorAll('.card')).some(function(c) { return c.style.display !== 'none'; });
+      s.style.display = any || !q ? '' : 'none';
+    });
+  });
+})();
+</script>
+
+<!-- myn-agent-avatars-wired -->
+<script src="assets/avatars/agent-avatars.js" defer></script>
+<script>
+(function(){
+  // Selectors where a single text leaf is the agent name → prepend avatar.
+  var SELECTORS = [
+    ".agent-name", ".approval-agent", ".heartbeat-name",
+    ".persona-name", ".agent-handle", ".agent-username",
+    "[data-agent]", "[data-agent-name]"
+  ];
+  function decorate(){
+    if(!window.MYN || !window.MYN.renderAvatarHTML) return false;
+    SELECTORS.forEach(function(sel){
+      document.querySelectorAll(sel + ":not(.myn-decorated)").forEach(function(el){
+        var key = el.dataset.agent || el.dataset.agentName || (el.textContent||"").trim();
+        var size = parseInt(el.dataset.size || "24", 10);
+        var img = window.MYN.renderAvatarHTML(key, size);
+        if (img) {
+          el.insertAdjacentHTML("afterbegin", img + " ");
+          el.classList.add("myn-decorated");
+          el.style.display = el.style.display || "inline-flex";
+          el.style.alignItems = "center";
+          el.style.gap = "6px";
+        }
+      });
+    });
+    // Tables with first-column agent names — opt-in via data-agent on <tr>
+    document.querySelectorAll("tr[data-agent]:not(.myn-row-decorated)").forEach(function(row){
+      var key = row.getAttribute("data-agent");
+      var firstCell = row.querySelector("td:first-child");
+      if (firstCell && key) {
+        var existingLink = firstCell.querySelector("a");
+        var img = window.MYN.renderAvatarHTML(key, 28);
+        if (img) {
+          if (existingLink) {
+            existingLink.insertAdjacentHTML("afterbegin", img);
+            existingLink.style.display = "inline-flex";
+            existingLink.style.alignItems = "center";
+            existingLink.style.gap = "8px";
+          } else {
+            firstCell.insertAdjacentHTML("afterbegin", img + " ");
+            firstCell.style.verticalAlign = "middle";
+          }
+          row.classList.add("myn-row-decorated");
+        }
+      }
+    });
+    return true;
+  }
+  function tick(t){ if(decorate() || t>40) return; setTimeout(function(){tick(t+1);}, 100); }
+  if(document.readyState === "loading"){ document.addEventListener("DOMContentLoaded", function(){tick(0);}); } else { tick(0); }
+  if(window.MutationObserver){ new MutationObserver(function(){decorate();}).observe(document.body || document.documentElement, {childList:true, subtree:true}); }
+})();
+</script>
+<script src="_widgets/floating-connectors.js" defer></script>
+</body>
+</html>

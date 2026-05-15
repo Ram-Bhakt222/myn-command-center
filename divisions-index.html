@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>9 Divisions · MYN Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-0: #0a0e14;
+  --bg-1: #0f141b;
+  --bg-2: #151c26;
+  --bg-3: #1d2631;
+  --border: rgba(255,255,255,0.06);
+  --border-strong: rgba(255,255,255,0.12);
+  --text-0: #f3f6fa;
+  --text-1: #c9d1d9;
+  --text-2: #8b949e;
+  --text-3: #6e7681;
+  --accent: #00d4aa;
+  --accent-dim: rgba(0,212,170,0.14);
+  --warn: #f59e0b;
+  --warn-dim: rgba(245,158,11,0.14);
+  --risk: #ef4444;
+  --risk-dim: rgba(239,68,68,0.14);
+  --good: #10b981;
+  --good-dim: rgba(16,185,129,0.14);
+  --info: #a78bfa;
+  --info-dim: rgba(167,139,250,0.14);
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px;
+  --s-6: 32px; --s-7: 48px; --s-8: 64px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg-0); color: var(--text-1); font-family: var(--font-body); font-size: 14px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4 { font-family: var(--font-display); color: var(--text-0); letter-spacing: -0.01em; font-weight: 600; }
+h1 { font-size: 28px; line-height: 1.2; }
+h2 { font-size: 20px; line-height: 1.3; }
+h3 { font-size: 15px; line-height: 1.35; font-weight: 600; }
+code, .mono { font-family: var(--font-mono); font-size: 12.5px; }
+
+.app { max-width: 1480px; margin: 0 auto; padding: var(--s-6) var(--s-6) var(--s-8); }
+
+header.top { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s-5); padding-bottom: var(--s-5); border-bottom: 1px solid var(--border); margin-bottom: var(--s-6); flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: var(--s-3); flex-wrap: wrap; }
+.brand h1 { font-weight: 700; }
+.brand .codename { font-family: var(--font-mono); font-size: 11px; padding: 3px 9px; border-radius: var(--r-sm); letter-spacing: 0.08em; text-transform: uppercase; }
+.brand .priority { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); padding: 3px 9px; background: var(--bg-3); border-radius: var(--r-sm); letter-spacing: 0.05em; }
+.subtitle { color: var(--text-2); font-size: 13.5px; margin-top: 6px; max-width: 760px; }
+.meta { display: flex; gap: var(--s-5); align-items: center; font-size: 12px; color: var(--text-2); }
+.meta .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--good); margin-right: 6px; box-shadow: 0 0 8px var(--good); }
+
+.kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--s-3); margin-bottom: var(--s-6); }
+.kpi { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); }
+.kpi .label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+.kpi .value { font-family: var(--font-display); font-size: 24px; font-weight: 600; color: var(--text-0); margin-top: 4px; line-height: 1.1; }
+.kpi .delta { font-size: 11.5px; margin-top: 4px; }
+.delta.up { color: var(--good); }
+.delta.down { color: var(--risk); }
+.delta.flat { color: var(--text-3); }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); margin-bottom: var(--s-6); }
+.col { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+.col-header { padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.col-header h2 { font-size: 14px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+.col-tag { font-family: var(--font-mono); font-size: 10.5px; padding: 3px 8px; border-radius: var(--r-sm); letter-spacing: 0.05em; }
+.col-body { padding: var(--s-5); }
+.col-current .col-tag { background: var(--bg-3); color: var(--text-2); }
+.col-future .col-header h2 { color: var(--info); }
+.col-future .col-tag { background: var(--info-dim); color: var(--info); }
+
+.section-header { display: flex; align-items: baseline; justify-content: space-between; margin: var(--s-7) 0 var(--s-4); padding-bottom: var(--s-3); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: var(--s-3); }
+.section-header h2 { font-size: 16px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text-0); font-weight: 600; }
+.section-header .meta-sm { font-size: 12px; color: var(--text-3); font-family: var(--font-mono); }
+
+.div-row { display: grid; grid-template-columns: 200px 1fr auto; gap: var(--s-4); padding: var(--s-3) 0; border-bottom: 1px dashed var(--border); align-items: center; font-size: 13px; }
+.div-row:last-child { border-bottom: none; }
+.div-name { color: var(--text-0); font-weight: 500; }
+.div-name .sub { font-size: 11px; color: var(--text-3); margin-left: 6px; }
+.div-detail { color: var(--text-2); font-size: 12.5px; }
+.div-badge { font-family: var(--font-mono); font-size: 11px; padding: 2px 7px; border-radius: var(--r-sm); font-weight: 500; }
+.badge-good { background: var(--good-dim); color: var(--good); }
+.badge-warn { background: var(--warn-dim); color: var(--warn); }
+.badge-risk { background: var(--risk-dim); color: var(--risk); }
+.badge-info { background: var(--info-dim); color: var(--info); }
+.badge-mute { background: var(--bg-3); color: var(--text-3); }
+
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--s-3); }
+.team-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); }
+.team-card .role-tag { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+.team-card .name { color: var(--text-0); font-weight: 600; font-size: 14px; }
+.team-card .focus { color: var(--text-2); font-size: 12px; margin-top: 2px; }
+.team-card .deliv { color: var(--text-1); font-size: 12.5px; margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--border); }
+
+.pipeline-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4) var(--s-5); margin-bottom: var(--s-3); display: grid; grid-template-columns: 1fr auto auto; gap: var(--s-4); align-items: center; }
+.pipeline-card .name { color: var(--text-0); font-weight: 500; font-size: 13.5px; }
+.pipeline-card .detail { color: var(--text-2); font-size: 12px; margin-top: 3px; }
+.pipeline-card .next { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
+
+.collateral-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--s-3); }
+.collateral-card { background: var(--bg-1); border-left: 3px solid var(--accent); border-radius: 0 var(--r-md) var(--r-md) 0; padding: var(--s-4); }
+.collateral-card .type { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+.collateral-card.draft { border-left-color: var(--warn); }
+.collateral-card.draft .type { color: var(--warn); }
+.collateral-card.published { border-left-color: var(--good); }
+.collateral-card.published .type { color: var(--good); }
+.collateral-card.planned { border-left-color: var(--info); }
+.collateral-card.planned .type { color: var(--info); }
+.collateral-card .title { color: var(--text-0); font-weight: 500; font-size: 13.5px; margin-bottom: 4px; }
+.collateral-card .meta { color: var(--text-3); font-size: 11.5px; font-family: var(--font-mono); }
+
+.callout { background: linear-gradient(90deg, var(--warn-dim), transparent 70%); border-left: 3px solid var(--warn); border-radius: var(--r-md); padding: var(--s-4) var(--s-5); margin-bottom: var(--s-6); }
+.callout.risk { background: linear-gradient(90deg, var(--risk-dim), transparent 70%); border-left-color: var(--risk); }
+.callout.info { background: linear-gradient(90deg, var(--info-dim), transparent 70%); border-left-color: var(--info); }
+.callout.good { background: linear-gradient(90deg, var(--good-dim), transparent 70%); border-left-color: var(--good); }
+.callout h3 { color: var(--text-0); font-size: 13.5px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.callout p { color: var(--text-1); font-size: 13px; }
+.callout p strong { color: var(--text-0); }
+
+.magic-sentence { background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: var(--r-md); padding: var(--s-5) var(--s-6); margin: var(--s-5) 0; }
+.magic-sentence .label { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--s-2); }
+.magic-sentence p { color: var(--text-0); font-size: 16px; font-family: var(--font-display); line-height: 1.4; font-style: italic; }
+
+footer { margin-top: var(--s-8); padding-top: var(--s-5); border-top: 1px solid var(--border); text-align: center; color: var(--text-3); font-size: 12px; }
+footer a { color: var(--text-2); text-decoration: none; border-bottom: 1px dotted var(--text-3); }
+footer a:hover { color: var(--accent); }
+
+@media (max-width: 980px) {
+  .kpi-row { grid-template-columns: repeat(3, 1fr); }
+  .split { grid-template-columns: 1fr; }
+  .div-row { grid-template-columns: 1fr; gap: 4px; }
+}
+
+.divs { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: var(--s-4); }
+.div-link { display: block; background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-5); text-decoration: none; transition: border-color 0.15s, transform 0.15s; }
+.div-link:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.div-link .cn { display: inline-block; font-family: var(--font-mono); font-size: 11px; padding: 3px 9px; border-radius: var(--r-sm); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--s-3); }
+.div-link h3 { color: var(--text-0); font-size: 17px; margin-bottom: 6px; }
+.div-link .tagline { color: var(--text-2); font-size: 13px; line-height: 1.5; margin-bottom: var(--s-3); }
+.div-link .prio { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-3); padding: 3px 8px; background: var(--bg-3); border-radius: var(--r-sm); display: inline-block; letter-spacing: 0.05em; }
+</style>
+</head>
+<body>
+
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; }
+.myn-nav__divisions { display: flex; gap: 2px; padding: 2px; background: rgba(255,255,255,0.03); border-radius: 6px; margin-left: 8px; }
+.myn-nav__divisions a { padding: 4px 10px; font-size: 12px; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Divisions</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="myn-command-center-v2.html" data-page="myn-command-center-v2">v2 Master</a>
+  <a href="divisions-index.html" data-page="divisions-index">All Divisions</a>  <a href="http://localhost:8787" target="_blank" rel="noopener" data-page="cockpit">Cockpit ↗</a>
+
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date">Updated 2026-05-07</span>
+</div>
+</nav>
+
+<div class="app">
+  <header class="top">
+    <div>
+      <div class="brand">
+        <h1>9 Divisions</h1>
+        <span class="codename" style="background: var(--accent-dim); color: var(--accent);">INDEX</span>
+      </div>
+      <p class="subtitle">One dashboard per division. Status, team, pipeline, and content-in-flight. Mirrors the AGENT_ROSTER division taxonomy.</p>
+    </div>
+    <div class="meta"><span><span class="dot"></span>Static reference</span><span class="mono">Updated 2026-05-07</span></div>
+  </header>
+
+  <div class="divs">
+<a href="division-meridian-hotels.html" class="div-link">
+  <div class="cn" style="background: #f59e0b22; color: #f59e0b;">MERIDIAN</div>
+  <h3>Hotels &amp; Luxury Residential</h3>
+  <p class="tagline">The axis of the day, where guests reset. Strongest unit economics — $7K-$8.5K/mo net positive per property.</p>
+  <div class="prio">TIER 1 - ANCHOR</div>
+</a>
+<a href="division-keystone-healthcare.html" class="div-link">
+  <div class="cn" style="background: #ef444422; color: #ef4444;">KEYSTONE</div>
+  <h3>Healthcare Systems</h3>
+  <p class="tagline">The clinical arch that holds everything else. Highest revenue per customer, strongest clinical evidence — but proof mechanism doesn&#x27;t ship until May 31.</p>
+  <div class="prio">TIER 2 - HIGHEST REVENUE</div>
+</a>
+<a href="division-fulcrum-corporate.html" class="div-link">
+  <div class="cn" style="background: #a78bfa22; color: #a78bfa;">FULCRUM</div>
+  <h3>Corporate Wellness</h3>
+  <p class="tagline">Leverage point — HR moves populations, not individuals. Selective pursuit only until healthcare proof delivers.</p>
+  <div class="prio">TIER 3 - SELECTIVE / HELD</div>
+</a>
+<a href="division-atlas-marketplace.html" class="div-link">
+  <div class="cn" style="background: #00d4aa22; color: #00d4aa;">ATLAS</div>
+  <h3>Yoga Therapy Marketplace</h3>
+  <p class="tagline">A mapped directory of therapists and seekers. Organic traffic, therapist supply, B2B/B2C dual-sided. Leverage, not lead generator.</p>
+  <div class="prio">TIER 4 - LEVERAGE</div>
+</a>
+<a href="division-cadence-wearables.html" class="div-link">
+  <div class="cn" style="background: #00d4aa22; color: #00d4aa;">CADENCE</div>
+  <h3>Wearables + EHR (Yoga Bio Sync)</h3>
+  <p class="tagline">Biometric rhythm — HRV, sleep, recovery — made audible. The credibility engine that turns yoga into a data-driven therapeutic intervention.</p>
+  <div class="prio">CRITICAL PATH - LAUNCH MAY 31</div>
+</a>
+<a href="division-harbor-locals.html" class="div-link">
+  <div class="cn" style="background: #a78bfa22; color: #a78bfa;">HARBOR</div>
+  <h3>LBSOY / Long Beach Locals</h3>
+  <p class="tagline">The brand&#x27;s home berth. Long Beach School of Yoga is the founder&#x27;s authority anchor and the local proof point that everything else stands on.</p>
+  <div class="prio">AUTHORITY ANCHOR</div>
+</a>
+<a href="division-ember-kids.html" class="div-link">
+  <div class="cn" style="background: #f59e0b22; color: #f59e0b;">EMBER</div>
+  <h3>Kids / Mommy &amp; Me / Schools</h3>
+  <p class="tagline">Small, warm, obviously alive. After-school programs, Mommy &amp; Me, school district partnerships (LBUSD/ELOP). Materials exist; sequence doesn&#x27;t.</p>
+  <div class="prio">TIER 4 - LARGE BUT SLOW</div>
+</a>
+<a href="division-aperture-brand.html" class="div-link">
+  <div class="cn" style="background: #00d4aa22; color: #00d4aa;">APERTURE</div>
+  <h3>Brand / Content / Events</h3>
+  <p class="tagline">How the brand opens to the world. The Marketing Agent&#x27;s voice gate, the content engine, the founder-forward narrative architecture.</p>
+  <div class="prio">CROSS-CUTTING - VOICE OWNER</div>
+</a>
+<a href="division-loom-ops.html" class="div-link">
+  <div class="cn" style="background: #a78bfa22; color: #a78bfa;">LOOM</div>
+  <h3>Ops / Finance / Automations</h3>
+  <p class="tagline">Weaves operational threads into something usable. AgentField, scheduled tasks, financial roll-up, automation backbone — and the report substrate that every other division needs.</p>
+  <div class="prio">INFRASTRUCTURE - SHARED SERVICE</div>
+</a>
+  </div>
+
+  <footer>
+    <a href="myn-command-center-v2.html">← v2 Master</a> &middot; <a href="index.html">Hub</a><br>
+    <span class="mono" style="margi
+<script src="_widgets/floating-connectors.js" defer></script>

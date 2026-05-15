@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CADENCE — Wearables + EHR (Yoga Bio Sync) · MYN Division Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-0: #0a0e14;
+  --bg-1: #0f141b;
+  --bg-2: #151c26;
+  --bg-3: #1d2631;
+  --border: rgba(255,255,255,0.06);
+  --border-strong: rgba(255,255,255,0.12);
+  --text-0: #f3f6fa;
+  --text-1: #c9d1d9;
+  --text-2: #8b949e;
+  --text-3: #6e7681;
+  --accent: #00d4aa;
+  --accent-dim: rgba(0,212,170,0.14);
+  --warn: #f59e0b;
+  --warn-dim: rgba(245,158,11,0.14);
+  --risk: #ef4444;
+  --risk-dim: rgba(239,68,68,0.14);
+  --good: #10b981;
+  --good-dim: rgba(16,185,129,0.14);
+  --info: #a78bfa;
+  --info-dim: rgba(167,139,250,0.14);
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px;
+  --s-6: 32px; --s-7: 48px; --s-8: 64px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg-0); color: var(--text-1); font-family: var(--font-body); font-size: 14px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4 { font-family: var(--font-display); color: var(--text-0); letter-spacing: -0.01em; font-weight: 600; }
+h1 { font-size: 28px; line-height: 1.2; }
+h2 { font-size: 20px; line-height: 1.3; }
+h3 { font-size: 15px; line-height: 1.35; font-weight: 600; }
+code, .mono { font-family: var(--font-mono); font-size: 12.5px; }
+
+.app { max-width: 1480px; margin: 0 auto; padding: var(--s-6) var(--s-6) var(--s-8); }
+
+header.top { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s-5); padding-bottom: var(--s-5); border-bottom: 1px solid var(--border); margin-bottom: var(--s-6); flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: var(--s-3); flex-wrap: wrap; }
+.brand h1 { font-weight: 700; }
+.brand .codename { font-family: var(--font-mono); font-size: 11px; padding: 3px 9px; border-radius: var(--r-sm); letter-spacing: 0.08em; text-transform: uppercase; }
+.brand .priority { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); padding: 3px 9px; background: var(--bg-3); border-radius: var(--r-sm); letter-spacing: 0.05em; }
+.subtitle { color: var(--text-2); font-size: 13.5px; margin-top: 6px; max-width: 760px; }
+.meta { display: flex; gap: var(--s-5); align-items: center; font-size: 12px; color: var(--text-2); }
+.meta .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--good); margin-right: 6px; box-shadow: 0 0 8px var(--good); }
+
+.kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--s-3); margin-bottom: var(--s-6); }
+.kpi { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); }
+.kpi .label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+.kpi .value { font-family: var(--font-display); font-size: 24px; font-weight: 600; color: var(--text-0); margin-top: 4px; line-height: 1.1; }
+.kpi .delta { font-size: 11.5px; margin-top: 4px; }
+.delta.up { color: var(--good); }
+.delta.down { color: var(--risk); }
+.delta.flat { color: var(--text-3); }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); margin-bottom: var(--s-6); }
+.col { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+.col-header { padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.col-header h2 { font-size: 14px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+.col-tag { font-family: var(--font-mono); font-size: 10.5px; padding: 3px 8px; border-radius: var(--r-sm); letter-spacing: 0.05em; }
+.col-body { padding: var(--s-5); }
+.col-current .col-tag { background: var(--bg-3); color: var(--text-2); }
+.col-future .col-header h2 { color: var(--info); }
+.col-future .col-tag { background: var(--info-dim); color: var(--info); }
+
+.section-header { display: flex; align-items: baseline; justify-content: space-between; margin: var(--s-7) 0 var(--s-4); padding-bottom: var(--s-3); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: var(--s-3); }
+.section-header h2 { font-size: 16px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text-0); font-weight: 600; }
+.section-header .meta-sm { font-size: 12px; color: var(--text-3); font-family: var(--font-mono); }
+
+.div-row { display: grid; grid-template-columns: 200px 1fr auto; gap: var(--s-4); padding: var(--s-3) 0; border-bottom: 1px dashed var(--border); align-items: center; font-size: 13px; }
+.div-row:last-child { border-bottom: none; }
+.div-name { color: var(--text-0); font-weight: 500; }
+.div-name .sub { font-size: 11px; color: var(--text-3); margin-left: 6px; }
+.div-detail { color: var(--text-2); font-size: 12.5px; }
+.div-badge { font-family: var(--font-mono); font-size: 11px; padding: 2px 7px; border-radius: var(--r-sm); font-weight: 500; }
+.badge-good { background: var(--good-dim); color: var(--good); }
+.badge-warn { background: var(--warn-dim); color: var(--warn); }
+.badge-risk { background: var(--risk-dim); color: var(--risk); }
+.badge-info { background: var(--info-dim); color: var(--info); }
+.badge-mute { background: var(--bg-3); color: var(--text-3); }
+
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--s-3); }
+.team-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); }
+.team-card .role-tag { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+.team-card .name { color: var(--text-0); font-weight: 600; font-size: 14px; }
+.team-card .focus { color: var(--text-2); font-size: 12px; margin-top: 2px; }
+.team-card .deliv { color: var(--text-1); font-size: 12.5px; margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--border); }
+
+.pipeline-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4) var(--s-5); margin-bottom: var(--s-3); display: grid; grid-template-columns: 1fr auto auto; gap: var(--s-4); align-items: center; }
+.pipeline-card .name { color: var(--text-0); font-weight: 500; font-size: 13.5px; }
+.pipeline-card .detail { color: var(--text-2); font-size: 12px; margin-top: 3px; }
+.pipeline-card .next { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
+
+.collateral-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--s-3); }
+.collateral-card { background: var(--bg-1); border-left: 3px solid var(--accent); border-radius: 0 var(--r-md) var(--r-md) 0; padding: var(--s-4); }
+.collateral-card .type { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+.collateral-card.draft { border-left-color: var(--warn); }
+.collateral-card.draft .type { color: var(--warn); }
+.collateral-card.published { border-left-color: var(--good); }
+.collateral-card.published .type { color: var(--good); }
+.collateral-card.planned { border-left-color: var(--info); }
+.collateral-card.planned .type { color: var(--info); }
+.collateral-card .title { color: var(--text-0); font-weight: 500; font-size: 13.5px; margin-bottom: 4px; }
+.collateral-card .meta { color: var(--text-3); font-size: 11.5px; font-family: var(--font-mono); }
+
+.callout { background: linear-gradient(90deg, var(--warn-dim), transparent 70%); border-left: 3px solid var(--warn); border-radius: var(--r-md); padding: var(--s-4) var(--s-5); margin-bottom: var(--s-6); }
+.callout.risk { background: linear-gradient(90deg, var(--risk-dim), transparent 70%); border-left-color: var(--risk); }
+.callout.info { background: linear-gradient(90deg, var(--info-dim), transparent 70%); border-left-color: var(--info); }
+.callout.good { background: linear-gradient(90deg, var(--good-dim), transparent 70%); border-left-color: var(--good); }
+.callout h3 { color: var(--text-0); font-size: 13.5px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.callout p { color: var(--text-1); font-size: 13px; }
+.callout p strong { color: var(--text-0); }
+
+.magic-sentence { background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: var(--r-md); padding: var(--s-5) var(--s-6); margin: var(--s-5) 0; }
+.magic-sentence .label { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--s-2); }
+.magic-sentence p { color: var(--text-0); font-size: 16px; font-family: var(--font-display); line-height: 1.4; font-style: italic; }
+
+footer { margin-top: var(--s-8); padding-top: var(--s-5); border-top: 1px solid var(--border); text-align: center; color: var(--text-3); font-size: 12px; }
+footer a { color: var(--text-2); text-decoration: none; border-bottom: 1px dotted var(--text-3); }
+footer a:hover { color: var(--accent); }
+
+@media (max-width: 980px) {
+  .kpi-row { grid-template-columns: repeat(3, 1fr); }
+  .split { grid-template-columns: 1fr; }
+  .div-row { grid-template-columns: 1fr; gap: 4px; }
+}
+
+.brand .codename { background: #00d4aa22; color: #00d4aa; }
+</style>
+</head>
+<body>
+
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; }
+.myn-nav__divisions { display: flex; gap: 2px; padding: 2px; background: rgba(255,255,255,0.03); border-radius: 6px; margin-left: 8px; }
+.myn-nav__divisions a { padding: 4px 10px; font-size: 12px; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Divisions</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="myn-command-center-v2.html" data-page="myn-command-center-v2">v2 Master</a>
+  <a href="divisions-index.html" data-page="divisions-index">All Divisions</a>  <a href="http://localhost:8787" target="_blank" rel="noopener" data-page="cockpit">Cockpit ↗</a>
+
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date">Updated 2026-05-07</span>
+</div>
+</nav>
+
+<div class="app">
+  <header class="top">
+    <div>
+      <div class="brand">
+        <h1>Wearables + EHR (Yoga Bio Sync)</h1>
+        <span class="codename">CADENCE</span>
+        <span class="priority">CRITICAL PATH - LAUNCH MAY 31</span>
+      </div>
+      <p class="subtitle">Biometric rhythm — HRV, sleep, recovery — made audible. The credibility engine that turns yoga into a data-driven therapeutic intervention.</p>
+    </div>
+    <div class="meta"><span><span class="dot"></span>Static reference</span><span class="mono">Updated 2026-05-07</span></div>
+  </header>
+
+  <div class="callout warn"><h3>T-21 GO/NO-GO checkpoint - May 10 (3 days)</h3><p><strong>GO</strong> = all technical green + ≥7 patients recruited. <strong>SOFT LAUNCH</strong> = technical green, <7 patients (run pilot, delay public comms to Q3). <strong>DELAY</strong> = any HIGH risk red → reschedule 2026-06-30. Action required: confirm patient recruitment count + technical status before the call. Engineering gate: FHIR + OAuth shape must be locked by May 15.</p></div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="label">Days to Launch</div><div class="value">24</div><div class="delta down">May 31 · 2026</div></div><div class="kpi"><div class="label">T-21 GO/NO-GO</div><div class="value">May 10</div><div class="delta down">3 days away · Ram decision</div></div><div class="kpi"><div class="label">ASU Team</div><div class="value">5</div><div class="delta flat">Anay/David/Ben/Roen/Wyatt</div></div><div class="kpi"><div class="label">HRV Target</div><div class="value">+10-20%</div><div class="delta up">pilot improvement target</div></div><div class="kpi"><div class="label">Deep Sleep</div><div class="value">+15-30 min</div><div class="delta up">pilot improvement target</div></div><div class="kpi"><div class="label">Stress (PSS-10)</div><div class="value">-15-25%</div><div class="delta up">pilot reduction target</div></div>
+  </div>
+
+  <div class="section-header">
+    <h2>Status</h2>
+    <span class="meta-sm">Where we are vs. 90-day target</span>
+  </div>
+  <div class="split">
+    <div class="col col-current">
+      <div class="col-header"><h2>Current state</h2><span class="col-tag">TODAY</span></div>
+      <div class="col-body"><div class="div-row"><div class="div-name">ASU Capstone team</div><div class="div-detail">5 students · Anay (lead) · David · Benjamin · Roen · Wyatt</div><span class="div-badge badge-info">Active</span></div><div class="div-row"><div class="div-name">Wearable abstraction</div><div class="div-detail">Anay - Oura first → Apple Health → Fitbit → Garmin</div><span class="div-badge badge-warn">Building</span></div><div class="div-row"><div class="div-name">Auth0 HIPAA + DigitalOcean</div><div class="div-detail">David - token vault · rules engine · HIPAA compliance</div><span class="div-badge badge-warn">Building</span></div><div class="div-row"><div class="div-name">FHIR Observation export</div><div class="div-detail">Benjamin - OpenEMR integration · must lock by May 15</div><span class="div-badge badge-info">Engineering gate</span></div><div class="div-row"><div class="div-name">Ingest pipeline</div><div class="div-detail">Roen - daily metrics summaries · cohort analytics</div><span class="div-badge badge-warn">Building</span></div><div class="div-row"><div class="div-name">Pre-session snapshot card</div><div class="div-detail">Wyatt - real-time HR overlay · Figma designs</div><span class="div-badge badge-warn">Building</span></div><div class="div-row"><div class="div-name">Brand anthem video</div><div class="div-detail">Hedra + FAL.AI Sonauto pipeline · launch-day asset</div><span class="div-badge badge-good">Planned</span></div><div class="div-row"><div class="div-name">Waitlist landing page</div><div class="div-detail">/yoga-bio-sync · Supabase pilot_waitlist table</div><span class="div-badge badge-good">Planned</span></div></div>
+    </div>
+    <div class="col col-future">
+      <div class="col-header"><h2>90-day target</h2><span class="col-tag">TARGET</span></div>
+      <div class="col-body"><div class="div-row"><div class="div-name">Yoga Bio Sync</div><div class="div-detail">Live · 10-hotel pilot running · HRV data published</div><span class="div-badge badge-info">Live</span></div><div class="div-row"><div class="div-name">FHIR + OpenEMR</div><div class="div-detail">Locked by May 15 · clinical credibility shipping</div><span class="div-badge badge-info">Locked</span></div><div class="div-row"><div class="div-name">Cohort-1 dashboard</div><div class="div-detail">4 KPI cards (HRV/sleep/PSS-10/recovery delta) · Nova May 31</div><span class="div-badge badge-info">Live</span></div><div class="div-row"><div class="div-name">Healthcare credibility</div><div class="div-detail">$14.4K savings claim now backed by Bio Sync data</div><span class="div-badge badge-info">Validated</span></div><div class="div-row"><div class="div-name">Hotels premium tier</div><div class="div-detail">Yoga Bio Sync™ as luxury upsell · 20-40% price uplift</div><span class="div-badge badge-info">Productized</span></div><div class="div-row"><div class="div-name">Insurer reimbursement</div><div class="div-detail">Biometric data strengthens reimbursable-intervention case</div><span class="div-badge badge-info">Lever</span></div><div class="div-row"><div class="div-name">Statistical significance</div><div class="div-detail">Jules&#x27; gate on cohort numbers · publishable rigor</div><span class="div-badge badge-info">Gated</span></div><div class="div-row"><div class="div-name">Monthly impact report</div><div class="div-detail">Halden&#x27;s runbook live · Supabase+GHL→PDF</div><span class="div-badge badge-info">Operational</span></div></div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>Team & Ownership</h2>
+    <span class="meta-sm">Lead · Second · Humans · Coordination agents</span>
+  </div>
+  <div class="team-grid"><div class="team-card"><div class="role-tag">Lead</div><div class="name">Nova</div><div class="focus">Cadence Lead - Engineering anchor</div><div class="deliv">Pre-launch ADR locking Anay&#x27;s OAuth + Benjamin&#x27;s FHIR shape before May 15 · Cohort-1 dashboard</div></div><div class="team-card"><div class="role-tag">Second</div><div class="name">Jules</div><div class="focus">Cadence Second - Trust gate</div><div class="deliv">PR review on every ASU capstone PR · statistical-significance gate on cohort numbers · HIPAA shadow on David</div></div><div class="team-card"><div class="role-tag">ASU</div><div class="name">Anay Pradhan</div><div class="focus">Project Lead / OAuth</div><div class="deliv">Wearable provider abstraction layer (Oura → Apple Health → Fitbit → Garmin)</div></div><div class="team-card"><div class="role-tag">ASU</div><div class="name">David Brown</div><div class="focus">Infrastructure / Security</div><div class="deliv">DigitalOcean · Auth0 (HIPAA) · token vault · rules engine</div></div><div class="team-card"><div class="role-tag">ASU</div><div class="name">Benjamin Herman</div><div class="focus">EHR / FHIR</div><div class="deliv">OpenEMR integration · FHIR Observation export · HIPAA compliance docs</div></div><div class="team-card"><div class="role-tag">ASU</div><div class="name">Roen Wainscoat</div><div class="focus">Data Pipelines</div><div class="deliv">Ingest pipeline · daily metrics summaries · cohort analytics</div></div><div class="team-card"><div class="role-tag">ASU</div><div class="name">Wyatt Belscher</div><div class="focus">UI / UX</div><div class="deliv">Pre-session snapshot card · real-time HR overlay · Figma designs</div></div><div class="team-card"><div class="role-tag">Coordination</div><div class="name">Halden (Loom)</div><div class="focus">Report substrate</div><div class="deliv">Monthly impact report runbook · eval set + failure-mode playbook</div></div></div>
+
+  <div class="section-header">
+    <h2>Pipeline / Deals / Leads</h2>
+    <span class="meta-sm">Active prospects, contracts, and lead segments</span>
+  </div>
+  <div><div class="pipeline-card"><div><div class="name">10-hotel pilot</div><div class="detail">Pilot study Phase III · 4 weeks · Oura Ring · post-May-31</div></div><div class="next">Pilot recruit</div></div><div class="pipeline-card"><div><div class="name">Insurer conversations</div><div class="detail">Biometric data unlocks reimbursement-vector validation</div></div><div class="next">Future</div></div><div class="pipeline-card"><div><div class="name">Hospital integrations</div><div class="detail">OpenEMR live first · Epic later</div></div><div class="next">Phased</div></div><div class="pipeline-card"><div><div class="name">Patient recruitment</div><div class="detail">Confirm count before May 10 GO/NO-GO call</div></div><div class="next">Critical</div></div></div>
+
+  <div class="section-header">
+    <h2>Content & Collateral in Flight</h2>
+    <span class="meta-sm">Mirrors marketing-drafts-dashboard for this division</span>
+  </div>
+  <div class="collateral-grid"><div class="collateral-card published"><div class="type">PUBLISHED</div><div class="title">Wearable-Validated Wellness (Corporate Yoga)</div><div class="meta">Blog #9 · 2026-04-20 · pre-launch teaser</div></div><div class="collateral-card published"><div class="type">PUBLISHED</div><div class="title">The 3.38x ROI: Self-Insured Employers</div><div class="meta">Blog #10 · 2026-04-23</div></div><div class="collateral-card planned"><div class="type">PLANNED</div><div class="title">LinkedIn: &#x27;23 days to launch&#x27; (May 8)</div><div class="meta">Marketing Agent · 1 day away</div></div><div class="collateral-card planned"><div class="type">PLANNED</div><div class="title">Why We Built Yoga Bio Sync (1800w blog)</div><div class="meta">May 26 launch blog · 19 days away</div></div><div class="collateral-card planned"><div class="type">PLANNED</div><div class="title">LinkedIn: &#x27;3 days to launch&#x27; (May 28) · ASU shoutout</div><div class="meta">Marketing Agent · 21 days away</div></div><div class="collateral-card planned"><div class="type">PLANNED</div><div class="title">Brand anthem video for Yoga Bio Sync</div><div class="meta">Hedra + FAL.AI pipeline · launch day</div></div><div class="collateral-card planned"><div class="type">PLANNED</div><div class="title">Waitlist landing page /yoga-bio-sync</div><div class="meta">Supabase pilot_waitlist · May 31</div></div><div class="collateral-card planned"><div class="type">PLANNED</div><div class="title">Press release draft + biometric flow infographic</div><div class="meta">Launch day all-channel push</div></div></div>
+
+  <div class="magic-sentence">
+    <div class="label">Magic Sentence</div>
+    <p>"Yoga Bio Sync turns a wellness practice into a measurable therapeutic intervention. HRV, sleep, recovery — wearables and EHR finally let us show the effect, not just claim it."</p>
+  </div>
+
+  <footer>
+    <a href="divisions-index.html">← All divisions</a> &m
+<script src="_widgets/floating-connectors.js" defer></script>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MERIDIAN — Hotels &amp; Luxury Residential · MYN Division Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-0: #0a0e14;
+  --bg-1: #0f141b;
+  --bg-2: #151c26;
+  --bg-3: #1d2631;
+  --border: rgba(255,255,255,0.06);
+  --border-strong: rgba(255,255,255,0.12);
+  --text-0: #f3f6fa;
+  --text-1: #c9d1d9;
+  --text-2: #8b949e;
+  --text-3: #6e7681;
+  --accent: #00d4aa;
+  --accent-dim: rgba(0,212,170,0.14);
+  --warn: #f59e0b;
+  --warn-dim: rgba(245,158,11,0.14);
+  --risk: #ef4444;
+  --risk-dim: rgba(239,68,68,0.14);
+  --good: #10b981;
+  --good-dim: rgba(16,185,129,0.14);
+  --info: #a78bfa;
+  --info-dim: rgba(167,139,250,0.14);
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px;
+  --s-6: 32px; --s-7: 48px; --s-8: 64px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg-0); color: var(--text-1); font-family: var(--font-body); font-size: 14px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4 { font-family: var(--font-display); color: var(--text-0); letter-spacing: -0.01em; font-weight: 600; }
+h1 { font-size: 28px; line-height: 1.2; }
+h2 { font-size: 20px; line-height: 1.3; }
+h3 { font-size: 15px; line-height: 1.35; font-weight: 600; }
+code, .mono { font-family: var(--font-mono); font-size: 12.5px; }
+
+.app { max-width: 1480px; margin: 0 auto; padding: var(--s-6) var(--s-6) var(--s-8); }
+
+header.top { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s-5); padding-bottom: var(--s-5); border-bottom: 1px solid var(--border); margin-bottom: var(--s-6); flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: var(--s-3); flex-wrap: wrap; }
+.brand h1 { font-weight: 700; }
+.brand .codename { font-family: var(--font-mono); font-size: 11px; padding: 3px 9px; border-radius: var(--r-sm); letter-spacing: 0.08em; text-transform: uppercase; }
+.brand .priority { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); padding: 3px 9px; background: var(--bg-3); border-radius: var(--r-sm); letter-spacing: 0.05em; }
+.subtitle { color: var(--text-2); font-size: 13.5px; margin-top: 6px; max-width: 760px; }
+.meta { display: flex; gap: var(--s-5); align-items: center; font-size: 12px; color: var(--text-2); }
+.meta .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--good); margin-right: 6px; box-shadow: 0 0 8px var(--good); }
+
+.kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--s-3); margin-bottom: var(--s-6); }
+.kpi { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); }
+.kpi .label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+.kpi .value { font-family: var(--font-display); font-size: 24px; font-weight: 600; color: var(--text-0); margin-top: 4px; line-height: 1.1; }
+.kpi .delta { font-size: 11.5px; margin-top: 4px; }
+.delta.up { color: var(--good); }
+.delta.down { color: var(--risk); }
+.delta.flat { color: var(--text-3); }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); margin-bottom: var(--s-6); }
+.col { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+.col-header { padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.col-header h2 { font-size: 14px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+.col-tag { font-family: var(--font-mono); font-size: 10.5px; padding: 3px 8px; border-radius: var(--r-sm); letter-spacing: 0.05em; }
+.col-body { padding: var(--s-5); }
+.col-current .col-tag { background: var(--bg-3); color: var(--text-2); }
+.col-future .col-header h2 { color: var(--info); }
+.col-future .col-tag { background: var(--info-dim); color: var(--info); }
+
+.section-header { display: flex; align-items: baseline; justify-content: space-between; margin: var(--s-7) 0 var(--s-4); padding-bottom: var(--s-3); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: var(--s-3); }
+.section-header h2 { font-size: 16px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text-0); font-weight: 600; }
+.section-header .meta-sm { font-size: 12px; color: var(--text-3); font-family: var(--font-mono); }
+
+.div-row { display: grid; grid-template-columns: 200px 1fr auto; gap: var(--s-4); padding: var(--s-3) 0; border-bottom: 1px dashed var(--border); align-items: center; font-size: 13px; }
+.div-row:last-child { border-bottom: none; }
+.div-name { color: var(--text-0); font-weight: 500; }
+.div-name .sub { font-size: 11px; color: var(--text-3); margin-left: 6px; }
+.div-detail { color: var(--text-2); font-size: 12.5px; }
+.div-badge { font-family: var(--font-mono); font-size: 11px; padding: 2px 7px; border-radius: var(--r-sm); font-weight: 500; }
+.badge-good { background: var(--good-dim); color: var(--good); }
+.badge-warn { background: var(--warn-dim); color: var(--warn); }
+.badge-risk { background: var(--risk-dim); color: var(--risk); }
+.badge-info { background: var(--info-dim); color: var(--info); }
+.badge-mute { background: var(--bg-3); color: var(--text-3); }
+
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--s-3); }
+.team-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); }
+.team-card .role-tag { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+.team-card .name { color: var(--text-0); font-weight: 600; font-size: 14px; }
+.team-card .focus { color: var(--text-2); font-size: 12px; margin-top: 2px; }
+.team-card .deliv { color: var(--text-1); font-size: 12.5px; margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--border); }
+
+.pipeline-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4) var(--s-5); margin-bottom: var(--s-3); display: grid; grid-template-columns: 1fr auto auto; gap: var(--s-4); align-items: center; }
+.pipeline-card .name { color: var(--text-0); font-weight: 500; font-size: 13.5px; }
+.pipeline-card .detail { color: var(--text-2); font-size: 12px; margin-top: 3px; }
+.pipeline-card .next { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
+
+.collateral-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--s-3); }
+.collateral-card { background: var(--bg-1); border-left: 3px solid var(--accent); border-radius: 0 var(--r-md) var(--r-md) 0; padding: var(--s-4); }
+.collateral-card .type { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+.collateral-card.draft { border-left-color: var(--warn); }
+.collateral-card.draft .type { color: var(--warn); }
+.collateral-card.published { border-left-color: var(--good); }
+.collateral-card.published .type { color: var(--good); }
+.collateral-card.planned { border-left-color: var(--info); }
+.collateral-card.planned .type { color: var(--info); }
+.collateral-card .title { color: var(--text-0); font-weight: 500; font-size: 13.5px; margin-bottom: 4px; }
+.collateral-card .meta { color: var(--text-3); font-size: 11.5px; font-family: var(--font-mono); }
+
+.callout { background: linear-gradient(90deg, var(--warn-dim), transparent 70%); border-left: 3px solid var(--warn); border-radius: var(--r-md); padding: var(--s-4) var(--s-5); margin-bottom: var(--s-6); }
+.callout.risk { background: linear-gradient(90deg, var(--risk-dim), transparent 70%); border-left-color: var(--risk); }
+.callout.info { background: linear-gradient(90deg, var(--info-dim), transparent 70%); border-left-color: var(--info); }
+.callout.good { background: linear-gradient(90deg, var(--good-dim), transparent 70%); border-left-color: var(--good); }
+.callout h3 { color: var(--text-0); font-size: 13.5px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.callout p { color: var(--text-1); font-size: 13px; }
+.callout p strong { color: var(--text-0); }
+
+.magic-sentence { background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: var(--r-md); padding: var(--s-5) var(--s-6); margin: var(--s-5) 0; }
+.magic-sentence .label { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--s-2); }
+.magic-sentence p { color: var(--text-0); font-size: 16px; font-family: var(--font-display); line-height: 1.4; font-style: italic; }
+
+footer { margin-top: var(--s-8); padding-top: var(--s-5); border-top: 1px solid var(--border); text-align: center; color: var(--text-3); font-size: 12px; }
+footer a { color: var(--text-2); text-decoration: none; border-bottom: 1px dotted var(--text-3); }
+footer a:hover { color: var(--accent); }
+
+@media (max-width: 980px) {
+  .kpi-row { grid-template-columns: repeat(3, 1fr); }
+  .split { grid-template-columns: 1fr; }
+  .div-row { grid-template-columns: 1fr; gap: 4px; }
+}
+
+.brand .codename { background: #f59e0b22; color: #f59e0b; }
+</style>
+</head>
+<body>
+
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; }
+.myn-nav__divisions { display: flex; gap: 2px; padding: 2px; background: rgba(255,255,255,0.03); border-radius: 6px; margin-left: 8px; }
+.myn-nav__divisions a { padding: 4px 10px; font-size: 12px; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Divisions</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="myn-command-center-v2.html" data-page="myn-command-center-v2">v2 Master</a>
+  <a href="divisions-index.html" data-page="divisions-index">All Divisions</a>  <a href="http://localhost:8787" target="_blank" rel="noopener" data-page="cockpit">Cockpit ↗</a>
+
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date">Updated 2026-05-07</span>
+</div>
+</nav>
+
+<div class="app">
+  <header class="top">
+    <div>
+      <div class="brand">
+        <h1>Hotels &amp; Luxury Residential</h1>
+        <span class="codename">MERIDIAN</span>
+        <span class="priority">TIER 1 - ANCHOR</span>
+      </div>
+      <p class="subtitle">The axis of the day, where guests reset. Strongest unit economics — $7K-$8.5K/mo net positive per property.</p>
+    </div>
+    <div class="meta"><span><span class="dot"></span>Static reference</span><span class="mono">Updated 2026-05-07</span></div>
+  </header>
+
+  <div class="callout good"><h3>Strongest economics in the portfolio</h3><p>Hotels are the <strong>economic anchor</strong> per CLAUDE.md PMF segmentation. Highest willingness to pay, recurring revenue, low price sensitivity. Conservative ROI: $11.2K monthly revenue impact per property, $7K-8.5K net positive after program cost. Highest marketing investment justified here. Olympics 2028 prep doubles the bet.</p></div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="label">Active Contracts</div><div class="value">5</div><div class="delta flat">Westin x2, Dagny, Intex, Bixby</div></div><div class="kpi"><div class="label">Pipeline (warm)</div><div class="value">656</div><div class="delta up">hotel contacts ready</div></div><div class="kpi"><div class="label">Active Lead Gen</div><div class="value">85</div><div class="delta up">leads since Apr 24 (Colorado)</div></div><div class="kpi"><div class="label">Net per Property</div><div class="value">$7K-8.5K</div><div class="delta up">monthly, conservative</div></div><div class="kpi"><div class="label">Fairmont Score</div><div class="value">87/100</div><div class="delta up">highest of 3 LB Fairmonts</div></div><div class="kpi"><div class="label">Next Send</div><div class="value">May 19</div><div class="delta flat">Sequence v2 → 656</div></div>
+  </div>
+
+  <div class="section-header">
+    <h2>Status</h2>
+    <span class="meta-sm">Where we are vs. 90-day target</span>
+  </div>
+  <div class="split">
+    <div class="col col-current">
+      <div class="col-header"><h2>Current state</h2><span class="col-tag">TODAY</span></div>
+      <div class="col-body"><div class="div-row"><div class="div-name">Fairmont Breakers LB</div><div class="div-detail">Pacific6 ownership · Jan 20 2027 retreat anchor · battlecard ready</div><span class="div-badge badge-info">Active prep</span></div><div class="div-row"><div class="div-name">Westin Sacramento</div><div class="div-detail">Thu-Sun 7:30 AM model property · post-mortem feeding Fairmont pitch</div><span class="div-badge badge-info">Live</span></div><div class="div-row"><div class="div-name">Westin Long Beach</div><div class="div-detail">M-Sun 7:30 AM Marina Room · wellness-lounge intro May 2026</div><span class="div-badge badge-info">Live</span></div><div class="div-row"><div class="div-name">Westin Boston Seaport</div><div class="div-detail">Tue 6:30 AM Pilates · East Coast reference property</div><span class="div-badge badge-info">Live</span></div><div class="div-row"><div class="div-name">The Dagny Boston</div><div class="div-detail">Active contract · expansion potential</div><span class="div-badge badge-info">Live</span></div><div class="div-row"><div class="div-name">Hotels Sequence v2</div><div class="div-detail">656 contacts · sends May 19 · emails 1-3 written, 4-7 &#x27;follow pattern&#x27;</div><span class="div-badge badge-warn">70% draft</span></div><div class="div-row"><div class="div-name">Hotel pitch deck v2</div><div class="div-detail">Lyric - reframes around &#x27;3 Numbers&#x27; · target May 10</div><span class="div-badge badge-good">In flight</span></div><div class="div-row"><div class="div-name">Daily lead pipeline</div><div class="div-detail">Apify → Colorado market rotation · 5/day weekdays</div><span class="div-badge badge-info">Running</span></div></div>
+    </div>
+    <div class="col col-future">
+      <div class="col-header"><h2>90-day target</h2><span class="col-tag">TARGET</span></div>
+      <div class="col-body"><div class="div-row"><div class="div-name">Hotels</div><div class="div-detail">Full 7-touch sequence live · 2 signed pilots · Westin expansion</div><span class="div-badge badge-info">Active</span></div><div class="div-row"><div class="div-name">Fairmont</div><div class="div-detail">Retreat signed · Pacific6 introduces sister properties</div><span class="div-badge badge-info">Anchor</span></div><div class="div-row"><div class="div-name">Wellness Gap-Fill Pilot</div><div class="div-detail">$1.5K-3K productized · 3 boutique pilots running</div><span class="div-badge badge-info">Productized</span></div><div class="div-row"><div class="div-name">Yoga as Infrastructure</div><div class="div-detail">Operators framework adopted · stress-recovery SLAs</div><span class="div-badge badge-good">Adopted</span></div><div class="div-row"><div class="div-name">Pacific6 portfolio</div><div class="div-detail">Long Beach cluster as proof of region density</div><span class="div-badge badge-info">Live</span></div><div class="div-row"><div class="div-name">Premium upsell</div><div class="div-detail">Yoga Bio Sync™ tier on luxury properties (post May 31)</div><span class="div-badge badge-info">Tier 2</span></div><div class="div-row"><div class="div-name">Olympics 2028</div><div class="div-detail">Infrastructure prep for LA Olympics wellness programming</div><span class="div-badge badge-good">Pre-empt</span></div><div class="div-row"><div class="div-name">East Coast</div><div class="div-detail">Dagny + Westin Seaport as East Coast reference cluster</div><span class="div-badge badge-info">Lever</span></div></div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>Team & Ownership</h2>
+    <span class="meta-sm">Lead · Second · Humans · Coordination agents</span>
+  </div>
+  <div class="team-grid"><div class="team-card"><div class="role-tag">Lead</div><div class="name">Solène</div><div class="focus">Meridian Lead - Discourse persona</div><div class="deliv">Pitch deck &#x27;3 Numbers&#x27; reframe (Apr 21 cycle delivered) · GM conversations</div></div><div class="team-card"><div class="role-tag">Second</div><div class="name">Cormac</div><div class="focus">Meridian Second - Hotel dashboards &amp; cohort analysis</div><div class="deliv">Per-property research packs · Looker dashboards · property ROI visuals</div></div><div class="team-card"><div class="role-tag">Agent</div><div class="name">Lyric</div><div class="focus">Brand voice, messaging, CX</div><div class="deliv">Fairmont pitch voice pass (outcomes-first refresh) · retreat experience copy</div></div><div class="team-card"><div class="role-tag">Agent</div><div class="name">Mira</div><div class="focus">Creative &amp; visual comms</div><div class="deliv">Retreat marketing assets · hotel activation visuals</div></div><div class="team-card"><div class="role-tag">Agent</div><div class="name">Halden</div><div class="focus">Growth analytics &amp; ROI (Loom)</div><div class="deliv">Hotel ROI model · Looker dashboards · property pricing</div></div><div class="team-card"><div class="role-tag">Agent</div><div class="name">Veritas</div><div class="focus">Roster registry &amp; capability map</div><div class="deliv">Agent documentation · division team manifests · state inventory</div></div></div>
+
+  <div class="section-header">
+    <h2>Pipeline / Deals / Leads</h2>
+    <span class="meta-sm">Active prospects, contracts, and lead segments</span>
+  </div>
+  <div><div class="pipeline-card"><div><div class="name">Fairmont Breakers LB</div><div class="detail">Score 87/100 · Pacific6 (John Molina) · no existing yoga · full opportunity</div></div><div class="next">Battlecard ready</div></div><div class="pipeline-card"><div><div class="name">Hyatt Regency LB</div><div class="detail">Warm SoCal pipeline · convention hotel segment</div></div><div class="next">Outreach</div></div><div class="pipeline-card"><div><div class="name">Hotel Maya LB</div><div class="detail">Warm SoCal pipeline · boutique segment</div></div><div class="next">Research</div></div><div class="pipeline-card"><div><div class="name">Fairmont Century Plaza</div><div class="detail">Warm SoCal pipeline · luxury segment</div></div><div class="next">Sister-prop play</div></div><div class="pipeline-card"><div><div class="name">La Valencia (La Jolla)</div><div class="detail">Warm SoCal pipeline · boutique luxury</div></div><div class="next">Research</div></div><div class="pipeline-card"><div><div class="name">Pendry SD</div><div class="detail">Warm SoCal pipeline · lifestyle hotel</div></div><div class="next">Research</div></div><div class="pipeline-card"><div><div class="name">80K records</div><div class="detail">instantly_HOTELS.csv · Clay_Pipeline_A_Hotel_Schema.xlsx · seeded</div></div><div class="next">Auto-enrichment</div></div></div>
+
+  <div class="section-header">
+    <h2>Content & Collateral in Flight</h2>
+    <span class="meta-sm">Mirrors marketing-drafts-dashboard for this division</span>
+  </div>
+  <div class="collateral-grid"><div class="collateral-card published"><div class="type">PUBLISHED</div><div class="title">Yoga as Infrastructure: How Hotels Are Turning Wellness Into Revenue</div><div class="meta">Blog #11 · 2026-04-27</div></div><div class="collateral-card published"><div class="type">PUBLISHED</div><div class="title">Case Study: Westin Boston Seaport&#x27;s Poolside Yoga Activation</div><div class="meta">Blog #12 · 2026-04-29</div></div><div class="collateral-card draft"><div class="type">DRAFT</div><div class="title">Hotels Sequence v2 (emails 4-7)</div><div class="meta">Marketing Agent · &#x27;follow pattern above&#x27;</div></div><div class="collateral-card planned"><div class="type">PLANNED</div><div class="title">Fairmont retreat save-the-date social post</div><div class="meta">Marketing Agent · May 1 confirm</div></div><div class="collateral-card draft"><div class="type">DRAFT</div><div class="title">Hotel pitch deck v2 (Grace)</div><div class="meta">Outcomes-first · target May 10</div></div><div class="collateral-card published"><div class="type">READY</div><div class="title">Fairmont Breakers Battlecard</div><div class="meta">knowledge-base/hotels/fairmont-breakers-battlecard.md</div></div><div class="collateral-card published"><div class="type">READY</div><div class="title">Sacramento Westin Activation Playbook</div><div class="meta">knowledge-base/hotels/sacramento-westin-playbook.md</div></div><div class="collateral-card published"><div class="type">READY</div><div class="title">Westin Long Beach Context File</div><div class="meta">knowledge-base/hotels/westin-long-beach-context.md</div></div></div>
+
+  <div class="magic-sentence">
+    <div class="label">Magic Sentence</div>
+    <p>"We helped Westin Boston Seaport activate poolside yoga programs that generated measurable guest engagement and positioned them as the wellness destination in their market — without adding any operational burden to their team."</p>
+  </div>
+
+  <footer>
+    <a href="divisions-index.html">← All divisions</a> &middot;
+  
+<script src="_widgets/floating-connectors.js" defer></script>

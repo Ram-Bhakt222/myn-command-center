@@ -1,0 +1,5 @@
+0cf804b Weekly audit update 2026-05-05
+3a3018e Weekly audit update 2026-04-27: longevity programming wedge, yoga TAM rebaseline (.66B), HR healthcare cost spike (6-10%)
+2c8d8a9 Weekly audit update 2026-04-27
+e90d510 Publish dashboards to docs/ for GitHub Pages
+c4bef3e Weekly audit update April 21, 2026

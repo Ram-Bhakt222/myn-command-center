@@ -1,0 +1,58 @@
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   4-21-26-full-audit.html
+	modified:   agent-control-plane.html
+	modified:   analytics-dashboard.html
+	modified:   architecture-dashboard.html
+	modified:   business-economics-dashboard.html
+	modified:   docs/4-21-26-full-audit.html
+	modified:   docs/agent-control-plane.html
+	modified:   docs/analytics-dashboard.html
+	modified:   docs/architecture-dashboard.html
+	modified:   docs/business-economics-dashboard.html
+	modified:   docs/hotel-activities-dashboard.html
+	modified:   docs/index.html
+	modified:   docs/lead-gen-dashboard.html
+	modified:   docs/master-directory.html
+	modified:   docs/paperclip-dashboard.html
+	modified:   docs/review-queue.html
+	modified:   docs/scott-hoffman-knowledge-base.html
+	modified:   docs/supabase-dashboard.html
+	modified:   docs/team-handoff-dashboard.html
+	modified:   hotel-activities-dashboard.html
+	modified:   index.html
+	modified:   lead-gen-dashboard.html
+	modified:   master-directory.html
+	modified:   paperclip-dashboard.html
+	modified:   review-queue.html
+	modified:   supabase-dashboard.html
+	modified:   team-handoff-dashboard.html
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	4-27-26-full-audit.html
+	4-29-26-full-audit.html
+	4-30-26-full-audit.html
+	5-5-26-full-audit.html
+	MYN-Pipeline-Daily-2026-04-27_AGENTLOG.md
+	MYN-Pipeline-Daily-2026-04-27_SLACK.md
+	README.md
+	_add.txt
+	_add_err.txt
+	_commit.txt
+	_commit_err.txt
+	_push_weekly_audit.bat
+	_status.txt
+	_status_err.txt
+	_weekly-audit-push.bat
+	assets/
+	budget-reports/
+	docs/assets/
+	docs/community-reengagement-plan.md
+	docs/server-hardening-runbook.md
+
+no changes added to commit (use "git add" and/or "git commit -a")

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HARBOR — LBSOY / Long Beach Locals · MYN Division Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-0: #0a0e14;
+  --bg-1: #0f141b;
+  --bg-2: #151c26;
+  --bg-3: #1d2631;
+  --border: rgba(255,255,255,0.06);
+  --border-strong: rgba(255,255,255,0.12);
+  --text-0: #f3f6fa;
+  --text-1: #c9d1d9;
+  --text-2: #8b949e;
+  --text-3: #6e7681;
+  --accent: #00d4aa;
+  --accent-dim: rgba(0,212,170,0.14);
+  --warn: #f59e0b;
+  --warn-dim: rgba(245,158,11,0.14);
+  --risk: #ef4444;
+  --risk-dim: rgba(239,68,68,0.14);
+  --good: #10b981;
+  --good-dim: rgba(16,185,129,0.14);
+  --info: #a78bfa;
+  --info-dim: rgba(167,139,250,0.14);
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px;
+  --s-6: 32px; --s-7: 48px; --s-8: 64px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg-0); color: var(--text-1); font-family: var(--font-body); font-size: 14px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4 { font-family: var(--font-display); color: var(--text-0); letter-spacing: -0.01em; font-weight: 600; }
+h1 { font-size: 28px; line-height: 1.2; }
+h2 { font-size: 20px; line-height: 1.3; }
+h3 { font-size: 15px; line-height: 1.35; font-weight: 600; }
+code, .mono { font-family: var(--font-mono); font-size: 12.5px; }
+
+.app { max-width: 1480px; margin: 0 auto; padding: var(--s-6) var(--s-6) var(--s-8); }
+
+header.top { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s-5); padding-bottom: var(--s-5); border-bottom: 1px solid var(--border); margin-bottom: var(--s-6); flex-wrap: wrap; }
+.brand { display: flex; align-items: baseline; gap: var(--s-3); flex-wrap: wrap; }
+.brand h1 { font-weight: 700; }
+.brand .codename { font-family: var(--font-mono); font-size: 11px; padding: 3px 9px; border-radius: var(--r-sm); letter-spacing: 0.08em; text-transform: uppercase; }
+.brand .priority { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); padding: 3px 9px; background: var(--bg-3); border-radius: var(--r-sm); letter-spacing: 0.05em; }
+.subtitle { color: var(--text-2); font-size: 13.5px; margin-top: 6px; max-width: 760px; }
+.meta { display: flex; gap: var(--s-5); align-items: center; font-size: 12px; color: var(--text-2); }
+.meta .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--good); margin-right: 6px; box-shadow: 0 0 8px var(--good); }
+
+.kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--s-3); margin-bottom: var(--s-6); }
+.kpi { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); }
+.kpi .label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+.kpi .value { font-family: var(--font-display); font-size: 24px; font-weight: 600; color: var(--text-0); margin-top: 4px; line-height: 1.1; }
+.kpi .delta { font-size: 11.5px; margin-top: 4px; }
+.delta.up { color: var(--good); }
+.delta.down { color: var(--risk); }
+.delta.flat { color: var(--text-3); }
+
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); margin-bottom: var(--s-6); }
+.col { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+.col-header { padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.col-header h2 { font-size: 14px; letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+.col-tag { font-family: var(--font-mono); font-size: 10.5px; padding: 3px 8px; border-radius: var(--r-sm); letter-spacing: 0.05em; }
+.col-body { padding: var(--s-5); }
+.col-current .col-tag { background: var(--bg-3); color: var(--text-2); }
+.col-future .col-header h2 { color: var(--info); }
+.col-future .col-tag { background: var(--info-dim); color: var(--info); }
+
+.section-header { display: flex; align-items: baseline; justify-content: space-between; margin: var(--s-7) 0 var(--s-4); padding-bottom: var(--s-3); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: var(--s-3); }
+.section-header h2 { font-size: 16px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text-0); font-weight: 600; }
+.section-header .meta-sm { font-size: 12px; color: var(--text-3); font-family: var(--font-mono); }
+
+.div-row { display: grid; grid-template-columns: 200px 1fr auto; gap: var(--s-4); padding: var(--s-3) 0; border-bottom: 1px dashed var(--border); align-items: center; font-size: 13px; }
+.div-row:last-child { border-bottom: none; }
+.div-name { color: var(--text-0); font-weight: 500; }
+.div-name .sub { font-size: 11px; color: var(--text-3); margin-left: 6px; }
+.div-detail { color: var(--text-2); font-size: 12.5px; }
+.div-badge { font-family: var(--font-mono); font-size: 11px; padding: 2px 7px; border-radius: var(--r-sm); font-weight: 500; }
+.badge-good { background: var(--good-dim); color: var(--good); }
+.badge-warn { background: var(--warn-dim); color: var(--warn); }
+.badge-risk { background: var(--risk-dim); color: var(--risk); }
+.badge-info { background: var(--info-dim); color: var(--info); }
+.badge-mute { background: var(--bg-3); color: var(--text-3); }
+
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--s-3); }
+.team-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4); }
+.team-card .role-tag { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+.team-card .name { color: var(--text-0); font-weight: 600; font-size: 14px; }
+.team-card .focus { color: var(--text-2); font-size: 12px; margin-top: 2px; }
+.team-card .deliv { color: var(--text-1); font-size: 12.5px; margin-top: var(--s-3); padding-top: var(--s-3); border-top: 1px solid var(--border); }
+
+.pipeline-card { background: var(--bg-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--s-4) var(--s-5); margin-bottom: var(--s-3); display: grid; grid-template-columns: 1fr auto auto; gap: var(--s-4); align-items: center; }
+.pipeline-card .name { color: var(--text-0); font-weight: 500; font-size: 13.5px; }
+.pipeline-card .detail { color: var(--text-2); font-size: 12px; margin-top: 3px; }
+.pipeline-card .next { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
+
+.collateral-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--s-3); }
+.collateral-card { background: var(--bg-1); border-left: 3px solid var(--accent); border-radius: 0 var(--r-md) var(--r-md) 0; padding: var(--s-4); }
+.collateral-card .type { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+.collateral-card.draft { border-left-color: var(--warn); }
+.collateral-card.draft .type { color: var(--warn); }
+.collateral-card.published { border-left-color: var(--good); }
+.collateral-card.published .type { color: var(--good); }
+.collateral-card.planned { border-left-color: var(--info); }
+.collateral-card.planned .type { color: var(--info); }
+.collateral-card .title { color: var(--text-0); font-weight: 500; font-size: 13.5px; margin-bottom: 4px; }
+.collateral-card .meta { color: var(--text-3); font-size: 11.5px; font-family: var(--font-mono); }
+
+.callout { background: linear-gradient(90deg, var(--warn-dim), transparent 70%); border-left: 3px solid var(--warn); border-radius: var(--r-md); padding: var(--s-4) var(--s-5); margin-bottom: var(--s-6); }
+.callout.risk { background: linear-gradient(90deg, var(--risk-dim), transparent 70%); border-left-color: var(--risk); }
+.callout.info { background: linear-gradient(90deg, var(--info-dim), transparent 70%); border-left-color: var(--info); }
+.callout.good { background: linear-gradient(90deg, var(--good-dim), transparent 70%); border-left-color: var(--good); }
+.callout h3 { color: var(--text-0); font-size: 13.5px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.callout p { color: var(--text-1); font-size: 13px; }
+.callout p strong { color: var(--text-0); }
+
+.magic-sentence { background: var(--bg-1); border: 1px solid var(--border-strong); border-radius: var(--r-md); padding: var(--s-5) var(--s-6); margin: var(--s-5) 0; }
+.magic-sentence .label { font-family: var(--font-mono); font-size: 10.5px; color: var(--accent); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--s-2); }
+.magic-sentence p { color: var(--text-0); font-size: 16px; font-family: var(--font-display); line-height: 1.4; font-style: italic; }
+
+footer { margin-top: var(--s-8); padding-top: var(--s-5); border-top: 1px solid var(--border); text-align: center; color: var(--text-3); font-size: 12px; }
+footer a { color: var(--text-2); text-decoration: none; border-bottom: 1px dotted var(--text-3); }
+footer a:hover { color: var(--accent); }
+
+@media (max-width: 980px) {
+  .kpi-row { grid-template-columns: repeat(3, 1fr); }
+  .split { grid-template-columns: 1fr; }
+  .div-row { grid-template-columns: 1fr; gap: 4px; }
+}
+
+.brand .codename { background: #a78bfa22; color: #a78bfa; }
+</style>
+</head>
+<body>
+
+<style>
+.myn-nav { position: sticky; top: 0; z-index: 9999; background: #0a0e14; border-bottom: 1px solid rgba(255,255,255,0.08); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; }
+.myn-nav__inner { display: flex; align-items: center; gap: 4px; padding: 10px 20px; overflow-x: auto; white-space: nowrap; }
+.myn-nav__brand { display: flex; flex-direction: column; padding-right: 18px; margin-right: 10px; border-right: 1px solid rgba(255,255,255,0.08); text-decoration: none; }
+.myn-nav__brand b { color: #00d4aa; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; font-family: 'Space Grotesk', 'Inter', sans-serif; }
+.myn-nav__brand span { color: #6e7681; font-size: 10px; margin-top: 1px; }
+.myn-nav a { color: #8b949e; text-decoration: none; padding: 6px 12px; border-radius: 6px; transition: color 0.15s, background 0.15s; font-weight: 500; }
+.myn-nav a:hover { color: #f3f6fa; background: rgba(255,255,255,0.04); }
+.myn-nav a.is-active { color: #00d4aa; background: rgba(0,212,170,0.12); }
+.myn-nav__spacer { flex: 1; min-width: 20px; }
+.myn-nav__date { font-size: 11px; color: #6e7681; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; }
+.myn-nav__divisions { display: flex; gap: 2px; padding: 2px; background: rgba(255,255,255,0.03); border-radius: 6px; margin-left: 8px; }
+.myn-nav__divisions a { padding: 4px 10px; font-size: 12px; }
+</style>
+<nav class="myn-nav" aria-label="MYN Command Center navigation">
+<div class="myn-nav__inner">
+  <a class="myn-nav__brand" href="index.html"><b>MYN Command</b><span>Divisions</span></a>
+  <a href="index.html" data-page="index">Hub</a>
+  <a href="myn-command-center-v2.html" data-page="myn-command-center-v2">v2 Master</a>
+  <a href="divisions-index.html" data-page="divisions-index">All Divisions</a>  <a href="http://localhost:8787" target="_blank" rel="noopener" data-page="cockpit">Cockpit ↗</a>
+
+  <span class="myn-nav__spacer"></span>
+  <span class="myn-nav__date">Updated 2026-05-07</span>
+</div>
+</nav>
+
+<div class="app">
+  <header class="top">
+    <div>
+      <div class="brand">
+        <h1>LBSOY / Long Beach Locals</h1>
+        <span class="codename">HARBOR</span>
+        <span class="priority">AUTHORITY ANCHOR</span>
+      </div>
+      <p class="subtitle">The brand&#x27;s home berth. Long Beach School of Yoga is the founder&#x27;s authority anchor and the local proof point that everything else stands on.</p>
+    </div>
+    <div class="meta"><span><span class="dot"></span>Static reference</span><span class="mono">Updated 2026-05-07</span></div>
+  </header>
+
+  <div class="callout info"><h3>Founder authority is underutilized</h3><p>Per CLAUDE.md, Ram's background — India training, book, LBSOY, UC Berkeley — are <strong>underutilized authority signals.</strong> Founder-forward doesn't mean influencer; it means trust transfer in healthcare-adjacent markets. Either Ram becomes the visible authority anchor, or the brand stands alone without him. <strong>Half-using him is worse than not using him.</strong></p></div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="label">LBSOY blog cadence</div><div class="value">Every 3 days</div><div class="delta up">lbsoy-blog scheduled task running</div></div><div class="kpi"><div class="label">Local radius</div><div class="value">5 miles</div><div class="delta flat">around 90803 (Long Beach)</div></div><div class="kpi"><div class="label">Founder asset</div><div class="value">Ram</div><div class="delta up">UC Berkeley · India · book</div></div><div class="kpi"><div class="label">Locals leads</div><div class="value">Building</div><div class="delta flat">community + 5-mile vendor partnerships</div></div><div class="kpi"><div class="label">Olympics 2028</div><div class="value">Pre-empt</div><div class="delta up">LA Olympics wellness infrastructure</div></div><div class="kpi"><div class="label">Authority playbook</div><div class="value">Live</div><div class="delta up">founder-authority/notebooklm playbook</div></div>
+  </div>
+
+  <div class="section-header">
+    <h2>Status</h2>
+    <span class="meta-sm">Where we are vs. 90-day target</span>
+  </div>
+  <div class="split">
+    <div class="col col-current">
+      <div class="col-header"><h2>Current state</h2><span class="col-tag">TODAY</span></div>
+      <div class="col-body"><div class="div-row"><div class="div-name">LBSOY blog cadence</div><div class="div-detail">lbsoy-blog-every-3-days scheduled task · running</div><span class="div-badge badge-info">Live</span></div><div class="div-row"><div class="div-name">Founder authority anchor</div><div class="div-detail">Ram - UC Berkeley · India training · Long Beach School of Yoga · book</div><span class="div-badge badge-good">Underutilized</span></div><div class="div-row"><div class="div-name">9-1-1 content ratio</div><div class="div-detail">9 value : 1 personal : 1 sell · governs SOCIAL_ATOMIZER output</div><span class="div-badge badge-info">Locked</span></div><div class="div-row"><div class="div-name">11-touchpoint / 90-day rule</div><div class="div-detail">Daily posting cadence per founder-authority playbook</div><span class="div-badge badge-info">Operational</span></div><div class="div-row"><div class="div-name">HVCr stack</div><div class="div-detail">UC Berkeley · LBSOY · ASU capstone · Apple Health/Oura · OpenEMR · IAYT</div><span class="div-badge badge-good">Visible</span></div><div class="div-row"><div class="div-name">LVCr audit</div><div class="div-detail">Strip cheap/broken/AI-generic before ship</div><span class="div-badge badge-good">Gate</span></div><div class="div-row"><div class="div-name">Local 5-mile partnerships</div><div class="div-detail">Vendors around 90803 · Mommy &amp; Me + retreat leverage</div><span class="div-badge badge-warn">Building</span></div><div class="div-row"><div class="div-name">Long Beach community</div><div class="div-detail">community.myyoganetwork.org Discourse · consolidating channels</div><span class="div-badge badge-info">Live</span></div></div>
+    </div>
+    <div class="col col-future">
+      <div class="col-header"><h2>90-day target</h2><span class="col-tag">TARGET</span></div>
+      <div class="col-body"><div class="div-row"><div class="div-name">LBSOY as proof</div><div class="div-detail">Local-first proof feeds every B2B pitch (Fairmont, Westin)</div><span class="div-badge badge-info">Compounding</span></div><div class="div-row"><div class="div-name">Founder forward</div><div class="div-detail">Ram visible authority anchor · trust transfer in healthcare-adjacent markets</div><span class="div-badge badge-info">Live</span></div><div class="div-row"><div class="div-name">Local retreat</div><div class="div-detail">D2C Event Growth Engine · Long Beach retreat planning live</div><span class="div-badge badge-info">Active</span></div><div class="div-row"><div class="div-name">Olympics 2028 prep</div><div class="div-detail">LA wellness programming infrastructure · pre-positioning</div><span class="div-badge badge-info">Lever</span></div><div class="div-row"><div class="div-name">Locals → marketplace flywheel</div><div class="div-detail">Long Beach community feeds therapist supply + class demand</div><span class="div-badge badge-info">Wired</span></div><div class="div-row"><div class="div-name">Found-author content</div><div class="div-detail">Substack/X/Threads standalone · LinkedIn byline-through-Ram</div><span class="div-badge badge-info">Two-track</span></div><div class="div-row"><div class="div-name">Brand voice gate</div><div class="div-detail">Lior runs every external send · Ram +1&#x27;s</div><span class="div-badge badge-info">Disciplined</span></div><div class="div-row"><div class="div-name">Authority compounding</div><div class="div-detail">Each LBSOY post + book reference + UC Berkeley credit stacks</div><span class="div-badge badge-info">Stack</span></div></div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>Team & Ownership</h2>
+    <span class="meta-sm">Lead · Second · Humans · Coordination agents</span>
+  </div>
+  <div class="team-grid"><div class="team-card"><div class="role-tag">Lead</div><div class="name">Linnea</div><div class="focus">Harbor Lead - LBSOY voice &amp; local activation</div><div class="deliv">LBSOY blog cadence · Long Beach community programming · local vendor network</div></div><div class="team-card"><div class="role-tag">Second</div><div class="name">Bodhi</div><div class="focus">Harbor Second - Locals coordination</div><div class="deliv">5-mile vendor partnerships · 90803 community building · retreat coordination</div></div><div class="team-card"><div class="role-tag">Coordination</div><div class="name">Lior (Aperture)</div><div class="focus">Brand voice gate</div><div class="deliv">Founder-forward voice consistency · disclosure-first agent personas · LinkedIn byline-through-Ram</div></div><div class="team-card"><div class="role-tag">Founder</div><div class="name">Ram Bhakt</div><div class="focus">Founder authority asset</div><div class="deliv">UC Berkeley · India training · LBSOY · book · IAYT vocabulary · category evangelist</div></div></div>
+
+  <div class="section-header">
+    <h2>Pipeline / Deals / Leads</h2>
+    <span class="meta-sm">Active prospects, contracts, and lead segments</span>
+  </div>
+  <div><div class="pipeline-card"><div><div class="name">Long Beach School of Yoga</div><div class="detail">longbeachschoolofyoga.com · primary local proof asset</div></div><div class="next">Live</div></div><div class="pipeline-card"><div><div class="name">LBSOY graduates reunion</div><div class="detail">Hotel day retreat event group · Fairmont anchor</div></div><div class="next">Planned</div></div><div class="pipeline-card"><div><div class="name">Local wellness orgs (90803)</div><div class="detail">5-mile influencer strategy · Mommy &amp; Me overlap</div></div><div class="next">Building</div></div><div class="pipeline-card"><div><div class="name">Long Beach hotel cluster</div><div class="detail">Westin LB · Hyatt Regency LB · Hotel Maya · Fairmont Breakers</div></div><div class="next">Compounding</div></div><div class="pipeline-card"><div><div class="name">Long Beach community</div><div class="detail">community.myyoganetwork.org · Discourse consolidation</div></div><div class="next">Active</div></div><div class="pipeline-card"><div><div class="name">Local event partners</div><div class="detail">Apify scrape of previous partners + promoters around 90803</div></div><div class="next">Research</div></div></div>
+
+  <div class="section-header">
+    <h2>Content & Collateral in Flight</h2>
+    <span class="meta-sm">Mirrors marketing-drafts-dashboard for this division</span>
+  </div>
+  <div class="collateral-grid"><div class="collateral-card published"><div class="type">PUBLISHED</div><div class="title">founder-authority/notebooklm-personal-branding playbook</div><div class="meta">knowledge-base/founder-authority/ · 2026-05-05 · canonical</div></div><div class="collateral-card published"><div class="type">PUBLISHED</div><div class="title">founder-authority/notebooklm-influencer-genz-aimarketing</div><div class="meta">knowledge-base/founder-authority/ · 2026-05-06 · 38-source synthesis</div></div><div class="collateral-card published"><div class="type">RUNNING</div><div class="title">lbsoy-blog-every-3-days</div><div class="meta">Scheduled task · LBSOY content cadence · 3-day rhythm</div></div><div class="collateral-card planned"><div class="type">PLANNED</div><div class="title">Long Beach retreat marketing plan</div><div class="meta">D2C Event Growth Engine · LBSOY graduates</div></div><div class="collateral-card planned"><div class="type">PLANNED</div><div class="title">Founder-forward LinkedIn cadence</div><div class="meta">byline-through-Ram · 9-1-1 ratio · 11 touchpoints</div></div><div class="collateral-card planned"><div class="type">PLANNED</div><div class="title">Local 5-mile influencer strategy</div><div class="meta">wellness orgs around 90803 · Mommy &amp; Me bridge</div></div></div>
+
+  <div class="magic-sentence">
+    <div class="label">Magic Sentence</div>
+    <p>"Long Beach School of Yoga isn&#x27;t a side project — it&#x27;s the proof point. Every hotel pitch, every healthcare conversation, every corporate deck stands on the local studio that&#x27;s been running yoga therapy training since before this stack existed."</p>
+  </div>
+
+  <footer>
+    <a href="divisions-index.html">← All divisions</a> &middot;
+    <a href="myn-command-center-v2.h
+<script src="_widgets/floating-connectors.js" defer></script>

@@ -390,7 +390,8 @@ footer {
   <a href="supabase-dashboard.html" data-page="supabase-dashboard">Supabase</a>
   <a href="paperclip-dashboard.html" data-page="paperclip-dashboard">Paperclip</a>
   <a href="review-queue.html" data-page="review-queue">Review</a>
-  <a href="4-21-26-full-audit.html" data-page="4-21-26-full-audit">Audit</a>
+  <a href="5-14-26-full-audit.html" data-page="5-14-26-full-audit">Audit</a>  <a href="http://localhost:8787" target="_blank" rel="noopener" data-page="cockpit">Cockpit</a>
+
   <span class="myn-nav__spacer"></span>
   <span class="myn-nav__date" id="myn-nav-date"></span>
 </div>
@@ -415,7 +416,7 @@ footer {
     </div>
     <div class="meta">
       <span><span class="dot"></span>Live reference (static)</span>
-      <span class="mono">Updated 2026-04-21</span>
+      <span class="mono">Updated 2026-05-14</span>
     </div>
   </header>
 
@@ -424,7 +425,7 @@ footer {
     <span class="icon">⚠</span>
     <div>
       <h2>Top risk flagged by audit</h2>
-      <p><strong>Healthcare outbound is over-promising a proof mechanism that doesn't launch until May 31.</strong> Every healthcare email leads with "$14,400 savings" and "Australian government validation" — but that's the Australian model, not MYN patient data. The Yoga Bio Sync wearables pilot that generates MYN's own proof is 40 days away. Mitigation options: delay healthcare outbound until post-May-31, or add a wearables-pilot caveat to every email this week.</p>
+      <p><strong>Healthcare outbound still over-promises proof — but the structural fix shipped this week. Pipeline values not flowing.</strong> Audit #16 (May 14): Marketing Agent landed the AEO/SEO infrastructure on May 13 — Citation Engine, Schema Kit, Living Science Engine v0.4 spec — the structural answer to the "$14,400 / Australian validation" claim. Yoga Bio Sync launches in 17 days (May 31). Run C-IAYT blog through Citation Engine first, then refit outbound. Second risk: <code>scripts/sync_ghl_pipeline.py</code> reports 1,395 active opportunities but <code>weighted_value_usd: 0.0</code> — Cockpit Pipeline panel stays decorative until stage values flow.</p>
     </div>
   </div>
 
@@ -807,5 +808,6 @@ footer {
   });
 </script>
 
+<script src="../_widgets/floating-connectors.js" defer></script>
 </body>
 </html>
