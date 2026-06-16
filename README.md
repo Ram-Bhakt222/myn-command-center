@@ -1,7 +1,10 @@
 # MYN Command Center
 
-> Operational dashboards for My Yoga Network. 15 HTML dashboards + 1 live analytics server.
-> Last updated: 2026-03-28
+> Operational dashboards for My Yoga Network — the operator-facing window into an AI-operated business stack.
+> 15+ HTML dashboards, live Cockpit analytics, and a capabilities/stack reference.
+> Last updated: 2026-06-15
+
+📄 **[Capabilities & Stack — Internal Ops Reference (PDF)](MYN_Capabilities_and_Stack_2026-06-15.pdf)** — point-in-time inventory of the full stack (Cockpit, AgentField, Hermes, integrations, data/analytics, scheduled jobs). Mirrors `capabilities/registry.json` in Strategy AGI.
 
 ---
 
@@ -25,40 +28,66 @@ Alternatively, use the **"Start Analytics Server"** scheduled task in Claude Cow
 
 ## Dashboards
 
-### Hub Dashboards
+All dashboards are static HTML — open directly in a browser, or via the published `docs/` GitHub Pages mirror. The Analytics view is now served **live from the MYN Cockpit** (`:8787/analytics`) rather than a standalone server.
+
+### Hub
 
 | Dashboard | File | Purpose |
 |-----------|------|---------|
-| **Unified Command Center** | `unified-command-center.html` | Main hub — links to all dashboards, agent roster, system status |
-| **Main Index** | `index.html` | Landing page and navigation |
-| **Master Dashboard** | `dashboard-master.html` | Full system overview — agents, workflows, divisions |
+| **Main Index** | `index.html` | Landing page + navigation to every dashboard |
 | **Master Directory** | `master-directory.html` | Directory of all system components |
 
-### Operations Dashboards
+### Operations
 
 | Dashboard | File | Purpose |
 |-----------|------|---------|
-| **Analytics (Live)** | `analytics-dashboard.html` | GA4 traffic, GTM events, PMF page tracking, Google Ads, GHL CRM. **Requires server** — see Quick Start above |
-| **Agent Control Plane** | `agent-control-plane.html` | 14 agents across 4 departments, $722/mo budget tracking, 7 operational tabs |
-| **AgentField Dashboard** | `agentfield-dashboard.html` | AgentField orchestration — agent configs, routing, DAG tracking |
-| **Agent OS** | `agent-os-dashboard.html` | Agent operating system status and health |
-| **Agentic OS** | `agentic-os-dashboard.html` | Extended agent orchestration view |
-| **Supabase Dashboard** | `supabase-dashboard.html` | Database health, table stats, query monitoring |
+| **Analytics** | `analytics-dashboard.html` | GA4 + Search Console, events/PMF, Google Ads, GHL CRM, operations |
+| **Agent Control Plane** | `agent-control-plane.html` | Agents across departments, budget tracking, operational tabs |
+| **Supabase** | `supabase-dashboard.html` | Database health, table stats, query monitoring |
+| **Lead Gen** | `lead-gen-dashboard.html` | Lead pipeline + outreach status |
 
-### Strategy Dashboards
+### Workflow
+
+| Dashboard | File | Purpose |
+|-----------|------|---------|
+| **Review Queue** | `review-queue.html` | Approval queue for agent outputs requiring human review |
+| **Skills Inventory** | `skills-inventory.html` | All Claude skills + stack capabilities |
+
+### Strategy
 
 | Dashboard | File | Purpose |
 |-----------|------|---------|
 | **Architecture** | `architecture-dashboard.html` | System architecture reference — tri-system map |
 | **Business Economics** | `business-economics-dashboard.html` | PMF economics, division P&L, revenue modeling |
-| **Team Handoff** | `team-handoff-dashboard.html` | Team coordination, intern handoffs, task routing |
+| **Team Handoff** | `team-handoff-dashboard.html` | Team coordination, handoffs, task routing |
+| **Divisions** | `divisions-index.html` + `division-*.html` | 9 division briefs (Aperture, Atlas, Cadence, Ember, Fulcrum, Harbor, Keystone, Loom, Meridian) |
 
-### Workflow Dashboards
+### Vertical / Account
 
 | Dashboard | File | Purpose |
 |-----------|------|---------|
-| **Paperclip** | `paperclip-dashboard.html` | Paperclip workflow automation view |
-| **Review Queue** | `review-queue.html` | Approval queue for agent outputs requiring human review |
+| **Hotel Activities** | `hotel-activities-dashboard.html` | Hotel & resort activities program view |
+| **Scott Hoffman KB** | `scott-hoffman-knowledge-base.html` | Account knowledge base |
+| **RFP 2627-003** | `rfp-2627-003-dashboard.html` | RFP response tracker |
+
+> **Retired:** `paperclip-dashboard.html` (removed 2026-06-10 — Paperclip service retired, redundant with AgentField + Cockpit + Discourse).
+
+---
+
+## Capabilities & Stack
+
+MYN runs as a layered, AI-operated stack. The operator window is this dashboard repo; the canonical machine-readable inventory is `capabilities/registry.json` in Strategy AGI (consumed by the Cockpit Mission Control page). Full detail in the **[Capabilities & Stack PDF](MYN_Capabilities_and_Stack_2026-06-15.pdf)**.
+
+| Layer | What runs there |
+|-------|-----------------|
+| **Control plane** | MYN Cockpit (Flask, `:8787`) — bootstrap pipeline, Mission Control (`/mission`), Cron Mission Control (`/cron`), live analytics (`/analytics`), opportunity scanner (`/opportunities`) |
+| **Orchestration** | AgentField (Docker) · Hermes (skills/memory/delegation) · Discourse agent newsroom (`:8800`, 23 personas) |
+| **Data & memory** | Supabase (structured) · Qdrant (`:6333`, vectors) · Langfuse (`:3005`, LLM traces) · nightly Postgres + Qdrant backups |
+| **Integrations / MCP** | GHL MCP (node, 576 endpoints) · GA4/GSC MCP · WhatsApp MCP · DigitalOcean MCP · n8n cloud engine (51 workflows / 23 active) |
+| **Content & video** | AI video gen (DANCE) · Remotion · content-engine · Whisper transcription container |
+| **Surfaces** | myn.org (members) · myn.com (public) · Marketing Agent KB · this Command Center repo |
+
+**Retired systems:** GoHighLevel-MCP docker (→ node `ghl-mcp-2026`), local n8n (→ cloud n8n), Paperclip.
 
 ---
 
